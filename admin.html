@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KINAFLIX Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #e50914;
+      --dark: #141414;
+      --light: #f4f4f4;
+      --gray: #999;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+      min-height: 100vh;
+    }
+
+    .admin-header {
+      background-color: var(--primary);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-logo {
+      font-size: 1.5rem;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .admin-nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 1.5rem;
+    }
+
+    .admin-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: rgba(20, 20, 20, 0.8);
+      border-radius: 8px;
+    }
+
+    .admin-title {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--primary);
+    }
+
+    .admin-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid var(--gray);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--light);
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .upload-preview {
+      margin-top: 1rem;
+      max-width: 200px;
+      max-height: 300px;
+      display: none;
+      border-radius: 4px;
+    }
+
+    .upload-preview.show {
+      display: block;
+    }
+
+    .submit-btn {
+      grid-column: span 2;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      background-color: #f40612;
+    }
+
+    .submit-btn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      display: none;
+      width: 40px;
+      height: 40px;
+      margin: 1rem auto;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner.active {
+      display: block;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--dark);
+      color: white;
+      padding: 1rem;
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      max-width: 300px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background-color: #4CAF50;
+    }
+
+    .toast.error {
+      background-color: #f44336;
+    }
+
+    .toast.info {
+      background-color: #2196F3;
+    }
+
+    @media (max-width: 768px) {
+      .admin-form {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-group.full-width {
+        grid-column: span 1;
+      }
+      
+      .submit-btn {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="admin-header">
+    <a href="index.html" class="admin-logo">KINAFLIX ADMIN</a>
+    <nav class="admin-nav">
+      <a href="index.html">Back to Site</a>
+    </nav>
+  </header>
+
+  <div class="admin-container">
+    <h1 class="admin-title">Upload New Movie</h1>
+    
+    <form id="movie-form" class="admin-form">
+      <div class="form-group full-width">
+        <label for="movie-title">Title*</label>
+        <input type="text" id="movie-title" required>
+      </div>
+      
+      <div class="form-group full-width">
+        <label for="movie-description">Description*</label>
+        <textarea id="movie-description" required></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="movie-image-url">Cover Image URL</label>
+        <input type="url" id="movie-image-url" placeholder="Or upload file below">
+      </div>
+      
+      <div class="form-group">
+        <label for="movie-image-upload">Upload Cover Image*</label>
+        <input type="file" id="movie-image-upload" accept="image/*" required>
+        <img id="upload-preview" class="upload-preview">
+      </div>
+      
+      <div class="form-group">
+        <label for="movie-year">Release Year*</label>
+        <input type="number" id="movie-year" required min="1900" max="2100">
+      </div>
+      
+      <div class="form-group">
+        <label for="movie-genres">Genres (comma separated)*</label>
+        <input type="text" id="movie-genres" placeholder="Action, Adventure, Comedy" required>
+      </div>
+      
+      <div class="form-group full-width">
+        <label for="movie-drive-link">Google Drive Link*</label>
+        <input type="url" id="movie-drive-link" required>
+      </div>
+      
+      <div class="form-group full-width">
+        <label for="movie-trailer">YouTube Trailer URL*</label>
+        <input type="url" id="movie-trailer" placeholder="https://www.youtube.com/watch?v=..." required>
+      </div>
+      
+      <div class="form-group">
+        <label for="movie-duration">Duration</label>
+        <input type="text" id="movie-duration" placeholder="1h 32min">
+      </div>
+      
+      <div class="form-group">
+        <label for="movie-cast">Cast (comma separated)</label>
+        <input type="text" id="movie-cast" placeholder="Actor 1, Actor 2">
+      </div>
+      
+      <div class="form-group">
+        <label for="movie-language">Language</label>
+        <input type="text" id="movie-language" placeholder="English">
+      </div>
+      
+      <div class="form-group">
+        <label for="movie-rating">Rating (0-10)</label>
+        <input type="number" id="movie-rating" min="0" max="10" step="0.1" placeholder="8.5">
+      </div>
+      
+      <button type="submit" class="submit-btn">Upload Movie</button>
+    </form>
+    
+    <div class="spinner" id="loading-spinner"></div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    import { 
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { 
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-storage.js";
+
+    // Firebase configuration - MUST match your project settings
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      authDomain: "kinaflix.firebaseapp.com",
+      projectId: "kinaflix",
+      storageBucket: "kinaflix.appspot.com",
+      messagingSenderId: "318239806217",
+      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+      measurementId: "G-DC1T9B6B9W"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // DOM Elements
+    const movieForm = document.getElementById('movie-form');
+    const imageUpload = document.getElementById('movie-image-upload');
+    const uploadPreview = document.getElementById('upload-preview');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const toast = document.getElementById('toast');
+    const submitBtn = document.querySelector('.submit-btn');
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      // Image upload preview
+      imageUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          // Validate file type
+          if (!file.type.match('image.*')) {
+            showToast('Please select an image file (JPEG, PNG, etc.)', 'error');
+            e.target.value = '';
+            return;
+          }
+          
+          // Validate file size (max 5MB)
+          if (file.size > 5 * 1024 * 1024) {
+            showToast('Image must be less than 5MB', 'error');
+            e.target.value = '';
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            uploadPreview.src = event.target.result;
+            uploadPreview.classList.add('show');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      // Form submission
+      movieForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await uploadMovie();
+      });
+    });
+
+    // Upload Movie to Firestore
+    async function uploadMovie() {
+      showLoading();
+      
+      try {
+        // Get form data
+        const movieData = {
+          title: document.getElementById('movie-title').value.trim(),
+          description: document.getElementById('movie-description').value.trim(),
+          coverImageUrl: document.getElementById('movie-image-url').value.trim(),
+          coverImageFile: imageUpload.files[0] || null,
+          releaseYear: parseInt(document.getElementById('movie-year').value.trim()),
+          genres: document.getElementById('movie-genres').value.trim().split(',').map(g => g.trim()),
+          googleDriveLink: document.getElementById('movie-drive-link').value.trim(),
+          trailerUrl: document.getElementById('movie-trailer').value.trim(),
+          duration: document.getElementById('movie-duration').value.trim(),
+          cast: document.getElementById('movie-cast').value.trim().split(',').map(c => c.trim()),
+          language: document.getElementById('movie-language').value.trim(),
+          rating: parseFloat(document.getElementById('movie-rating').value) || null,
+          views: 0,
+          dateAdded: serverTimestamp()
+        };
+        
+        // Validate required fields
+        if (!validateMovieData(movieData)) {
+          hideLoading();
+          return;
+        }
+
+        // Process image upload
+        let coverImageUrl = movieData.coverImageUrl;
+        if (movieData.coverImageFile) {
+          coverImageUrl = await uploadImageFile(movieData.coverImageFile);
+          if (!coverImageUrl) {
+            hideLoading();
+            return;
+          }
+        } else if (!coverImageUrl) {
+          showToast('Either image URL or file upload is required', 'error');
+          hideLoading();
+          return;
+        }
+
+        // Prepare movie document for Firestore
+        const movieDoc = {
+          title: movieData.title,
+          description: movieData.description,
+          coverImageUrl: coverImageUrl,
+          releaseYear: movieData.releaseYear,
+          genres: movieData.genres,
+          googleDriveLink: movieData.googleDriveLink,
+          trailerUrl: movieData.trailerUrl,
+          views: movieData.views,
+          dateAdded: movieData.dateAdded
+        };
+
+        // Add optional fields if provided
+        if (movieData.duration) movieDoc.duration = movieData.duration;
+        if (movieData.cast && movieData.cast.length > 0) movieDoc.cast = movieData.cast;
+        if (movieData.language) movieDoc.language = movieData.language;
+        if (movieData.rating) movieDoc.rating = movieData.rating;
+
+        // Save to Firestore
+        try {
+          const docRef = await addDoc(collection(db, 'movies'), movieDoc);
+          console.log('Movie document written with ID: ', docRef.id);
+          
+          // Reset form on success
+          movieForm.reset();
+          uploadPreview.classList.remove('show');
+          showToast('Movie uploaded successfully!', 'success');
+        } catch (firestoreError) {
+          console.error('Error adding document: ', firestoreError);
+          showToast('Failed to save movie data: ' + firestoreError.message, 'error');
+        }
+      } catch (error) {
+        console.error('Error uploading movie:', error);
+        showToast('Error uploading movie: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Validate movie data before upload
+    function validateMovieData(movieData) {
+      const errors = [];
+      
+      if (!movieData.title) errors.push('Movie title is required');
+      if (!movieData.description) errors.push('Movie description is required');
+      if (!movieData.releaseYear || isNaN(movieData.releaseYear)) errors.push('Valid release year is required');
+      if (!movieData.genres || movieData.genres.length === 0) errors.push('At least one genre is required');
+      if (!movieData.googleDriveLink) errors.push('Google Drive link is required');
+      if (!movieData.trailerUrl) errors.push('Trailer URL is required');
+      
+      if (errors.length > 0) {
+        showToast(errors.join('<br>'), 'error');
+        return false;
+      }
+      
+      return true;
+    }
+
+    // Upload image file to Firebase Storage
+    async function uploadImageFile(file) {
+      try {
+        showToast('Uploading image...', 'info');
+        
+        // Create unique filename with sanitization
+        const timestamp = Date.now();
+        const sanitizedName = file.name.replace(/[^\w.-]/g, '_');
+        const fileName = `posters/${timestamp}_${sanitizedName}`;
+        const storageRef = ref(storage, fileName);
+        
+        // Add metadata with content type
+        const metadata = {
+          contentType: file.type || 'image/jpeg' // default to jpeg if type not available
+        };
+        
+        const snapshot = await uploadBytes(storageRef, file, metadata);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        
+        showToast('Image uploaded successfully!', 'success');
+        return downloadUrl;
+      } catch (uploadError) {
+        console.error('Image upload error:', uploadError);
+        let errorMsg = 'Failed to upload image';
+        
+        if (uploadError.code === 'storage/unauthorized') {
+          errorMsg += ': Unauthorized. Check your Storage rules.';
+        } else if (uploadError.code === 'storage/canceled') {
+          errorMsg += ': Upload canceled.';
+        } else if (uploadError.code === 'storage/retry-limit-exceeded') {
+          errorMsg += ': Network error. Please try again.';
+        } else {
+          errorMsg += `: ${uploadError.message}`;
+        }
+        
+        showToast(errorMsg, 'error');
+        return null;
+      }
+    }
+
+    // Show Toast Notification
+    function showToast(message, type = 'info') {
+      toast.innerHTML = message;
+      toast.className = 'toast';
+      toast.classList.add(type, 'show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 5000);
+    }
+
+    // Show Loading Spinner
+    function showLoading() {
+      loadingSpinner.classList.add('active');
+      submitBtn.disabled = true;
+    }
+
+    // Hide Loading Spinner
+    function hideLoading() {
+      loadingSpinner.classList.remove('active');
+      submitBtn.disabled = false;
+    }
+  </script>
+</body>
+</html>
