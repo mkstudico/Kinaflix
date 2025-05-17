@@ -97,18 +97,6 @@
       resize: vertical;
     }
 
-    .upload-preview {
-      margin-top: 1rem;
-      max-width: 200px;
-      max-height: 300px;
-      display: none;
-      border-radius: 4px;
-    }
-
-    .upload-preview.show {
-      display: block;
-    }
-
     .submit-btn {
       grid-column: span 2;
       background-color: var(--primary);
@@ -206,7 +194,7 @@
   </header>
 
   <div class="admin-container">
-    <h1 class="admin-title">Upload New Movie</h1>
+    <h1 class="admin-title">Add New Movie</h1>
     
     <form id="movie-form" class="admin-form">
       <div class="form-group full-width">
@@ -219,15 +207,9 @@
         <textarea id="movie-description" required></textarea>
       </div>
       
-      <div class="form-group">
-        <label for="movie-image-url">Cover Image URL</label>
-        <input type="url" id="movie-image-url" placeholder="Or upload file below">
-      </div>
-      
-      <div class="form-group">
-        <label for="movie-image-upload">Upload Cover Image*</label>
-        <input type="file" id="movie-image-upload" accept="image/*" required>
-        <img id="upload-preview" class="upload-preview">
+      <div class="form-group full-width">
+        <label for="movie-image-url">Cover Image URL*</label>
+        <input type="url" id="movie-image-url" required placeholder="https://example.com/poster.jpg">
       </div>
       
       <div class="form-group">
@@ -237,17 +219,17 @@
       
       <div class="form-group">
         <label for="movie-genres">Genres (comma separated)*</label>
-        <input type="text" id="movie-genres" placeholder="Action, Adventure, Comedy" required>
+        <input type="text" id="movie-genres" required placeholder="Action, Adventure, Comedy">
       </div>
       
       <div class="form-group full-width">
         <label for="movie-drive-link">Google Drive Link*</label>
-        <input type="url" id="movie-drive-link" required>
+        <input type="url" id="movie-drive-link" required placeholder="https://drive.google.com/...">
       </div>
       
       <div class="form-group full-width">
         <label for="movie-trailer">YouTube Trailer URL*</label>
-        <input type="url" id="movie-trailer" placeholder="https://www.youtube.com/watch?v=..." required>
+        <input type="url" id="movie-trailer" required placeholder="https://www.youtube.com/watch?v=...">
       </div>
       
       <div class="form-group">
@@ -270,7 +252,7 @@
         <input type="number" id="movie-rating" min="0" max="10" step="0.1" placeholder="8.5">
       </div>
       
-      <button type="submit" class="submit-btn">Upload Movie</button>
+      <button type="submit" class="submit-btn">Add Movie</button>
     </form>
     
     <div class="spinner" id="loading-spinner"></div>
@@ -279,7 +261,7 @@
   <div class="toast" id="toast"></div>
 
   <script type="module">
-    // Import Firebase modules
+    // Import Firebase modules (Firestore only)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { 
       getFirestore,
@@ -287,14 +269,8 @@
       addDoc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
-    import { 
-      getStorage,
-      ref,
-      uploadBytes,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-storage.js";
 
-    // Firebase configuration - MUST match your project settings
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
@@ -308,54 +284,24 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     // DOM Elements
     const movieForm = document.getElementById('movie-form');
-    const imageUpload = document.getElementById('movie-image-upload');
-    const uploadPreview = document.getElementById('upload-preview');
     const loadingSpinner = document.getElementById('loading-spinner');
     const toast = document.getElementById('toast');
     const submitBtn = document.querySelector('.submit-btn');
 
     // Initialize the page
     document.addEventListener('DOMContentLoaded', () => {
-      // Image upload preview
-      imageUpload.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          // Validate file type
-          if (!file.type.match('image.*')) {
-            showToast('Please select an image file (JPEG, PNG, etc.)', 'error');
-            e.target.value = '';
-            return;
-          }
-          
-          // Validate file size (max 5MB)
-          if (file.size > 5 * 1024 * 1024) {
-            showToast('Image must be less than 5MB', 'error');
-            e.target.value = '';
-            return;
-          }
-
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            uploadPreview.src = event.target.result;
-            uploadPreview.classList.add('show');
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-      
       // Form submission
       movieForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        await uploadMovie();
+        await addMovieToFirestore();
       });
     });
 
-    // Upload Movie to Firestore
-    async function uploadMovie() {
+    // Add Movie to Firestore
+    async function addMovieToFirestore() {
       showLoading();
       
       try {
@@ -364,7 +310,6 @@
           title: document.getElementById('movie-title').value.trim(),
           description: document.getElementById('movie-description').value.trim(),
           coverImageUrl: document.getElementById('movie-image-url').value.trim(),
-          coverImageFile: imageUpload.files[0] || null,
           releaseYear: parseInt(document.getElementById('movie-year').value.trim()),
           genres: document.getElementById('movie-genres').value.trim().split(',').map(g => g.trim()),
           googleDriveLink: document.getElementById('movie-drive-link').value.trim(),
@@ -383,25 +328,11 @@
           return;
         }
 
-        // Process image upload
-        let coverImageUrl = movieData.coverImageUrl;
-        if (movieData.coverImageFile) {
-          coverImageUrl = await uploadImageFile(movieData.coverImageFile);
-          if (!coverImageUrl) {
-            hideLoading();
-            return;
-          }
-        } else if (!coverImageUrl) {
-          showToast('Either image URL or file upload is required', 'error');
-          hideLoading();
-          return;
-        }
-
         // Prepare movie document for Firestore
         const movieDoc = {
           title: movieData.title,
           description: movieData.description,
-          coverImageUrl: coverImageUrl,
+          coverImageUrl: movieData.coverImageUrl,
           releaseYear: movieData.releaseYear,
           genres: movieData.genres,
           googleDriveLink: movieData.googleDriveLink,
@@ -417,36 +348,40 @@
         if (movieData.rating) movieDoc.rating = movieData.rating;
 
         // Save to Firestore
-        try {
-          const docRef = await addDoc(collection(db, 'movies'), movieDoc);
-          console.log('Movie document written with ID: ', docRef.id);
-          
-          // Reset form on success
-          movieForm.reset();
-          uploadPreview.classList.remove('show');
-          showToast('Movie uploaded successfully!', 'success');
-        } catch (firestoreError) {
-          console.error('Error adding document: ', firestoreError);
-          showToast('Failed to save movie data: ' + firestoreError.message, 'error');
-        }
+        const docRef = await addDoc(collection(db, 'movies'), movieDoc);
+        console.log('Movie document written with ID: ', docRef.id);
+        
+        // Reset form on success
+        movieForm.reset();
+        showToast('Movie added successfully!', 'success');
       } catch (error) {
-        console.error('Error uploading movie:', error);
-        showToast('Error uploading movie: ' + error.message, 'error');
+        console.error('Error adding movie:', error);
+        showToast('Error adding movie: ' + error.message, 'error');
       } finally {
         hideLoading();
       }
     }
 
-    // Validate movie data before upload
+    // Validate movie data before adding
     function validateMovieData(movieData) {
       const errors = [];
       
       if (!movieData.title) errors.push('Movie title is required');
       if (!movieData.description) errors.push('Movie description is required');
+      if (!movieData.coverImageUrl) errors.push('Cover image URL is required');
       if (!movieData.releaseYear || isNaN(movieData.releaseYear)) errors.push('Valid release year is required');
       if (!movieData.genres || movieData.genres.length === 0) errors.push('At least one genre is required');
       if (!movieData.googleDriveLink) errors.push('Google Drive link is required');
       if (!movieData.trailerUrl) errors.push('Trailer URL is required');
+      
+      // Validate URL formats
+      try {
+        new URL(movieData.coverImageUrl);
+        new URL(movieData.googleDriveLink);
+        new URL(movieData.trailerUrl);
+      } catch (e) {
+        errors.push('Please enter valid URLs for image, drive link, and trailer');
+      }
       
       if (errors.length > 0) {
         showToast(errors.join('<br>'), 'error');
@@ -454,46 +389,6 @@
       }
       
       return true;
-    }
-
-    // Upload image file to Firebase Storage
-    async function uploadImageFile(file) {
-      try {
-        showToast('Uploading image...', 'info');
-        
-        // Create unique filename with sanitization
-        const timestamp = Date.now();
-        const sanitizedName = file.name.replace(/[^\w.-]/g, '_');
-        const fileName = `posters/${timestamp}_${sanitizedName}`;
-        const storageRef = ref(storage, fileName);
-        
-        // Add metadata with content type
-        const metadata = {
-          contentType: file.type || 'image/jpeg' // default to jpeg if type not available
-        };
-        
-        const snapshot = await uploadBytes(storageRef, file, metadata);
-        const downloadUrl = await getDownloadURL(snapshot.ref);
-        
-        showToast('Image uploaded successfully!', 'success');
-        return downloadUrl;
-      } catch (uploadError) {
-        console.error('Image upload error:', uploadError);
-        let errorMsg = 'Failed to upload image';
-        
-        if (uploadError.code === 'storage/unauthorized') {
-          errorMsg += ': Unauthorized. Check your Storage rules.';
-        } else if (uploadError.code === 'storage/canceled') {
-          errorMsg += ': Upload canceled.';
-        } else if (uploadError.code === 'storage/retry-limit-exceeded') {
-          errorMsg += ': Network error. Please try again.';
-        } else {
-          errorMsg += `: ${uploadError.message}`;
-        }
-        
-        showToast(errorMsg, 'error');
-        return null;
-      }
     }
 
     // Show Toast Notification
