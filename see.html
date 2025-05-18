@@ -289,8 +289,7 @@
       <p class="movie-description" id="movie-description"></p>
       <div class="action-buttons" id="action-buttons">
         <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
-        <button class="action-btn" id="download-btn"><i class="fas fa-download"></i> Shyira Mubibiko</button>
-        <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i></button>
+        <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> Add to watchlist</button>
         <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Share</button>
       </div>
     </div>
@@ -346,7 +345,6 @@
     const movieMeta = document.getElementById('movie-meta');
     const movieDescription = document.getElementById('movie-description');
     const watchNowBtn = document.getElementById('watch-now-btn');
-    const downloadBtn = document.getElementById('download-btn');
     const watchlistBtn = document.getElementById('watchlist-btn');
     const shareBtn = document.getElementById('share-btn');
     const playBtn = document.getElementById('play-btn');
@@ -362,7 +360,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       initAuth();
       watchNowBtn.addEventListener('click', () => window.location.href = `watch.html?id=${movieId}`);
-      downloadBtn.addEventListener('click', () => alert('Download functionality not implemented yet.'));
       shareBtn.addEventListener('click', () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
@@ -483,10 +480,10 @@
       onSnapshot(watchlistRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
           watchlistBtn.classList.add('watchlist-added');
-          watchlistBtn.innerHTML = '<i class="fas fa-check"></i>';
+          watchlistBtn.innerHTML = '<i class="fas fa-check"></i> Remove from watchlist';
         } else {
           watchlistBtn.classList.remove('watchlist-added');
-          watchlistBtn.innerHTML = '<i class="fas fa-plus"></i>';
+          watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to watchlist';
         }
         watchlistBtn.onclick = toggleWatchlist;
       }, (error) => {
@@ -507,15 +504,13 @@
           await setDoc(watchlistRef, {
             movies: arrayRemove(movieId)
           }, { merge: true });
-          alert('Removed from watchlist!');
         } else {
           await setDoc(watchlistRef, {
             movies: arrayUnion(movieId)
           }, { merge: true });
-          alert('Added to watchlist!');
         }
       } catch (error) {
-        alert('Error updating watchlist: ' + error.message);
+        console.error('Error updating watchlist:', error);
       }
     }
 
