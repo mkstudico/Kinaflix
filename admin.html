@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KINAFLIX Admin</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KINAFLIX – Admin Panel</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     :root {
       --primary: #e50914;
       --dark: #141414;
       --light: #f4f4f4;
       --gray: #999;
+      --dark-gray: #222;
     }
 
     * {
@@ -23,56 +25,93 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--dark);
       color: var(--light);
-      min-height: 100vh;
+      transition: background 0.3s ease;
     }
 
-    .admin-header {
-      background-color: var(--primary);
+    body.light-mode {
+      background-color: var(--light);
+      color: var(--dark);
+    }
+
+    header {
+      background-color: var(--dark);
       padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      transition: background 0.3s ease;
     }
 
-    .admin-logo {
-      font-size: 1.5rem;
-      color: white;
+    body.light-mode header {
+      background-color: var(--light);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      color: var(--primary);
       font-weight: bold;
       text-decoration: none;
     }
 
-    .admin-nav a {
-      color: white;
-      text-decoration: none;
-      margin-left: 1.5rem;
+    .auth-buttons {
+      display: flex;
+      gap: 1rem;
     }
 
-    .admin-container {
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background-color: rgba(20, 20, 20, 0.8);
-      border-radius: 8px;
+    .auth-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
-    .admin-title {
-      text-align: center;
-      margin-bottom: 2rem;
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--light);
+      color: var(--light);
+    }
+
+    body.light-mode .logout-btn {
+      border: 1px solid var(--dark);
+      color: var(--dark);
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: none;
+      color: var(--light);
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-left: 1rem;
+    }
+
+    body.light-mode .theme-toggle {
+      color: var(--dark);
+    }
+
+    main {
+      padding: 2rem 5rem;
+    }
+
+    .admin-section {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
       color: var(--primary);
     }
 
-    .admin-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
     .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .form-group.full-width {
-      grid-column: span 2;
+      margin-bottom: 1.5rem;
     }
 
     .form-group label {
@@ -90,21 +129,32 @@
       border: 1px solid var(--gray);
       background-color: rgba(0, 0, 0, 0.5);
       color: var(--light);
+      font-size: 1rem;
+    }
+
+    body.light-mode .form-group input,
+    body.light-mode .form-group textarea,
+    body.light-mode .form-group select {
+      background-color: white;
+      color: var(--dark);
     }
 
     .form-group textarea {
-      min-height: 100px;
       resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-group select[multiple] {
+      height: 150px;
     }
 
     .submit-btn {
-      grid-column: span 2;
       background-color: var(--primary);
       color: white;
       border: none;
-      padding: 1rem;
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
       border-radius: 4px;
-      font-size: 1rem;
       cursor: pointer;
       transition: background 0.3s ease;
     }
@@ -113,16 +163,11 @@
       background-color: #f40612;
     }
 
-    .submit-btn:disabled {
-      background-color: #555;
-      cursor: not-allowed;
-    }
-
     .spinner {
       display: none;
       width: 40px;
       height: 40px;
-      margin: 1rem auto;
+      margin: 2rem auto;
       border: 4px solid rgba(0, 0, 0, 0.1);
       border-radius: 50%;
       border-top-color: var(--primary);
@@ -150,7 +195,6 @@
       opacity: 0;
       transition: all 0.3s ease;
       z-index: 1000;
-      max-width: 300px;
     }
 
     .toast.show {
@@ -166,252 +210,249 @@
       background-color: #f44336;
     }
 
-    .toast.info {
-      background-color: #2196F3;
+    footer {
+      background-color: var(--dark-gray);
+      padding: 3rem 5rem 1rem;
+      color: var(--gray);
+    }
+
+    body.light-mode footer {
+      background-color: #e0e0e0;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--dark);
+    }
+
+    body.light-mode .footer-bottom {
+      border-top: 1px solid #ccc;
     }
 
     @media (max-width: 768px) {
-      .admin-form {
-        grid-template-columns: 1fr;
+      main, footer {
+        padding: 2rem;
       }
-      
-      .form-group.full-width {
-        grid-column: span 1;
-      }
-      
-      .submit-btn {
-        grid-column: span 1;
+    }
+
+    @media (max-width: 576px) {
+      main, footer {
+        padding: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <header class="admin-header">
-    <a href="index.html" class="admin-logo">KINAFLIX ADMIN</a>
-    <nav class="admin-nav">
-      <a href="index.html">Back to Site</a>
-    </nav>
+  <header>
+    <a href="index.html" class="logo">KINAFLIX</a>
+    <div class="auth-buttons" id="auth-buttons">
+      <button class="auth-btn logout-btn">Logout</button>
+      <button class="theme-toggle"><i class="fas fa-moon"></i></button>
+    </div>
   </header>
 
-  <div class="admin-container">
-    <h1 class="admin-title">Add New Movie</h1>
-    
-    <form id="movie-form" class="admin-form">
-      <div class="form-group full-width">
-        <label for="movie-title">Title*</label>
-        <input type="text" id="movie-title" required>
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="movie-description">Description*</label>
-        <textarea id="movie-description" required></textarea>
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="movie-image-url">Cover Image URL*</label>
-        <input type="url" id="movie-image-url" required placeholder="https://example.com/poster.jpg">
-      </div>
-      
-      <div class="form-group">
-        <label for="movie-year">Release Year*</label>
-        <input type="number" id="movie-year" required min="1900" max="2100">
-      </div>
-      
-      <div class="form-group">
-        <label for="movie-genres">Genres (comma separated)*</label>
-        <input type="text" id="movie-genres" required placeholder="Action, Adventure, Comedy">
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="movie-drive-link">Google Drive Link*</label>
-        <input type="url" id="movie-drive-link" required placeholder="https://drive.google.com/...">
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="movie-trailer">YouTube Trailer URL*</label>
-        <input type="url" id="movie-trailer" required placeholder="https://www.youtube.com/watch?v=...">
-      </div>
-      
-      <div class="form-group">
-        <label for="movie-duration">Duration</label>
-        <input type="text" id="movie-duration" placeholder="1h 32min">
-      </div>
-      
-      <div class="form-group">
-        <label for="movie-cast">Cast (comma separated)</label>
-        <input type="text" id="movie-cast" placeholder="Actor 1, Actor 2">
-      </div>
-      
-      <div class="form-group">
-        <label for="movie-language">Language</label>
-        <input type="text" id="movie-language" placeholder="English">
-      </div>
-      
-      <div class="form-group">
-        <label for="movie-rating">Rating (0-10)</label>
-        <input type="number" id="movie-rating" min="0" max="10" step="0.1" placeholder="8.5">
-      </div>
-      
-      <button type="submit" class="submit-btn">Add Movie</button>
-    </form>
-    
+  <main>
     <div class="spinner" id="loading-spinner"></div>
-  </div>
-  
-  <div class="toast" id="toast"></div>
+    <section class="admin-section">
+      <h2 class="section-title">Add New Movie</h2>
+      <form id="movie-form">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" required />
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="genres">Genres (select multiple)</label>
+          <select id="genres" name="genres" multiple>
+            <option value="Action">Action</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Drama">Drama</option>
+            <option value="Horror">Horror</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Romance">Romance</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Animation">Animation</option>
+            <option value="Documentary">Documentary</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="releaseYear">Release Year</label>
+          <input type="number" id="releaseYear" name="releaseYear" min="1900" max="2025" />
+        </div>
+        <div class="form-group">
+          <label for="rating">Rating (0-10)</label>
+          <input type="number" id="rating" name="rating" min="0" max="10" step="0.1" />
+        </div>
+        <div class="form-group">
+          <label for="posterImageUrl">Poster Image URL</label>
+          <input type="url" id="posterImageUrl" name="posterImageUrl" />
+        </div>
+        <div class="form-group">
+          <label for="googleDriveLink">Google Drive Link (Full Movie)</label>
+          <input type="url" id="googleDriveLink" name="googleDriveLink" />
+        </div>
+        <div class="form-group">
+          <label for="youtubeTrailerUrl">YouTube Trailer URL</label>
+          <input type="url" id="youtubeTrailerUrl" name="youtubeTrailerUrl" />
+        </div>
+        <div class="form-group">
+          <label for="umusobanuzi">Umusobanuzi</label>
+          <input type="text" id="umusobanuzi" name="umusobanuzi" />
+        </div>
+        <button type="submit" class="submit-btn">Add Movie</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-bottom">
+      <p>© 2025 KINAFLIX. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script type="module">
-    // Import Firebase modules (Firestore only)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-    import { 
-      getFirestore,
-      collection,
-      addDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
       projectId: "kinaflix",
-      storageBucket: "kinaflix.appspot.com",
+      storageBucket: "kinaflix.firebasestorage.app",
       messagingSenderId: "318239806217",
       appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
       measurementId: "G-DC1T9B6B9W"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // DOM Elements
     const movieForm = document.getElementById('movie-form');
     const loadingSpinner = document.getElementById('loading-spinner');
-    const toast = document.getElementById('toast');
-    const submitBtn = document.querySelector('.submit-btn');
+    const authButtons = document.getElementById('auth-buttons');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
 
-    // Initialize the page
     document.addEventListener('DOMContentLoaded', () => {
-      // Form submission
-      movieForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await addMovieToFirestore();
-      });
+      initAuth();
+      initUI();
     });
 
-    // Add Movie to Firestore
-    async function addMovieToFirestore() {
-      showLoading();
-      
-      try {
-        // Get form data
-        const movieData = {
-          title: document.getElementById('movie-title').value.trim(),
-          description: document.getElementById('movie-description').value.trim(),
-          coverImageUrl: document.getElementById('movie-image-url').value.trim(),
-          releaseYear: parseInt(document.getElementById('movie-year').value.trim()),
-          genres: document.getElementById('movie-genres').value.trim().split(',').map(g => g.trim()),
-          googleDriveLink: document.getElementById('movie-drive-link').value.trim(),
-          trailerUrl: document.getElementById('movie-trailer').value.trim(),
-          duration: document.getElementById('movie-duration').value.trim(),
-          cast: document.getElementById('movie-cast').value.trim().split(',').map(c => c.trim()),
-          language: document.getElementById('movie-language').value.trim(),
-          rating: parseFloat(document.getElementById('movie-rating').value) || null,
-          views: 0,
-          dateAdded: serverTimestamp()
-        };
-        
-        // Validate required fields
-        if (!validateMovieData(movieData)) {
-          hideLoading();
-          return;
+    function initAuth() {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          updateAuthUI(user);
+        } else {
+          showToast('Please login to access the admin panel', 'error');
+          window.location.href = 'login.html';
         }
+      });
+    }
 
-        // Prepare movie document for Firestore
-        const movieDoc = {
-          title: movieData.title,
-          description: movieData.description,
-          coverImageUrl: movieData.coverImageUrl,
-          releaseYear: movieData.releaseYear,
-          genres: movieData.genres,
-          googleDriveLink: movieData.googleDriveLink,
-          trailerUrl: movieData.trailerUrl,
-          views: movieData.views,
-          dateAdded: movieData.dateAdded
-        };
+    function initUI() {
+      const themeToggle = document.querySelector('.theme-toggle');
+      themeToggle.addEventListener('click', toggleTheme);
 
-        // Add optional fields if provided
-        if (movieData.duration) movieDoc.duration = movieData.duration;
-        if (movieData.cast && movieData.cast.length > 0) movieDoc.cast = movieData.cast;
-        if (movieData.language) movieDoc.language = movieData.language;
-        if (movieData.rating) movieDoc.rating = movieData.rating;
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        document.querySelector('.theme-toggle i').classList.remove('fa-moon');
+        document.querySelector('.theme-toggle i').classList.add('fa-sun');
+      }
 
-        // Save to Firestore
-        const docRef = await addDoc(collection(db, 'movies'), movieDoc);
-        console.log('Movie document written with ID: ', docRef.id);
-        
-        // Reset form on success
+      movieForm.addEventListener('submit', handleFormSubmit);
+    }
+
+    function updateAuthUI(user) {
+      authButtons.innerHTML = `
+        <button class="auth-btn logout-btn">Logout</button>
+        <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
+      `;
+      document.querySelector('.logout-btn').addEventListener('click', () => {
+        signOut(auth).then(() => {
+          showToast('Logged out successfully', 'success');
+          window.location.href = 'index.html';
+        }).catch((error) => {
+          showToast(error.message, 'error');
+        });
+      });
+      document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const icon = document.querySelector('.theme-toggle i');
+      if (document.body.classList.contains('light-mode')) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        localStorage.setItem('theme', 'light');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type, 'show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      showLoading();
+      try {
+        const title = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const genres = Array.from(document.getElementById('genres').selectedOptions).map(option => option.value);
+        const releaseYear = parseInt(document.getElementById('releaseYear').value) || null;
+        const rating = parseFloat(document.getElementById('rating').value) || null;
+        const posterImageUrl = document.getElementById('posterImageUrl').value.trim();
+        const googleDriveLink = document.getElementById('googleDriveLink').value.trim();
+        const youtubeTrailerUrl = document.getElementById('youtubeTrailerUrl').value.trim();
+        const umusobanuzi = document.getElementById('umusobanuzi').value.trim();
+
+        await addDoc(collection(db, 'movies'), {
+          title,
+          description: description || null,
+          genres: genres.length > 0 ? genres : null,
+          releaseYear,
+          rating,
+          posterImageUrl: posterImageUrl || null,
+          googleDriveLink: googleDriveLink || null,
+          youtubeTrailerUrl: youtubeTrailerUrl || null,
+          umusobanuzi: umusobanuzi || null,
+          dateAdded: new Date(),
+          views: 0
+        });
+
+        showToast('Movie added successfully', 'success');
         movieForm.reset();
-        showToast('Movie added successfully!', 'success');
       } catch (error) {
-        console.error('Error adding movie:', error);
         showToast('Error adding movie: ' + error.message, 'error');
       } finally {
         hideLoading();
       }
     }
 
-    // Validate movie data before adding
-    function validateMovieData(movieData) {
-      const errors = [];
-      
-      if (!movieData.title) errors.push('Movie title is required');
-      if (!movieData.description) errors.push('Movie description is required');
-      if (!movieData.coverImageUrl) errors.push('Cover image URL is required');
-      if (!movieData.releaseYear || isNaN(movieData.releaseYear)) errors.push('Valid release year is required');
-      if (!movieData.genres || movieData.genres.length === 0) errors.push('At least one genre is required');
-      if (!movieData.googleDriveLink) errors.push('Google Drive link is required');
-      if (!movieData.trailerUrl) errors.push('Trailer URL is required');
-      
-      // Validate URL formats
-      try {
-        new URL(movieData.coverImageUrl);
-        new URL(movieData.googleDriveLink);
-        new URL(movieData.trailerUrl);
-      } catch (e) {
-        errors.push('Please enter valid URLs for image, drive link, and trailer');
-      }
-      
-      if (errors.length > 0) {
-        showToast(errors.join('<br>'), 'error');
-        return false;
-      }
-      
-      return true;
-    }
-
-    // Show Toast Notification
-    function showToast(message, type = 'info') {
-      toast.innerHTML = message;
-      toast.className = 'toast';
-      toast.classList.add(type, 'show');
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 5000);
-    }
-
-    // Show Loading Spinner
     function showLoading() {
       loadingSpinner.classList.add('active');
-      submitBtn.disabled = true;
     }
 
-    // Hide Loading Spinner
     function hideLoading() {
       loadingSpinner.classList.remove('active');
-      submitBtn.disabled = false;
     }
   </script>
 </body>
