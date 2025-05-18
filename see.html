@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch Movie - KINAFLIX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #e50914;
+      --dark: #141414;
+      --light: #f4f4f4;
+      --gray: #999;
+      --dark-gray: #222;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .back-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .movie-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .movie-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .movie-poster-large {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .movie-details {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .movie-title {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .movie-meta {
+      display: flex;
+      gap: 1rem;
+      color: var(--gray);
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .movie-rating {
+      color: gold;
+      font-weight: bold;
+    }
+
+    .movie-view-count {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .time-indicator {
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    .movie-description {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .movie-genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .genre-tag-large {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .movie-actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .watch-now-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.3s ease;
+    }
+
+    .watch-now-btn:hover {
+      background-color: #f40612;
+    }
+
+    .watchlist-btn {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.3s ease;
+    }
+
+    .watchlist-btn:hover {
+      background-color: #444;
+    }
+
+    .watchlist-btn.in-watchlist {
+      background-color: #4CAF50;
+    }
+
+    .watchlist-btn.in-watchlist:hover {
+      background-color: #45a049;
+    }
+
+    .player-container {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      height: 0;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      background-color: black;
+      border-radius: 8px;
+    }
+
+    .player-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 2rem auto;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Comments Section */
+    .comments-section {
+      padding: 2rem 0;
+      margin-top: 2rem;
+      border-top: 1px solid var(--dark-gray);
+    }
+
+    .comments-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    .comment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .comment-input-group {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .comment-input {
+      flex: 1;
+      padding: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid var(--gray);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--light);
+    }
+
+    .comment-submit {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .comment-submit:hover {
+      background-color: #f40612;
+    }
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .comment {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 4px;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .comment-author {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .comment-date {
+      color: var(--gray);
+      font-size: 0.8rem;
+    }
+
+    .comment-text {
+      line-height: 1.5;
+    }
+
+    /* Similar Movies */
+    .similar-movies {
+      margin-top: 3rem;
+    }
+
+    .similar-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    .movies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .movie-card {
+      background-color: var(--dark-gray);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .movie-poster {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .movie-info {
+      padding: 1rem;
+    }
+
+    .movie-title-small {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .movie-meta-small {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    .movie-rating-small {
+      color: gold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="back-btn" id="back-btn">
+      <i class="fas fa-arrow-left"></i> Back to Browse
+    </button>
+    
+    <div class="spinner" id="loading-spinner"></div>
+    
+    <div id="content" style="display: none;">
+      <div class="movie-container">
+        <div>
+          <img id="movie-poster" class="movie-poster-large" src="" alt="Movie Poster">
+        </div>
+        
+        <div class="movie-details">
+          <h1 class="movie-title" id="movie-title"></h1>
+          <div class="movie-meta" id="movie-meta">
+            <!-- Meta data will be loaded here -->
+          </div>
+          <div class="time-indicator" id="time-indicator"></div>
+          <div class="movie-genres" id="movie-genres"></div>
+          <p class="movie-description" id="movie-description"></p>
+          
+          <div class="movie-actions">
+            <button class="watch-now-btn" id="watch-now-btn">
+              <i class="fas fa-play"></i> Watch Now
+            </button>
+            <button class="watchlist-btn" id="watchlist-btn">
+              <i class="fas fa-plus"></i> Add to Watchlist
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="player-container" id="player-container">
+        <!-- Player will be loaded here -->
+      </div>
+
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <h2 class="comments-title">Comments</h2>
+        
+        <!-- Comment Form -->
+        <form id="comment-form" class="comment-form">
+          <div class="comment-input-group">
+            <input type="text" id="comment-name" class="comment-input" placeholder="Your name" required>
+            <input type="text" id="comment-text" class="comment-input" placeholder="Your comment" required>
+            <button type="submit" class="comment-submit">Post</button>
+          </div>
+        </form>
+        
+        <!-- Comments List -->
+        <div class="comments-list" id="comments-list">
+          <!-- Comments will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Similar Movies -->
+      <div class="similar-movies" id="similar-movies">
+        <h2 class="similar-title">Similar Movies</h2>
+        <div class="movies-grid" id="similar-movies-grid">
+          <!-- Similar movies will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    import { 
+      getFirestore,
+      doc,
+      getDoc,
+      collection,
+      query,
+      where,
+      orderBy,
+      onSnapshot,
+      addDoc,
+      serverTimestamp,
+      increment,
+      updateDoc,
+      arrayUnion,
+      arrayRemove
+    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      authDomain: "kinaflix.firebaseapp.com",
+      projectId: "kinaflix",
+      storageBucket: "kinaflix.appspot.com",
+      messagingSenderId: "318239806217",
+      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+      measurementId: "G-DC1T9B6B9W"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Get movie ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieId = urlParams.get('id');
+
+    // DOM Elements
+    const backBtn = document.getElementById('back-btn');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const content = document.getElementById('content');
+    const moviePoster = document.getElementById('movie-poster');
+    const movieTitle = document.getElementById('movie-title');
+    const movieMeta = document.getElementById('movie-meta');
+    const timeIndicator = document.getElementById('time-indicator');
+    const movieGenres = document.getElementById('movie-genres');
+    const movieDescription = document.getElementById('movie-description');
+    const watchNowBtn = document.getElementById('watch-now-btn');
+    const watchlistBtn = document.getElementById('watchlist-btn');
+    const playerContainer = document.getElementById('player-container');
+    const commentForm = document.getElementById('comment-form');
+    const commentName = document.getElementById('comment-name');
+    const commentText = document.getElementById('comment-text');
+    const commentsList = document.getElementById('comments-list');
+    const similarMoviesGrid = document.getElementById('similar-movies-grid');
+
+    // State
+    let currentUser = null;
+    let currentMovie = null;
+    let inWatchlist = false;
+    let viewStartTime;
+    let viewCounted = false;
+    let lastViewTime = 0;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+      loadMovieData();
+      
+      // Back button
+      backBtn.addEventListener('click', () => {
+        window.history.back();
+      });
+      
+      // Watch Now button
+      watchNowBtn.addEventListener('click', () => {
+        if (currentMovie && currentMovie.googleDriveLink) {
+          window.open(currentMovie.googleDriveLink, '_blank');
+          
+          // Track the play event
+          if (currentUser) {
+            trackMoviePlay();
+          }
+        }
+      });
+      
+      // Watchlist button
+      watchlistBtn.addEventListener('click', toggleWatchlist);
+      
+      // Comment form
+      commentForm.addEventListener('submit', handleCommentSubmit);
+    });
+
+    // Initialize Authentication
+    function initAuth() {
+      onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user) {
+          // Pre-fill name if logged in
+          commentName.value = user.displayName || '';
+          checkWatchlistStatus();
+        }
+      });
+    }
+
+    // Load Movie Data
+    async function loadMovieData() {
+      if (!movieId) {
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      showLoading();
+      
+      try {
+        // Get movie details
+        const movieRef = doc(db, 'movies', movieId);
+        const movieSnap = await getDoc(movieRef);
+        
+        if (!movieSnap.exists()) {
+          throw new Error('Movie not found');
+        }
+        
+        currentMovie = { 
+          id: movieSnap.id, 
+          ...movieSnap.data(),
+          timestamp: movieSnap.data().dateAdded?.toDate() || new Date()
+        };
+        
+        renderMovieDetails();
+        startViewTimer();
+        loadComments();
+        loadSimilarMovies();
+        
+        // Check watchlist status if user is logged in
+        if (currentUser) {
+          checkWatchlistStatus();
+        }
+        
+        content.style.display = 'block';
+        hideLoading();
+      } catch (error) {
+        console.error('Error loading movie:', error);
+        showToast('Error loading movie data', 'error');
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Render Movie Details
+    function renderMovieDetails() {
+      // Set movie poster
+      moviePoster.src = currentMovie.coverImageUrl || 'https://via.placeholder.com/500x750?text=No+Image';
+      moviePoster.alt = currentMovie.title;
+      
+      // Set movie title
+      movieTitle.textContent = currentMovie.title;
+      
+      // Clear and set meta data
+      movieMeta.innerHTML = '';
+      
+      if (currentMovie.releaseYear) {
+        const yearSpan = document.createElement('span');
+        yearSpan.textContent = currentMovie.releaseYear;
+        movieMeta.appendChild(yearSpan);
+      }
+      
+      if (currentMovie.duration) {
+        const durationSpan = document.createElement('span');
+        durationSpan.textContent = currentMovie.duration;
+        movieMeta.appendChild(durationSpan);
+      }
+      
+      if (currentMovie.language) {
+        const langSpan = document.createElement('span');
+        langSpan.textContent = currentMovie.language;
+        movieMeta.appendChild(langSpan);
+      }
+      
+      if (currentMovie.rating) {
+        const ratingSpan = document.createElement('span');
+        ratingSpan.className = 'movie-rating';
+        ratingSpan.innerHTML = `<i class="fas fa-star"></i> ${currentMovie.rating}`;
+        movieMeta.appendChild(ratingSpan);
+      }
+      
+      if (currentMovie.views) {
+        const viewsSpan = document.createElement('span');
+        viewsSpan.className = 'movie-view-count';
+        viewsSpan.innerHTML = `<i class="fas fa-eye"></i> ${currentMovie.views}`;
+        movieMeta.appendChild(viewsSpan);
+      }
+      
+      // Set time since upload
+      timeIndicator.textContent = formatTimeSince(currentMovie.timestamp);
+      
+      // Set genres
+      movieGenres.innerHTML = '';
+      if (currentMovie.genres && currentMovie.genres.length > 0) {
+        currentMovie.genres.forEach(genre => {
+          const genreTag = document.createElement('span');
+          genreTag.className = 'genre-tag-large';
+          genreTag.textContent = genre;
+          movieGenres.appendChild(genreTag);
+        });
+      }
+      
+      // Set description
+      movieDescription.textContent = currentMovie.description || 'No description available.';
+      
+      // Set up player
+      playerContainer.innerHTML = '';
+      if (currentMovie.trailerUrl) {
+        const youtubeId = extractYoutubeId(currentMovie.trailerUrl);
+        if (youtubeId) {
+          playerContainer.innerHTML = `
+            <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=0" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen></iframe>
+          `;
+        } else {
+          playerContainer.innerHTML = '<p>Trailer not available</p>';
+        }
+      } else {
+        playerContainer.innerHTML = '<p>Trailer not available</p>';
+      }
+    }
+
+    // Format time since upload
+    function formatTimeSince(timestamp) {
+      const now = new Date();
+      const seconds = Math.floor((now - timestamp) / 1000);
+      
+      let interval = Math.floor(seconds / 31536000);
+      if (interval >= 1) return `Uploaded ${interval} year${interval === 1 ? '' : 's'} ago`;
+      
+      interval = Math.floor(seconds / 2592000);
+      if (interval >= 1) return `Uploaded ${interval} month${interval === 1 ? '' : 's'} ago`;
+      
+      interval = Math.floor(seconds / 86400);
+      if (interval >= 1) return `Uploaded ${interval} day${interval === 1 ? '' : 's'} ago`;
+      
+      interval = Math.floor(seconds / 3600);
+      if (interval >= 1) return `Uploaded ${interval} hour${interval === 1 ? '' : 's'} ago`;
+      
+      interval = Math.floor(seconds / 60);
+      if (interval >= 1) return `Uploaded ${interval} minute${interval === 1 ? '' : 's'} ago`;
+      
+      return `Uploaded ${Math.floor(seconds)} second${seconds === 1 ? '' : 's'} ago`;
+    }
+
+    // Start view timer (count view after 10 seconds)
+    function startViewTimer() {
+      viewStartTime = Date.now();
+      
+      // Check if view was counted in the last hour
+      const lastView = localStorage.getItem(`lastView_${movieId}`);
+      lastViewTime = lastView ? parseInt(lastView) : 0;
+      
+      const oneHourAgo = Date.now() - 3600000; // 1 hour in milliseconds
+      
+      if (lastViewTime < oneHourAgo) {
+        setTimeout(async () => {
+          if (!viewCounted) {
+            try {
+              const movieRef = doc(db, 'movies', movieId);
+              await updateDoc(movieRef, {
+                views: increment(1)
+              });
+              
+              // Update local display
+              const currentViews = parseInt(currentMovie.views) || 0;
+              currentMovie.views = currentViews + 1;
+              
+              // Update views display
+              const viewsElement = document.querySelector('.movie-view-count');
+              if (viewsElement) {
+                viewsElement.innerHTML = `<i class="fas fa-eye"></i> ${currentMovie.views}`;
+              }
+              
+              // Store last view time
+              localStorage.setItem(`lastView_${movieId}`, Date.now().toString());
+              viewCounted = true;
+            } catch (error) {
+              console.error('Error counting view:', error);
+            }
+          }
+        }, 10000); // 10 seconds
+      }
+    }
+
+    // Track movie play in user history
+    async function trackMoviePlay() {
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        await updateDoc(userRef, {
+          history: arrayUnion(movieId)
+        });
+      } catch (error) {
+        console.error('Error tracking movie play:', error);
+      }
+    }
+
+    // Check if movie is in user's watchlist
+    async function checkWatchlistStatus() {
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          inWatchlist = userData.watchlist && userData.watchlist.includes(movieId);
+          
+          // Update watchlist button
+          updateWatchlistButton();
+        }
+      } catch (error) {
+        console.error('Error checking watchlist:', error);
+      }
+    }
+
+    // Update watchlist button appearance
+    function updateWatchlistButton() {
+      if (inWatchlist) {
+        watchlistBtn.innerHTML = '<i class="fas fa-check"></i> In Watchlist';
+        watchlistBtn.classList.add('in-watchlist');
+      } else {
+        watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to Watchlist';
+        watchlistBtn.classList.remove('in-watchlist');
+      }
+    }
+
+    // Toggle watchlist status
+    async function toggleWatchlist() {
+      if (!currentUser) {
+        showToast('Please login to use watchlist', 'error');
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        
+        if (inWatchlist) {
+          // Remove from watchlist
+          await updateDoc(userRef, {
+            watchlist: arrayRemove(movieId)
+          });
+          showToast('Removed from watchlist', 'success');
+        } else {
+          // Add to watchlist
+          await updateDoc(userRef, {
+            watchlist: arrayUnion(movieId)
+          });
+          showToast('Added to watchlist', 'success');
+        }
+        
+        // Toggle state and update button
+        inWatchlist = !inWatchlist;
+        updateWatchlistButton();
+      } catch (error) {
+        console.error('Error updating watchlist:', error);
+        showToast('Error updating watchlist', 'error');
+      }
+    }
+
+    // Load and display comments
+    function loadComments() {
+      const commentsRef = collection(db, 'comments');
+      const q = query(commentsRef, where('movieId', '==', movieId), orderBy('timestamp', 'desc'));
+      
+      onSnapshot(q, (snapshot) => {
+        commentsList.innerHTML = '';
+        
+        snapshot.forEach((doc) => {
+          const comment = doc.data();
+          displayComment(comment);
+        });
+      });
+    }
+
+    // Display a single comment
+    function displayComment(comment) {
+      const commentDiv = document.createElement('div');
+      commentDiv.className = 'comment';
+      
+      const commentDate = comment.timestamp?.toDate() || new Date();
+      
+      commentDiv.innerHTML = `
+        <div class="comment-header">
+          <span class="comment-author">${comment.name}</span>
+          <span class="comment-date">${formatCommentDate(commentDate)}</span>
+        </div>
+        <div class="comment-text">${comment.text}</div>
+      `;
+      
+      commentsList.appendChild(commentDiv);
+    }
+
+    // Format comment date
+    function formatCommentDate(date) {
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Handle comment submission
+    async function handleCommentSubmit(e) {
+      e.preventDefault();
+      
+      const name = commentName.value.trim();
+      const text = commentText.value.trim();
+      
+      if (!name || !text) {
+        showToast('Please enter both your name and a comment', 'error');
+        return;
+      }
+      
+      try {
+        await addDoc(collection(db, 'comments'), {
+          movieId: movieId,
+          name: name,
+          text: text,
+          timestamp: serverTimestamp()
+        });
+        
+        // Clear comment text
+        commentText.value = '';
+      } catch (error) {
+        console.error('Error adding comment:', error);
+        showToast('Failed to post comment. Please try again.', 'error');
+      }
+    }
+
+    // Load similar movies (by genre)
+    async function loadSimilarMovies() {
+      if (!currentMovie.genres || currentMovie.genres.length === 0) {
+        document.getElementById('similar-movies').style.display = 'none';
+        return;
+      }
+      
+      try {
+        // Get 4 movies that share at least one genre with current movie
+        const q = query(
+          collection(db, 'movies'),
+          where('genres', 'array-contains-any', currentMovie.genres),
+          where('id', '!=', currentMovie.id),
+          limit(4)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const similarMovies = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        if (similarMovies.length > 0) {
+          renderSimilarMovies(similarMovies);
+        } else {
+          document.getElementById('similar-movies').style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error loading similar movies:', error);
+        document.getElementById('similar-movies').style.display = 'none';
+      }
+    }
+
+    // Render similar movies
+    function renderSimilarMovies(movies) {
+      similarMoviesGrid.innerHTML = movies.map(movie => `
+        <div class="movie-card" data-movie-id="${movie.id}">
+          <img src="${movie.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
+               alt="${movie.title}" class="movie-poster" />
+          <div class="movie-info">
+            <h3 class="movie-title-small">${movie.title}</h3>
+            <div class="movie-meta-small">
+              <span>${movie.releaseYear || 'N/A'}</span>
+              ${movie.rating ? `<span class="movie-rating-small"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      // Attach click events
+      document.querySelectorAll('.movie-card').forEach(card => {
+        card.addEventListener('click', () => {
+          window.location.href = `see.html?id=${card.getAttribute('data-movie-id')}`;
+        });
+      });
+    }
+
+    // Extract YouTube ID from URL
+    function extractYoutubeId(url) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    // Show Toast Notification
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 10);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    // Show Loading Spinner
+    function showLoading() {
+      loadingSpinner.style.display = 'block';
+      content.style.display = 'none';
+    }
+
+    // Hide Loading Spinner
+    function hideLoading() {
+      loadingSpinner.style.display = 'none';
+      content.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

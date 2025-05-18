@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - KINAFLIX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #e50914;
+      --dark: #141414;
+      --light: #f4f4f4;
+      --gray: #999;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--dark);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      color: var(--primary);
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .auth-container {
+      max-width: 450px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: rgba(20, 20, 20, 0.8);
+      border-radius: 8px;
+      width: 100%;
+    }
+
+    .auth-title {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid var(--gray);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--light);
+    }
+
+    .auth-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    .auth-btn:hover {
+      background-color: #f40612;
+    }
+
+    .social-auth {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .social-title {
+      margin-bottom: 1rem;
+      color: var(--gray);
+      position: relative;
+    }
+
+    .social-title::before,
+    .social-title::after {
+      content: "";
+      display: inline-block;
+      width: 30%;
+      height: 1px;
+      background-color: var(--gray);
+      position: absolute;
+      top: 50%;
+    }
+
+    .social-title::before {
+      left: 0;
+    }
+
+    .social-title::after {
+      right: 0;
+    }
+
+    .social-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .google-btn {
+      background-color: #4285F4;
+    }
+
+    .facebook-btn {
+      background-color: #3b5998;
+    }
+
+    .auth-footer {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .auth-footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .spinner {
+      display: none;
+      width: 40px;
+      height: 40px;
+      margin: 1rem auto;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner.active {
+      display: block;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--dark);
+      color: white;
+      padding: 1rem;
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background-color: #4CAF50;
+    }
+
+    .toast.error {
+      background-color: #f44336;
+    }
+
+    footer {
+      background-color: var(--dark);
+      text-align: center;
+      padding: 1rem;
+      margin-top: auto;
+    }
+
+    @media (max-width: 576px) {
+      .auth-container {
+        padding: 1.5rem;
+        margin: 1rem;
+      }
+      
+      .social-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .social-title::before,
+      .social-title::after {
+        width: 25%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo">KINAFLIX</a>
+  </header>
+
+  <div class="auth-container">
+    <h1 class="auth-title">Create Account</h1>
+    
+    <form class="auth-form" id="register-form">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password (min 6 characters)</label>
+        <input type="password" id="password" minlength="6" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirm-password">Confirm Password</label>
+        <input type="password" id="confirm-password" minlength="6" required>
+      </div>
+      
+      <button type="submit" class="auth-btn">Sign Up</button>
+      
+      <div class="spinner" id="loading-spinner"></div>
+      
+      <div class="social-auth">
+        <div class="social-title">Or sign up with</div>
+        <div class="social-buttons">
+          <a href="#" class="social-btn google-btn" id="google-register">
+            <i class="fab fa-google"></i> Google
+          </a>
+          <a href="#" class="social-btn facebook-btn" id="facebook-register">
+            <i class="fab fa-facebook-f"></i> Facebook
+          </a>
+        </div>
+      </div>
+      
+      <div class="auth-footer">
+        <p>Already have an account? <a href="login.html">Sign in now</a></p>
+      </div>
+    </form>
+  </div>
+  
+  <footer>
+    <p>&copy; 2025 KINAFLIX. All rights reserved.</p>
+  </footer>
+  
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
+      FacebookAuthProvider
+    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+    import { 
+      getFirestore,
+      doc,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      authDomain: "kinaflix.firebaseapp.com",
+      projectId: "kinaflix",
+      storageBucket: "kinaflix.appspot.com",
+      messagingSenderId: "318239806217",
+      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+      measurementId: "G-DC1T9B6B9W"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Providers
+    const googleProvider = new GoogleAuthProvider();
+    const facebookProvider = new FacebookAuthProvider();
+
+    // DOM Elements
+    const registerForm = document.getElementById('register-form');
+    const googleRegister = document.getElementById('google-register');
+    const facebookRegister = document.getElementById('facebook-register');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const toast = document.getElementById('toast');
+
+    // Form submission
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      
+      if (password !== confirmPassword) {
+        showToast("Passwords don't match", 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Add user data to Firestore
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          name: name,
+          email: email,
+          createdAt: new Date(),
+          watchlist: [],
+          history: []
+        });
+        
+        showToast('Registration successful!', 'success');
+        window.location.href = 'index.html';
+      } catch (error) {
+        showToast(getErrorMessage(error.code), 'error');
+        hideLoading();
+      }
+    });
+
+    // Google Registration
+    googleRegister.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        showLoading();
+        const result = await signInWithPopup(auth, googleProvider);
+        
+        // Check if user exists in Firestore
+        const userRef = doc(db, 'users', result.user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+          // Add new user to Firestore
+          await setDoc(userRef, {
+            name: result.user.displayName,
+            email: result.user.email,
+            createdAt: new Date(),
+            watchlist: [],
+            history: []
+          });
+        }
+        
+        showToast('Google registration successful!', 'success');
+        window.location.href = 'index.html';
+      } catch (error) {
+        showToast(getErrorMessage(error.code), 'error');
+        hideLoading();
+      }
+    });
+
+    // Facebook Registration
+    facebookRegister.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        showLoading();
+        const result = await signInWithPopup(auth, facebookProvider);
+        
+        // Check if user exists in Firestore
+        const userRef = doc(db, 'users', result.user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+          // Add new user to Firestore
+          await setDoc(userRef, {
+            name: result.user.displayName,
+            email: result.user.email,
+            createdAt: new Date(),
+            watchlist: [],
+            history: []
+          });
+        }
+        
+        showToast('Facebook registration successful!', 'success');
+        window.location.href = 'index.html';
+      } catch (error) {
+        showToast(getErrorMessage(error.code), 'error');
+        hideLoading();
+      }
+    });
+
+    // Show Toast Notification
+    function showToast(message, type = 'info') {
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type, 'show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Show Loading Spinner
+    function showLoading() {
+      loadingSpinner.classList.add('active');
+    }
+
+    // Hide Loading Spinner
+    function hideLoading() {
+      loadingSpinner.classList.remove('active');
+    }
+
+    // Get user-friendly error messages
+    function getErrorMessage(errorCode) {
+      switch(errorCode) {
+        case 'auth/email-already-in-use':
+          return 'Email already in use';
+        case 'auth/invalid-email':
+          return 'Invalid email address';
+        case 'auth/weak-password':
+          return 'Password should be at least 6 characters';
+        case 'auth/popup-closed-by-user':
+          return 'Registration popup was closed';
+        case 'auth/cancelled-popup-request':
+          return 'Registration popup was cancelled';
+        case 'auth/account-exists-with-different-credential':
+          return 'Account already exists with different method';
+        default:
+          return 'Registration failed. Please try again';
+      }
+    }
+  </script>
+</body>
+</html>
