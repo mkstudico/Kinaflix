@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Watch Movie - KINAFLIX</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     :root {
       --primary: #e50914;
@@ -12,6 +12,7 @@
       --light: #f4f4f4;
       --gray: #999;
       --dark-gray: #222;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     }
 
     * {
@@ -24,114 +25,118 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--dark);
       color: var(--light);
+      line-height: 1.5;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
+    .logo {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+      z-index: 10;
     }
 
-    .back-btn {
-      background-color: var(--primary);
-      color: white;
+    .logo:hover {
+      color: #f40612;
+    }
+
+    .player-section {
+      position: relative;
+      width: 100%;
+      height: 80vh;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .player-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    .player-container iframe {
+      width: 100%;
+      height: 100%;
       border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-bottom: 1rem;
+    }
+
+    .player-controls {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-    }
-
-    .movie-container {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    @media (max-width: 768px) {
-      .movie-container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .movie-poster-large {
-      width: 100%;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    .movie-details {
-      display: flex;
-      flex-direction: column;
       gap: 1rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .player-section:hover .player-controls {
+      opacity: 1;
+    }
+
+    .play-btn {
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .play-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .movie-info {
+      position: absolute;
+      bottom: 2rem;
+      left: 2rem;
+      color: white;
+      max-width: 50%;
     }
 
     .movie-title {
-      font-size: 2rem;
+      font-size: 2.5rem;
       margin-bottom: 0.5rem;
     }
 
     .movie-meta {
       display: flex;
       gap: 1rem;
-      color: var(--gray);
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .movie-rating {
-      color: gold;
-      font-weight: bold;
-    }
-
-    .movie-view-count {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .time-indicator {
-      font-size: 0.9rem;
-      color: var(--gray);
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
     }
 
     .movie-description {
-      margin-bottom: 1.5rem;
-      line-height: 1.6;
+      font-size: 1rem;
+      line-height: 1.4;
     }
 
-    .movie-genres {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .genre-tag-large {
-      background-color: var(--primary);
-      color: white;
-      padding: 0.3rem 0.8rem;
-      border-radius: 4px;
-      font-size: 0.9rem;
-    }
-
-    .movie-actions {
+    .action-buttons {
       display: flex;
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-top: 1rem;
     }
 
-    .watch-now-btn {
-      background-color: var(--primary);
+    .action-btn {
+      background: rgba(0, 0, 0, 0.7);
       color: white;
       border: none;
-      padding: 0.8rem 2rem;
+      padding: 0.5rem 1rem;
       border-radius: 4px;
-      font-size: 1.1rem;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -139,300 +144,185 @@
       transition: background 0.3s ease;
     }
 
-    .watch-now-btn:hover {
-      background-color: #f40612;
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
     }
 
-    .watchlist-btn {
-      background-color: #333;
-      color: white;
-      border: none;
-      padding: 0.8rem 2rem;
-      border-radius: 4px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: background 0.3s ease;
+    .action-btn.play {
+      background: var(--primary);
     }
 
-    .watchlist-btn:hover {
-      background-color: #444;
+    .action-btn.play:hover {
+      background: #f40612;
     }
 
-    .watchlist-btn.in-watchlist {
-      background-color: #4CAF50;
+    .action-btn.watchlist-added {
+      background: rgba(0, 255, 0, 0.3);
     }
 
-    .watchlist-btn.in-watchlist:hover {
-      background-color: #45a049;
-    }
-
-    .player-container {
-      position: relative;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
-      height: 0;
-      overflow: hidden;
-      margin-bottom: 2rem;
-      background-color: black;
-      border-radius: 8px;
-    }
-
-    .player-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      margin: 2rem auto;
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--primary);
-      animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Comments Section */
     .comments-section {
       padding: 2rem 0;
-      margin-top: 2rem;
-      border-top: 1px solid var(--dark-gray);
+      background: var(--dark-gray);
     }
 
     .comments-title {
       font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      color: var(--primary);
-    }
-
-    .comment-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .comment-input-group {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .comment-input {
-      flex: 1;
-      padding: 0.8rem;
-      border-radius: 4px;
-      border: 1px solid var(--gray);
-      background-color: rgba(0, 0, 0, 0.5);
       color: var(--light);
+      margin-bottom: 1rem;
+      padding-left: 1rem;
     }
 
-    .comment-submit {
-      background-color: var(--primary);
-      color: white;
+    .comments-form {
+      padding: 0 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .comments-form textarea {
+      width: 100%;
+      padding: 0.5rem;
       border: none;
-      padding: 0.8rem 1.5rem;
       border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .comment-submit:hover {
-      background-color: #f40612;
-    }
-
-    .comments-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .comment {
-      background-color: rgba(0, 0, 0, 0.3);
-      padding: 1rem;
-      border-radius: 4px;
-    }
-
-    .comment-header {
-      display: flex;
-      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--light);
+      resize: vertical;
+      min-height: 50px;
       margin-bottom: 0.5rem;
     }
 
-    .comment-author {
+    .comments-form button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .comments-form button:hover {
+      background: #f40612;
+    }
+
+    .comments-list {
+      padding: 0 1rem;
+    }
+
+    .comment {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .comment .user {
       font-weight: bold;
       color: var(--primary);
     }
 
-    .comment-date {
-      color: var(--gray);
-      font-size: 0.8rem;
+    .comment .text {
+      margin-top: 0.2rem;
     }
 
-    .comment-text {
-      line-height: 1.5;
+    .spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s ease-in-out infinite;
+      z-index: 10;
     }
 
-    /* Similar Movies */
-    .similar-movies {
-      margin-top: 3rem;
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
     }
 
-    .similar-title {
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      color: var(--primary);
+    @media (max-width: 768px) {
+      .player-section {
+        height: 60vh;
+      }
+      .movie-info {
+        max-width: 80%;
+      }
+      .movie-title {
+        font-size: 1.8rem;
+      }
+      .logo {
+        font-size: 1.2rem;
+      }
     }
 
-    .movies-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .movie-card {
-      background-color: var(--dark-gray);
-      border-radius: 8px;
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .movie-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .movie-poster {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      display: block;
-    }
-
-    .movie-info {
-      padding: 1rem;
-    }
-
-    .movie-title-small {
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .movie-meta-small {
-      display: flex;
-      justify-content: space-between;
-      color: var(--gray);
-      font-size: 0.9rem;
-    }
-
-    .movie-rating-small {
-      color: gold;
+    @media (max-width: 480px) {
+      .player-section {
+        height: 50vh;
+      }
+      .movie-info {
+        bottom: 1rem;
+        left: 1rem;
+      }
+      .movie-title {
+        font-size: 1.5rem;
+      }
+      .logo {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <button class="back-btn" id="back-btn">
-      <i class="fas fa-arrow-left"></i> Back to Browse
-    </button>
-    
-    <div class="spinner" id="loading-spinner"></div>
-    
-    <div id="content" style="display: none;">
-      <div class="movie-container">
-        <div>
-          <img id="movie-poster" class="movie-poster-large" src="" alt="Movie Poster">
-        </div>
-        
-        <div class="movie-details">
-          <h1 class="movie-title" id="movie-title"></h1>
-          <div class="movie-meta" id="movie-meta">
-            <!-- Meta data will be loaded here -->
-          </div>
-          <div class="time-indicator" id="time-indicator"></div>
-          <div class="movie-genres" id="movie-genres"></div>
-          <p class="movie-description" id="movie-description"></p>
-          
-          <div class="movie-actions">
-            <button class="watch-now-btn" id="watch-now-btn">
-              <i class="fas fa-play"></i> Watch Now
-            </button>
-            <button class="watchlist-btn" id="watchlist-btn">
-              <i class="fas fa-plus"></i> Add to Watchlist
-            </button>
-          </div>
-        </div>
-      </div>
+  <a href="index.html" class="logo">KINAFLIX</a>
 
-      <div class="player-container" id="player-container">
-        <!-- Player will be loaded here -->
-      </div>
-
-      <!-- Comments Section -->
-      <div class="comments-section">
-        <h2 class="comments-title">Comments</h2>
-        
-        <!-- Comment Form -->
-        <form id="comment-form" class="comment-form">
-          <div class="comment-input-group">
-            <input type="text" id="comment-name" class="comment-input" placeholder="Your name" required>
-            <input type="text" id="comment-text" class="comment-input" placeholder="Your comment" required>
-            <button type="submit" class="comment-submit">Post</button>
-          </div>
-        </form>
-        
-        <!-- Comments List -->
-        <div class="comments-list" id="comments-list">
-          <!-- Comments will be loaded here -->
-        </div>
-      </div>
-
-      <!-- Similar Movies -->
-      <div class="similar-movies" id="similar-movies">
-        <h2 class="similar-title">Similar Movies</h2>
-        <div class="movies-grid" id="similar-movies-grid">
-          <!-- Similar movies will be loaded here -->
-        </div>
+  <div class="player-section">
+    <div class="player-container" id="player-container">
+      <div class="spinner" id="loading-spinner"></div>
+      <div id="youtube-player"></div>
+    </div>
+    <div class="player-controls" id="player-controls">
+      <button class="play-btn" id="play-btn"><i class="fas fa-play"></i></button>
+    </div>
+    <div class="movie-info" id="movie-info">
+      <h1 class="movie-title" id="movie-title"></h1>
+      <div class="movie-meta" id="movie-meta"></div>
+      <p class="movie-description" id="movie-description"></p>
+      <div class="action-buttons" id="action-buttons">
+        <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
+        <button class="action-btn" id="download-btn"><i class="fas fa-download"></i> Shyira Mubibiko</button>
+        <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i></button>
+        <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Share</button>
       </div>
     </div>
   </div>
 
+  <div class="comments-section">
+    <h2 class="comments-title">Comments</h2>
+    <div class="comments-form" id="comments-form">
+      <textarea id="comment-input" placeholder="Write a comment..."></textarea>
+      <button id="submit-comment">Submit</button>
+    </div>
+    <div class="comments-list" id="comments-list"></div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script type="module">
-    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-    import { 
+    import {
       getFirestore,
       doc,
       getDoc,
+      setDoc,
+      arrayUnion,
+      arrayRemove,
+      onSnapshot,
       collection,
       query,
       where,
-      orderBy,
-      onSnapshot,
-      addDoc,
-      serverTimestamp,
-      increment,
-      updateDoc,
-      arrayUnion,
-      arrayRemove
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
@@ -443,509 +333,245 @@
       measurementId: "G-DC1T9B6B9W"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Get movie ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
 
-    // DOM Elements
-    const backBtn = document.getElementById('back-btn');
+    const playerContainer = document.getElementById('player-container');
     const loadingSpinner = document.getElementById('loading-spinner');
-    const content = document.getElementById('content');
-    const moviePoster = document.getElementById('movie-poster');
     const movieTitle = document.getElementById('movie-title');
     const movieMeta = document.getElementById('movie-meta');
-    const timeIndicator = document.getElementById('time-indicator');
-    const movieGenres = document.getElementById('movie-genres');
     const movieDescription = document.getElementById('movie-description');
     const watchNowBtn = document.getElementById('watch-now-btn');
+    const downloadBtn = document.getElementById('download-btn');
     const watchlistBtn = document.getElementById('watchlist-btn');
-    const playerContainer = document.getElementById('player-container');
-    const commentForm = document.getElementById('comment-form');
-    const commentName = document.getElementById('comment-name');
-    const commentText = document.getElementById('comment-text');
+    const shareBtn = document.getElementById('share-btn');
+    const playBtn = document.getElementById('play-btn');
+    const commentInput = document.getElementById('comment-input');
+    const submitCommentBtn = document.getElementById('submit-comment');
     const commentsList = document.getElementById('comments-list');
-    const similarMoviesGrid = document.getElementById('similar-movies-grid');
 
-    // State
-    let currentUser = null;
     let currentMovie = null;
-    let inWatchlist = false;
-    let viewStartTime;
-    let viewCounted = false;
-    let lastViewTime = 0;
+    let player = null;
+    let isPlaying = false;
+    let currentUser = null;
 
-    // Initialize the page
     document.addEventListener('DOMContentLoaded', () => {
       initAuth();
-      loadMovieData();
-      
-      // Back button
-      backBtn.addEventListener('click', () => {
-        window.history.back();
+      watchNowBtn.addEventListener('click', () => window.location.href = `watch.html?id=${movieId}`);
+      downloadBtn.addEventListener('click', () => alert('Download functionality not implemented yet.'));
+      shareBtn.addEventListener('click', () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
       });
-      
-      // Watch Now button
-      watchNowBtn.addEventListener('click', () => {
-        if (currentMovie && currentMovie.googleDriveLink) {
-          window.open(currentMovie.googleDriveLink, '_blank');
-          
-          // Track the play event
-          if (currentUser) {
-            trackMoviePlay();
-          }
-        }
-      });
-      
-      // Watchlist button
-      watchlistBtn.addEventListener('click', toggleWatchlist);
-      
-      // Comment form
-      commentForm.addEventListener('submit', handleCommentSubmit);
+      submitCommentBtn.addEventListener('click', addComment);
     });
 
-    // Initialize Authentication
     function initAuth() {
       onAuthStateChanged(auth, (user) => {
-        currentUser = user;
         if (user) {
-          // Pre-fill name if logged in
-          commentName.value = user.displayName || '';
+          currentUser = user;
+          loadMovieData();
           checkWatchlistStatus();
+        } else {
+          window.location.href = 'login.html';
         }
       });
     }
 
-    // Load Movie Data
     async function loadMovieData() {
       if (!movieId) {
+        alert('No movie ID provided');
         window.location.href = 'index.html';
         return;
       }
-      
+
       showLoading();
-      
       try {
-        // Get movie details
         const movieRef = doc(db, 'movies', movieId);
         const movieSnap = await getDoc(movieRef);
-        
+
         if (!movieSnap.exists()) {
           throw new Error('Movie not found');
         }
-        
-        currentMovie = { 
-          id: movieSnap.id, 
+
+        currentMovie = {
+          id: movieSnap.id,
           ...movieSnap.data(),
           timestamp: movieSnap.data().dateAdded?.toDate() || new Date()
         };
-        
+
         renderMovieDetails();
-        startViewTimer();
         loadComments();
-        loadSimilarMovies();
-        
-        // Check watchlist status if user is logged in
-        if (currentUser) {
-          checkWatchlistStatus();
-        }
-        
-        content.style.display = 'block';
-        hideLoading();
       } catch (error) {
-        console.error('Error loading movie:', error);
-        showToast('Error loading movie data', 'error');
+        alert('Error loading movie: ' + error.message);
         window.location.href = 'index.html';
+      } finally {
+        hideLoading();
       }
     }
 
-    // Render Movie Details
     function renderMovieDetails() {
-      // Set movie poster
-      moviePoster.src = currentMovie.coverImageUrl || 'https://via.placeholder.com/500x750?text=No+Image';
-      moviePoster.alt = currentMovie.title;
-      
-      // Set movie title
-      movieTitle.textContent = currentMovie.title;
-      
-      // Clear and set meta data
-      movieMeta.innerHTML = '';
-      
-      if (currentMovie.releaseYear) {
-        const yearSpan = document.createElement('span');
-        yearSpan.textContent = currentMovie.releaseYear;
-        movieMeta.appendChild(yearSpan);
-      }
-      
-      if (currentMovie.duration) {
-        const durationSpan = document.createElement('span');
-        durationSpan.textContent = currentMovie.duration;
-        movieMeta.appendChild(durationSpan);
-      }
-      
-      if (currentMovie.language) {
-        const langSpan = document.createElement('span');
-        langSpan.textContent = currentMovie.language;
-        movieMeta.appendChild(langSpan);
-      }
-      
-      if (currentMovie.rating) {
-        const ratingSpan = document.createElement('span');
-        ratingSpan.className = 'movie-rating';
-        ratingSpan.innerHTML = `<i class="fas fa-star"></i> ${currentMovie.rating}`;
-        movieMeta.appendChild(ratingSpan);
-      }
-      
-      if (currentMovie.views) {
-        const viewsSpan = document.createElement('span');
-        viewsSpan.className = 'movie-view-count';
-        viewsSpan.innerHTML = `<i class="fas fa-eye"></i> ${currentMovie.views}`;
-        movieMeta.appendChild(viewsSpan);
-      }
-      
-      // Set time since upload
-      timeIndicator.textContent = formatTimeSince(currentMovie.timestamp);
-      
-      // Set genres
-      movieGenres.innerHTML = '';
-      if (currentMovie.genres && currentMovie.genres.length > 0) {
-        currentMovie.genres.forEach(genre => {
-          const genreTag = document.createElement('span');
-          genreTag.className = 'genre-tag-large';
-          genreTag.textContent = genre;
-          movieGenres.appendChild(genreTag);
-        });
-      }
-      
-      // Set description
+      movieTitle.textContent = currentMovie.title || 'N/A';
+      movieMeta.innerHTML = `
+        ${currentMovie.genres?.[0] || 'N/A'} |
+        ${currentMovie.country || 'N/A'} |
+        ${currentMovie.releaseYear || 'N/A'}
+      `;
       movieDescription.textContent = currentMovie.description || 'No description available.';
-      
-      // Set up player
-      playerContainer.innerHTML = '';
-      if (currentMovie.trailerUrl) {
-        const youtubeId = extractYoutubeId(currentMovie.trailerUrl);
+      setupPlayer();
+    }
+
+    function setupPlayer() {
+      if (currentMovie.youtubeTrailerUrl) {
+        const youtubeId = extractYoutubeId(currentMovie.youtubeTrailerUrl);
         if (youtubeId) {
-          playerContainer.innerHTML = `
-            <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=0" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen></iframe>
-          `;
+          player = new YT.Player('youtube-player', {
+            height: '100%',
+            width: '100%',
+            videoId: youtubeId,
+            playerVars: {
+              'autoplay': 0,
+              'controls': 0,
+              'rel': 0,
+              'showinfo': 0,
+              'mute': 0
+            },
+            events: {
+              'onReady': onPlayerReady,
+              'onError': onPlayerError
+            }
+          });
         } else {
-          playerContainer.innerHTML = '<p>Trailer not available</p>';
+          playerContainer.innerHTML = '<p>Invalid trailer URL</p>';
         }
       } else {
         playerContainer.innerHTML = '<p>Trailer not available</p>';
       }
     }
 
-    // Format time since upload
-    function formatTimeSince(timestamp) {
-      const now = new Date();
-      const seconds = Math.floor((now - timestamp) / 1000);
-      
-      let interval = Math.floor(seconds / 31536000);
-      if (interval >= 1) return `Uploaded ${interval} year${interval === 1 ? '' : 's'} ago`;
-      
-      interval = Math.floor(seconds / 2592000);
-      if (interval >= 1) return `Uploaded ${interval} month${interval === 1 ? '' : 's'} ago`;
-      
-      interval = Math.floor(seconds / 86400);
-      if (interval >= 1) return `Uploaded ${interval} day${interval === 1 ? '' : 's'} ago`;
-      
-      interval = Math.floor(seconds / 3600);
-      if (interval >= 1) return `Uploaded ${interval} hour${interval === 1 ? '' : 's'} ago`;
-      
-      interval = Math.floor(seconds / 60);
-      if (interval >= 1) return `Uploaded ${interval} minute${interval === 1 ? '' : 's'} ago`;
-      
-      return `Uploaded ${Math.floor(seconds)} second${seconds === 1 ? '' : 's'} ago`;
-    }
-
-    // Start view timer (count view after 10 seconds)
-    function startViewTimer() {
-      viewStartTime = Date.now();
-      
-      // Check if view was counted in the last hour
-      const lastView = localStorage.getItem(`lastView_${movieId}`);
-      lastViewTime = lastView ? parseInt(lastView) : 0;
-      
-      const oneHourAgo = Date.now() - 3600000; // 1 hour in milliseconds
-      
-      if (lastViewTime < oneHourAgo) {
-        setTimeout(async () => {
-          if (!viewCounted) {
-            try {
-              const movieRef = doc(db, 'movies', movieId);
-              await updateDoc(movieRef, {
-                views: increment(1)
-              });
-              
-              // Update local display
-              const currentViews = parseInt(currentMovie.views) || 0;
-              currentMovie.views = currentViews + 1;
-              
-              // Update views display
-              const viewsElement = document.querySelector('.movie-view-count');
-              if (viewsElement) {
-                viewsElement.innerHTML = `<i class="fas fa-eye"></i> ${currentMovie.views}`;
-              }
-              
-              // Store last view time
-              localStorage.setItem(`lastView_${movieId}`, Date.now().toString());
-              viewCounted = true;
-            } catch (error) {
-              console.error('Error counting view:', error);
-            }
-          }
-        }, 10000); // 10 seconds
-      }
-    }
-
-    // Track movie play in user history
-    async function trackMoviePlay() {
-      try {
-        const userRef = doc(db, 'users', currentUser.uid);
-        await updateDoc(userRef, {
-          history: arrayUnion(movieId)
-        });
-      } catch (error) {
-        console.error('Error tracking movie play:', error);
-      }
-    }
-
-    // Check if movie is in user's watchlist
-    async function checkWatchlistStatus() {
-      try {
-        const userRef = doc(db, 'users', currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          inWatchlist = userData.watchlist && userData.watchlist.includes(movieId);
-          
-          // Update watchlist button
-          updateWatchlistButton();
+    function onPlayerReady(event) {
+      playBtn.addEventListener('click', () => {
+        if (isPlaying) {
+          player.pauseVideo();
+          playBtn.innerHTML = '<i class="fas fa-play"></i>';
+        } else {
+          player.playVideo();
+          playBtn.innerHTML = '<i class="fas fa-pause"></i>';
         }
-      } catch (error) {
+        isPlaying = !isPlaying;
+      });
+    }
+
+    function onPlayerError(event) {
+      console.error('YouTube Player Error:', event.data);
+      playerContainer.innerHTML = '<p>Error loading trailer. It might not be embeddable.</p>';
+    }
+
+    function extractYoutubeId(url) {
+      const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+      const match = url.match(regExp);
+      return match ? match[1] : null;
+    }
+
+    async function checkWatchlistStatus() {
+      if (!currentUser) return;
+      const watchlistRef = doc(db, 'watchlists', currentUser.uid);
+      onSnapshot(watchlistRef, (docSnap) => {
+        if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
+          watchlistBtn.classList.add('watchlist-added');
+          watchlistBtn.innerHTML = '<i class="fas fa-check"></i>';
+        } else {
+          watchlistBtn.classList.remove('watchlist-added');
+          watchlistBtn.innerHTML = '<i class="fas fa-plus"></i>';
+        }
+        watchlistBtn.onclick = toggleWatchlist;
+      }, (error) => {
         console.error('Error checking watchlist:', error);
-      }
+      });
     }
 
-    // Update watchlist button appearance
-    function updateWatchlistButton() {
-      if (inWatchlist) {
-        watchlistBtn.innerHTML = '<i class="fas fa-check"></i> In Watchlist';
-        watchlistBtn.classList.add('in-watchlist');
-      } else {
-        watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to Watchlist';
-        watchlistBtn.classList.remove('in-watchlist');
-      }
-    }
-
-    // Toggle watchlist status
     async function toggleWatchlist() {
       if (!currentUser) {
-        showToast('Please login to use watchlist', 'error');
-        window.location.href = 'login.html';
+        alert('Please log in to manage your watchlist.');
         return;
       }
-      
+
+      const watchlistRef = doc(db, 'watchlists', currentUser.uid);
       try {
-        const userRef = doc(db, 'users', currentUser.uid);
-        
-        if (inWatchlist) {
-          // Remove from watchlist
-          await updateDoc(userRef, {
-            watchlist: arrayRemove(movieId)
-          });
-          showToast('Removed from watchlist', 'success');
+        const docSnap = await getDoc(watchlistRef);
+        if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
+          await setDoc(watchlistRef, {
+            movies: arrayRemove(movieId)
+          }, { merge: true });
+          alert('Removed from watchlist!');
         } else {
-          // Add to watchlist
-          await updateDoc(userRef, {
-            watchlist: arrayUnion(movieId)
-          });
-          showToast('Added to watchlist', 'success');
+          await setDoc(watchlistRef, {
+            movies: arrayUnion(movieId)
+          }, { merge: true });
+          alert('Added to watchlist!');
         }
-        
-        // Toggle state and update button
-        inWatchlist = !inWatchlist;
-        updateWatchlistButton();
       } catch (error) {
-        console.error('Error updating watchlist:', error);
-        showToast('Error updating watchlist', 'error');
+        alert('Error updating watchlist: ' + error.message);
       }
     }
 
-    // Load and display comments
-    function loadComments() {
+    async function loadComments() {
       const commentsRef = collection(db, 'comments');
-      const q = query(commentsRef, where('movieId', '==', movieId), orderBy('timestamp', 'desc'));
-      
+      const q = query(commentsRef, where('movieId', '==', movieId));
       onSnapshot(q, (snapshot) => {
         commentsList.innerHTML = '';
-        
-        snapshot.forEach((doc) => {
+        snapshot.forEach(doc => {
           const comment = doc.data();
-          displayComment(comment);
+          const commentElement = document.createElement('div');
+          commentElement.className = 'comment';
+          commentElement.innerHTML = `
+            <span class="user">${comment.userEmail || 'Anonymous'}</span>
+            <p class="text">${comment.text}</p>
+          `;
+          commentsList.appendChild(commentElement);
         });
+      }, (error) => {
+        console.error('Error loading comments:', error);
       });
     }
 
-    // Display a single comment
-    function displayComment(comment) {
-      const commentDiv = document.createElement('div');
-      commentDiv.className = 'comment';
-      
-      const commentDate = comment.timestamp?.toDate() || new Date();
-      
-      commentDiv.innerHTML = `
-        <div class="comment-header">
-          <span class="comment-author">${comment.name}</span>
-          <span class="comment-date">${formatCommentDate(commentDate)}</span>
-        </div>
-        <div class="comment-text">${comment.text}</div>
-      `;
-      
-      commentsList.appendChild(commentDiv);
-    }
-
-    // Format comment date
-    function formatCommentDate(date) {
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    // Handle comment submission
-    async function handleCommentSubmit(e) {
-      e.preventDefault();
-      
-      const name = commentName.value.trim();
-      const text = commentText.value.trim();
-      
-      if (!name || !text) {
-        showToast('Please enter both your name and a comment', 'error');
+    async function addComment() {
+      const text = commentInput.value.trim();
+      if (!text) {
+        alert('Please enter a comment.');
         return;
       }
-      
+
+      if (!currentUser) {
+        alert('Please log in to comment.');
+        return;
+      }
+
       try {
         await addDoc(collection(db, 'comments'), {
           movieId: movieId,
-          name: name,
+          userId: currentUser.uid,
+          userEmail: currentUser.email,
           text: text,
           timestamp: serverTimestamp()
         });
-        
-        // Clear comment text
-        commentText.value = '';
+        commentInput.value = '';
+        alert('Comment added successfully!');
       } catch (error) {
-        console.error('Error adding comment:', error);
-        showToast('Failed to post comment. Please try again.', 'error');
+        alert('Error adding comment: ' + error.message);
       }
     }
 
-    // Load similar movies (by genre)
-    async function loadSimilarMovies() {
-      if (!currentMovie.genres || currentMovie.genres.length === 0) {
-        document.getElementById('similar-movies').style.display = 'none';
-        return;
-      }
-      
-      try {
-        // Get 4 movies that share at least one genre with current movie
-        const q = query(
-          collection(db, 'movies'),
-          where('genres', 'array-contains-any', currentMovie.genres),
-          where('id', '!=', currentMovie.id),
-          limit(4)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const similarMovies = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        if (similarMovies.length > 0) {
-          renderSimilarMovies(similarMovies);
-        } else {
-          document.getElementById('similar-movies').style.display = 'none';
-        }
-      } catch (error) {
-        console.error('Error loading similar movies:', error);
-        document.getElementById('similar-movies').style.display = 'none';
-      }
-    }
-
-    // Render similar movies
-    function renderSimilarMovies(movies) {
-      similarMoviesGrid.innerHTML = movies.map(movie => `
-        <div class="movie-card" data-movie-id="${movie.id}">
-          <img src="${movie.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
-               alt="${movie.title}" class="movie-poster" />
-          <div class="movie-info">
-            <h3 class="movie-title-small">${movie.title}</h3>
-            <div class="movie-meta-small">
-              <span>${movie.releaseYear || 'N/A'}</span>
-              ${movie.rating ? `<span class="movie-rating-small"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
-            </div>
-          </div>
-        </div>
-      `).join('');
-      
-      // Attach click events
-      document.querySelectorAll('.movie-card').forEach(card => {
-        card.addEventListener('click', () => {
-          window.location.href = `see.html?id=${card.getAttribute('data-movie-id')}`;
-        });
-      });
-    }
-
-    // Extract YouTube ID from URL
-    function extractYoutubeId(url) {
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    // Show Toast Notification
-    function showToast(message, type = 'info') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.classList.add('show');
-      }, 10);
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-          toast.remove();
-        }, 300);
-      }, 3000);
-    }
-
-    // Show Loading Spinner
     function showLoading() {
       loadingSpinner.style.display = 'block';
-      content.style.display = 'none';
     }
 
-    // Hide Loading Spinner
     function hideLoading() {
       loadingSpinner.style.display = 'none';
-      content.style.display = 'block';
     }
   </script>
 </body>
