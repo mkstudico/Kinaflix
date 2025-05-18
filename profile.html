@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KINAFLIX – Profile</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #e50914;
+      --dark: #141414;
+      --light: #f4f4f4;
+      --gray: #999;
+      --dark-gray: #222;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+      transition: background 0.3s ease;
+    }
+
+    body.light-mode {
+      background-color: var(--light);
+      color: var(--dark);
+    }
+
+    header {
+      background-color: var(--dark);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      transition: background 0.3s ease;
+    }
+
+    body.light-mode header {
+      background-color: var(--light);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      color: var(--primary);
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .auth-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--light);
+      color: var(--light);
+    }
+
+    body.light-mode .logout-btn {
+      border: 1px solid var(--dark);
+      color: var(--dark);
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: none;
+      color: var(--light);
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-left: 1rem;
+    }
+
+    body.light-mode .theme-toggle {
+      color: var(--dark);
+    }
+
+    .profile-container {
+      display: flex;
+      min-height: calc(100vh - 60px - 100px);
+      padding: 2rem 5rem;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: var(--dark-gray);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-right: 2rem;
+    }
+
+    body.light-mode .sidebar {
+      background-color: #e0e0e0;
+    }
+
+    .sidebar h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    .sidebar ul {
+      list-style: none;
+    }
+
+    .sidebar li {
+      margin-bottom: 1rem;
+    }
+
+    .sidebar a {
+      color: var(--light);
+      text-decoration: none;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+
+    body.light-mode .sidebar a {
+      color: var(--dark);
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .main-content {
+      flex: 1;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    .settings-form {
+      max-width: 500px;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-group select {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid var(--gray);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--light);
+      font-size: 1rem;
+    }
+
+    body.light-mode .form-group select {
+      background-color: white;
+      color: var(--dark);
+    }
+
+    .save-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .save-btn:hover {
+      background-color: #f40612;
+    }
+
+    .movies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .movie-card {
+      background-color: var(--dark-gray);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      cursor: pointer;
+    }
+
+    body.light-mode .movie-card {
+      background-color: #e0e0e0;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .movie-poster {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .movie-info {
+      padding: 1rem;
+    }
+
+    .movie-title {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .movie-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    .movie-rating {
+      color: gold;
+    }
+
+    .movie-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .movie-card:hover .movie-overlay {
+      opacity: 1;
+    }
+
+    .overlay-title {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .overlay-genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+
+    .genre-tag {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .overlay-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .overlay-btn:hover {
+      background-color: #f40612;
+    }
+
+    .watchlist-btn {
+      background-color: #333;
+    }
+
+    .watchlist-btn.in-watchlist {
+      background-color: #4CAF50;
+    }
+
+    .umusobanuzi {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      z-index: 10;
+    }
+
+    .spinner {
+      display: none;
+      width: 40px;
+      height: 40px;
+      margin: 2rem auto;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner.active {
+      display: block;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--dark);
+      color: white;
+      padding: 1rem;
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background-color: #4CAF50;
+    }
+
+    .toast.error {
+      background-color: #f44336;
+    }
+
+    footer {
+      background-color: var(--dark-gray);
+      padding: 3rem 5rem 1rem;
+      color: var(--gray);
+    }
+
+    body.light-mode footer {
+      background-color: #e0e0e0;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--dark);
+    }
+
+    body.light-mode .footer-bottom {
+      border-top: 1px solid #ccc;
+    }
+
+    @media (max-width: 1024px) {
+      .profile-container {
+        padding: 2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .profile-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 2rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .profile-container, footer {
+        padding: 1rem;
+      }
+      .movies-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo">KINAFLIX</a>
+    <div class="auth-buttons" id="auth-buttons">
+      <button class="auth-btn logout-btn">Logout</button>
+      <button class="theme-toggle"><i class="fas fa-moon"></i></button>
+    </div>
+  </header>
+
+  <main class="profile-container">
+    <aside class="sidebar">
+      <h2>Profile</h2>
+      <ul>
+        <li><a href="#" class="sidebar-link active" data-section="settings"><i class="fas fa-cog"></i> Settings</a></li>
+        <li><a href="#" class="sidebar-link" data-section="history"><i class="fas fa-history"></i> History</a></li>
+        <li><a href="#" class="sidebar-link" data-section="watchlist"><i class="fas fa-bookmark"></i> Watchlist</a></li>
+      </ul>
+    </aside>
+
+    <div class="main-content">
+      <div class="spinner" id="loading-spinner"></div>
+
+      <section class="section" id="settings-section">
+        <h2 class="section-title">Settings</h2>
+        <form class="settings-form" id="settings-form">
+          <div class="form-group">
+            <label for="sort-field">Sort Movies By</label>
+            <select id="sort-field" name="sort-field">
+              <option value="dateAdded">Date Added</option>
+              <option value="title">Alphabetical</option>
+              <option value="rating">Ratings</option>
+              <option value="releaseYear">Year</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="sort-order">Sort Order</label>
+            <select id="sort-order" name="sort-order">
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
+          <button type="submit" class="save-btn">Save Preferences</button>
+        </form>
+      </section>
+
+      <section class="section" id="history-section" style="display: none;">
+        <h2 class="section-title">Your Watch History</h2>
+        <div class="movies-grid" id="history-grid"></div>
+      </section>
+
+      <section class="section" id="watchlist-section" style="display: none;">
+        <h2 class="section-title">Your Watchlist</h2>
+        <div class="movies-grid" id="watchlist-grid"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-bottom">
+      <p>© 2025 KINAFLIX. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, arrayUnion, arrayRemove, increment } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      authDomain: "kinaflix.firebaseapp.com",
+      projectId: "kinaflix",
+      storageBucket: "kinaflix.firebasestorage.app",
+      messagingSenderId: "318239806217",
+      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+      measurementId: "G-DC1T9B6B9W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const settingsSection = document.getElementById('settings-section');
+    const historySection = document.getElementById('history-section');
+    const watchlistSection = document.getElementById('watchlist-section');
+    const settingsForm = document.getElementById('settings-form');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const authButtons = document.getElementById('auth-buttons');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+
+    let currentUser = null;
+    let watchlist = [];
+    let watchHistory = [];
+    let lastViewTimestamps = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+      initUI();
+    });
+
+    function initAuth() {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user;
+          updateAuthUI(user);
+          await loadUserData(user.uid);
+          loadSettings();
+        } else {
+          showToast('Please login to view your profile', 'error');
+          window.location.href = 'login.html';
+        }
+      });
+    }
+
+    function initUI() {
+      const themeToggle = document.querySelector('.theme-toggle');
+      themeToggle.addEventListener('click', toggleTheme);
+
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        document.querySelector('.theme-toggle i').classList.remove('fa-moon');
+        document.querySelector('.theme-toggle i').classList.add('fa-sun');
+      }
+
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const section = link.getAttribute('data-section');
+          navigateToSection(section);
+        });
+      });
+
+      settingsForm.addEventListener('submit', handleSettingsSubmit);
+    }
+
+    function updateAuthUI(user) {
+      authButtons.innerHTML = `
+        <button class="auth-btn logout-btn">Logout</button>
+        <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
+      `;
+      document.querySelector('.logout-btn').addEventListener('click', () => {
+        signOut(auth).then(() => {
+          showToast('Logged out successfully', 'success');
+          window.location.href = 'index.html';
+        }).catch((error) => {
+          showToast(error.message, 'error');
+        });
+      });
+      document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const icon = document.querySelector('.theme-toggle i');
+      if (document.body.classList.contains('light-mode')) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        localStorage.setItem('theme', 'light');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type, 'show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function navigateToSection(section) {
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      document.querySelector(`.sidebar-link[data-section="${section}"]`).classList.add('active');
+
+      settingsSection.style.display = section === 'settings' ? 'block' : 'none';
+      historySection.style.display = section === 'history' ? 'block' : 'none';
+      watchlistSection.style.display = section === 'watchlist' ? 'block' : 'none';
+
+      if (section === 'history') {
+        loadHistory();
+      } else if (section === 'watchlist') {
+        loadWatchlist();
+      }
+    }
+
+    async function loadUserData(userId) {
+      try {
+        const userRef = doc(db, 'users', userId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          watchlist = userData.watchlist || [];
+          watchHistory = userData.history || [];
+        } else {
+          await updateDoc(userRef, {
+            watchlist: [],
+            history: [],
+            displayPreferences: { sortField: 'dateAdded', sortOrder: 'desc' }
+          });
+        }
+      } catch (error) {
+        showToast('Error loading user data: ' + error.message, 'error');
+      }
+    }
+
+    async function loadSettings() {
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const preferences = userSnap.data().displayPreferences || {};
+          document.getElementById('sort-field').value = preferences.sortField || 'dateAdded';
+          document.getElementById('sort-order').value = preferences.sortOrder || 'desc';
+        }
+      } catch (error) {
+        showToast('Error loading settings: ' + error.message, 'error');
+      }
+    }
+
+    async function handleSettingsSubmit(e) {
+      e.preventDefault();
+      showLoading();
+      try {
+        const sortField = document.getElementById('sort-field').value;
+        const sortOrder = document.getElementById('sort-order').value;
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          displayPreferences: {
+            sortField,
+            sortOrder
+          }
+        });
+        showToast('Preferences saved successfully', 'success');
+      } catch (error) {
+        showToast('Error saving preferences: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function loadHistory() {
+      showLoading();
+      try {
+        if (watchHistory.length === 0) {
+          document.getElementById('history-grid').innerHTML = '<p>You haven\'t watched any movies yet.</p>';
+          hideLoading();
+          return;
+        }
+        const moviePromises = watchHistory.map(movieId => 
+          getDoc(doc(db, 'movies', movieId)).then(docSnap => 
+            docSnap.exists() ? { 
+              id: docSnap.id, 
+              ...docSnap.data(),
+              timestamp: docSnap.data().dateAdded?.toDate() || new Date()
+            } : null
+          )
+        );
+        let movies = (await Promise.all(moviePromises)).filter(Boolean);
+        movies = sortMovies(movies);
+        document.getElementById('history-grid').innerHTML = movies.length > 0 
+          ? movies.map(movie => renderMovieCard(movie)).join('')
+          : '<p>No movies found.</p>';
+        attachMovieCardEvents();
+        hideLoading();
+      } catch (error) {
+        showToast('Error loading history: ' + error.message, 'error');
+        hideLoading();
+      }
+    }
+
+    async function loadWatchlist() {
+      showLoading();
+      try {
+        if (watchlist.length === 0) {
+          document.getElementById('watchlist-grid').innerHTML = '<p>Your watchlist is empty. Add movies to watch later!</p>';
+          hideLoading();
+          return;
+        }
+        const moviePromises = watchlist.map(movieId => 
+          getDoc(doc(db, 'movies', movieId)).then(docSnap => 
+            docSnap.exists() ? { 
+              id: docSnap.id, 
+              ...docSnap.data(),
+              timestamp: docSnap.data().dateAdded?.toDate() || new Date()
+            } : null
+          )
+        );
+        let movies = (await Promise.all(moviePromises)).filter(Boolean);
+        movies = sortMovies(movies);
+        document.getElementById('watchlist-grid').innerHTML = movies.length > 0 
+          ? movies.map(movie => renderMovieCard(movie)).join('')
+          : '<p>No movies found.</p>';
+        attachMovieCardEvents();
+        hideLoading();
+      } catch (error) {
+        showToast('Error loading watchlist: ' + error.message, 'error');
+        hideLoading();
+      }
+    }
+
+    async function countView(movieId) {
+      const now = Date.now();
+      const lastViewTime = lastViewTimestamps[movieId] || 0;
+      if (now - lastViewTime > 3600000) {
+        try {
+          const movieRef = doc(db, 'movies', movieId);
+          await updateDoc(movieRef, {
+            views: increment(1)
+          });
+          lastViewTimestamps[movieId] = now;
+          if (!watchHistory.includes(movieId)) {
+            await updateDoc(doc(db, 'users', currentUser.uid), {
+              history: arrayUnion(movieId)
+            });
+            watchHistory.push(movieId);
+          }
+        } catch (error) {
+          console.error('Error counting view:', error);
+        }
+      }
+    }
+
+    function sortMovies(movies) {
+      const sortField = document.getElementById('sort-field').value;
+      const sortOrder = document.getElementById('sort-order').value;
+      const sorted = [...movies];
+      const isAsc = sortOrder === 'asc';
+      switch (sortField) {
+        case 'title':
+          sorted.sort((a, b) => isAsc 
+            ? a.title.localeCompare(b.title) 
+            : b.title.localeCompare(a.title));
+          break;
+        case 'rating':
+          sorted.sort((a, b) => isAsc 
+            ? (a.rating || 0) - (b.rating || 0) 
+            : (b.rating || 0) - (a.rating || 0));
+          break;
+        case 'releaseYear':
+          sorted.sort((a, b) => isAsc 
+            ? (a.releaseYear || 0) - (b.releaseYear || 0) 
+            : (b.releaseYear || 0) - (a.releaseYear || 0));
+          break;
+        default:
+          sorted.sort((a, b) => isAsc 
+            ? a.timestamp - b.timestamp 
+            : b.timestamp - a.timestamp);
+      }
+      return sorted;
+    }
+
+    function renderMovieCard(movie) {
+      const inWatchlist = watchlist.includes(movie.id);
+      const timeSince = formatTimeSince(movie.timestamp);
+      return `
+        <div class="movie-card" data-movie-id="${movie.id}">
+          ${movie.umusobanuzi ? `<span class="umusobanuzi">${movie.umusobanuzi}</span>` : ''}
+          <img src="${movie.posterImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
+               alt="${movie.title}" class="movie-poster" />
+          <div class="movie-info">
+            <h3 class="movie-title">${movie.title}</h3>
+            <div class="movie-meta">
+              <span>${movie.releaseYear || 'N/A'}</span>
+              ${movie.rating ? `<span class="movie-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
+            </div>
+            ${movie.views ? `<div class="view-count"><i class="fas fa-eye"></i> ${movie.views}</div>` : ''}
+            <div class="time-indicator">${timeSince}</div>
+          </div>
+          <div class="movie-overlay">
+            <h3 class="overlay-title">${movie.title}</h3>
+            ${movie.genres ? `
+              <div class="overlay-genres">
+                ${movie.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
+              </div>
+            ` : ''}
+            <p>${movie.description?.substring(0, 100) || 'No description available'}...</p>
+            <button class="overlay-btn watch-btn" data-movie-id="${movie.id}">
+              <i class="fas fa-play"></i> Watch Now
+            </button>
+            ${movie.youtubeTrailerUrl ? `
+              <a href="${movie.youtubeTrailerUrl}" target="_blank" class="overlay-btn">
+                <i class="fas fa-video"></i> Watch Trailer
+              </a>
+            ` : ''}
+            <button class="overlay-btn watchlist-btn ${inWatchlist ? 'in-watchlist' : ''}" data-movie-id="${movie.id}">
+              <i class="fas ${inWatchlist ? 'fa-check' : 'fa-plus'}"></i> ${inWatchlist ? 'In Watchlist' : 'Watchlist'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function formatTimeSince(timestamp) {
+      const now = new Date();
+      const seconds = Math.floor((now - timestamp) / 1000);
+      let interval = Math.floor(seconds / 31536000);
+      if (interval >= 1) return `${interval} year${interval === 1 ? '' : 's'} ago`;
+      interval = Math.floor(seconds / 2592000);
+      if (interval >= 1) return `${interval} month${interval === 1 ? '' : 's'} ago`;
+      interval = Math.floor(seconds / 86400);
+      if (interval >= 1) return `${interval} day${interval === 1 ? '' : 's'} ago`;
+      interval = Math.floor(seconds / 3600);
+      if (interval >= 1) return `${interval} hour${interval === 1 ? '' : 's'} ago`;
+      interval = Math.floor(seconds / 60);
+      if (interval >= 1) return `${interval} minute${interval === 1 ? '' : 's'} ago`;
+      return `${Math.floor(seconds)} second${seconds === 1 ? '' : 's'} ago`;
+    }
+
+    function attachMovieCardEvents() {
+      document.querySelectorAll('.watch-btn, .movie-card:not(.watchlist-btn)').forEach(element => {
+        element.addEventListener('click', async (e) => {
+          const movieId = element.getAttribute('data-movie-id') || 
+                         element.closest('.movie-card')?.getAttribute('data-movie-id');
+          if (movieId) {
+            await countView(movieId);
+            window.location.href = `see.html?id=${movieId}`;
+          }
+        });
+      });
+
+      document.querySelectorAll('.watchlist-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const movieId = button.getAttribute('data-movie-id');
+          try {
+            const userRef = doc(db, 'users', currentUser.uid);
+            if (watchlist.includes(movieId)) {
+              await updateDoc(userRef, {
+                watchlist: arrayRemove(movieId)
+              });
+              watchlist = watchlist.filter(id => id !== movieId);
+              showToast('Removed from watchlist', 'success');
+            } else {
+              await updateDoc(userRef, {
+                watchlist: arrayUnion(movieId)
+              });
+              watchlist.push(movieId);
+              showToast('Added to watchlist', 'success');
+            }
+            button.innerHTML = `<i class="fas ${watchlist.includes(movieId) ? 'fa-check' : 'fa-plus'}"></i> ${watchlist.includes(movieId) ? 'In Watchlist' : 'Watchlist'}`;
+            button.classList.toggle('in-watchlist', watchlist.includes(movieId));
+            if (watchlistSection.style.display === 'block') {
+              loadWatchlist();
+            }
+          } catch (error) {
+            showToast('Error updating watchlist: ' + error.message, 'error');
+          }
+        });
+      });
+    }
+
+    function showLoading() {
+      loadingSpinner.classList.add('active');
+    }
+
+    function hideLoading() {
+      loadingSpinner.classList.remove('active');
+    }
+  </script>
+</body>
+</html>
