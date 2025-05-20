@@ -290,7 +290,7 @@
         </div>
         <div class="form-group">
           <label for="posterImageUrl">Poster Image URL</label>
-          <input type="url" id="posterImageUrl" name="posterImageUrl" />
+          <input type="url" id="coverImageUrl" name="coverImageUrl" />
         </div>
         <div class="form-group">
           <label for="googleDriveLink">Google Drive Link (Full Movie)</label>
@@ -419,7 +419,7 @@
         const genres = Array.from(document.getElementById('genres').selectedOptions).map(option => option.value);
         const releaseYear = parseInt(document.getElementById('releaseYear').value) || null;
         const rating = parseFloat(document.getElementById('rating').value) || null;
-        const posterImageUrl = document.getElementById('posterImageUrl').value.trim();
+        const coverImageUrl = document.getElementById('coverImageUrl').value.trim();
         const googleDriveLink = document.getElementById('googleDriveLink').value.trim();
         const youtubeTrailerUrl = document.getElementById('youtubeTrailerUrl').value.trim();
         const umusobanuzi = document.getElementById('umusobanuzi').value.trim();
@@ -430,7 +430,7 @@
           genres: genres.length > 0 ? genres : null,
           releaseYear,
           rating,
-          posterImageUrl: posterImageUrl || null,
+          coverImageUrl: coverImageUrl || null,
           googleDriveLink: googleDriveLink || null,
           youtubeTrailerUrl: youtubeTrailerUrl || null,
           umusobanuzi: umusobanuzi || null,
