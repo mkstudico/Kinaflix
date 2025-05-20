@@ -799,7 +799,7 @@
         <div class="footer-column">
           <h3>Legal</h3>
           <ul>
-            <li><a href="#">Contact Us</a></li>
+            <li><a href="pass.html">Admin</a></li>
           </ul>
         </div>
         
@@ -916,7 +916,7 @@
         });
         document.querySelector('.sidebar-footer .theme-toggle i').classList.remove('fa-moon');
         document.querySelector('.sidebar-footer .theme-toggle i').classList.add('fa-sun');
-        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' Light Mode';
+        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' L';
         document.querySelector('.sidebar-footer .theme-toggle').insertAdjacentHTML('afterbegin', '<i class="fas fa-sun"></i>');
       }
 
@@ -1030,14 +1030,14 @@
         icon.classList.add('fa-sun');
         sidebarIcon.classList.remove('fa-moon');
         sidebarIcon.classList.add('fa-sun');
-        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' Light Mode';
+        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' L';
         localStorage.setItem('theme', 'light');
       } else {
         icon.classList.remove('fa-sun');
         icon.classList.add('fa-moon');
         sidebarIcon.classList.remove('fa-sun');
         sidebarIcon.classList.add('fa-moon');
-        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' Dark Mode';
+        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' D';
         localStorage.setItem('theme', 'dark');
       }
       
