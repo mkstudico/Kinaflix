@@ -52,65 +52,48 @@
     }
 
     .player-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .player-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(40%);
+      transition: filter 0.3s ease;
+    }
+
+    .player-container::after {
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: #000;
-    }
-
-    .player-container iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .player-controls {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .player-section:hover .player-controls {
-      opacity: 1;
-    }
-
-    .play-btn {
-      background: rgba(0, 0, 0, 0.7);
-      border: none;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .play-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.7), transparent);
+      z-index: 1;
     }
 
     .movie-info {
       position: absolute;
-      bottom: 2rem;
+      top: 50%;
       left: 2rem;
+      transform: translateY(-50%);
       color: white;
-      max-width: 50%;
+      max-width: 40%;
+      z-index: 2;
+      padding: 1.5rem;
+      border-radius: 8px;
     }
 
     .movie-title {
-      font-size: 2.5rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3rem;
+      font-weight: 700;
       margin-bottom: 0.5rem;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
     }
 
     .movie-meta {
@@ -118,46 +101,59 @@
       gap: 1rem;
       font-size: 1rem;
       margin-bottom: 0.5rem;
+      opacity: 0.9;
+      font-style: italic;
     }
 
     .movie-description {
-      font-size: 1rem;
-      line-height: 1.4;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .action-buttons {
       display: flex;
       gap: 1rem;
-      margin-top: 1rem;
+      flex-wrap: wrap;
     }
 
     .action-btn {
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(255, 255, 255, 0.1);
       color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .action-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
     }
 
     .action-btn.play {
       background: var(--primary);
+      border: none;
     }
 
     .action-btn.play:hover {
       background: #f40612;
+      transform: translateY(-2px);
     }
 
     .action-btn.watchlist-added {
-      background: rgba(0, 255, 0, 0.3);
+      background: rgba(0, 255, 0, 0.2);
+      border: 1px solid rgba(0, 255, 0, 0.4);
     }
 
     .comments-section {
@@ -222,33 +218,24 @@
       margin-top: 0.2rem;
     }
 
-    .spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s ease-in-out infinite;
-      z-index: 10;
-    }
-
-    @keyframes spin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
     @media (max-width: 768px) {
       .player-section {
         height: 60vh;
       }
       .movie-info {
-        max-width: 80%;
+        max-width: 70%;
+        left: 1rem;
+        padding: 1rem;
       }
       .movie-title {
-        font-size: 1.8rem;
+        font-size: 2rem;
+      }
+      .movie-description {
+        font-size: 0.95rem;
+      }
+      .action-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
       }
       .logo {
         font-size: 1.2rem;
@@ -260,11 +247,19 @@
         height: 50vh;
       }
       .movie-info {
-        bottom: 1rem;
-        left: 1rem;
+        max-width: 90%;
+        left: 0.5rem;
+        padding: 0.8rem;
       }
       .movie-title {
         font-size: 1.5rem;
+      }
+      .movie-description {
+        font-size: 0.85rem;
+      }
+      .action-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
       }
       .logo {
         font-size: 1rem;
@@ -277,20 +272,17 @@
 
   <div class="player-section">
     <div class="player-container" id="player-container">
-      <div class="spinner" id="loading-spinner"></div>
-      <div id="youtube-player"></div>
-    </div>
-    <div class="player-controls" id="player-controls">
-      <button class="play-btn" id="play-btn"><i class="fas fa-play"></i></button>
-    </div>
-    <div class="movie-info" id="movie-info">
-      <h1 class="movie-title" id="movie-title"></h1>
-      <div class="movie-meta" id="movie-meta"></div>
-      <p class="movie-description" id="movie-description"></p>
-      <div class="action-buttons" id="action-buttons">
-        <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
-        <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> Add to watchlist</button>
-        <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Share</button>
+      <img src="" alt="Movie Poster" id="player-image" class="player-image" />
+      <div class="movie-info" id="movie-info">
+        <h1 class="movie-title" id="movie-title"></h1>
+        <div class="movie-meta" id="movie-meta"></div>
+        <p class="movie-description" id="movie-description"></p>
+        <div class="action-buttons" id="action-buttons">
+          <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
+          <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> Add to watchlist</button>
+          <button class="action-btn" id="play-on-drive-btn">Play on Drive</button>
+          <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Share</button>
+        </div>
       </div>
     </div>
   </div>
@@ -304,7 +296,6 @@
     <div class="comments-list" id="comments-list"></div>
   </div>
 
-  <script src="https://www.youtube.com/iframe_api"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import {
@@ -320,7 +311,7 @@
       where,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
@@ -339,45 +330,46 @@
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
 
-    const playerContainer = document.getElementById('player-container');
-    const loadingSpinner = document.getElementById('loading-spinner');
+    const playerImage = document.getElementById('player-image');
     const movieTitle = document.getElementById('movie-title');
     const movieMeta = document.getElementById('movie-meta');
     const movieDescription = document.getElementById('movie-description');
     const watchNowBtn = document.getElementById('watch-now-btn');
     const watchlistBtn = document.getElementById('watchlist-btn');
+    const playOnDriveBtn = document.getElementById('play-on-drive-btn');
     const shareBtn = document.getElementById('share-btn');
-    const playBtn = document.getElementById('play-btn');
     const commentInput = document.getElementById('comment-input');
     const submitCommentBtn = document.getElementById('submit-comment');
     const commentsList = document.getElementById('comments-list');
 
     let currentMovie = null;
-    let player = null;
-    let isPlaying = false;
     let currentUser = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      initAuth();
-      watchNowBtn.addEventListener('click', () => window.location.href = `watch.html?id=${movieId}`);
+      loadMovieData();
+      watchNowBtn.addEventListener('click', () => {
+        if (currentMovie.googleDriveLink) {
+          const playableLink = currentMovie.googleDriveLink.includes('/view')
+            ? currentMovie.googleDriveLink.replace('/view', '/preview')
+            : currentMovie.googleDriveLink;
+          window.open(playableLink, '_blank');
+        } else {
+          alert('Google Drive link not available.');
+        }
+      });
+      playOnDriveBtn.addEventListener('click', () => {
+        if (currentMovie.googleDriveLink) {
+          window.open(currentMovie.googleDriveLink, '_blank');
+        } else {
+          alert('Google Drive link not available.');
+        }
+      });
       shareBtn.addEventListener('click', () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
       });
       submitCommentBtn.addEventListener('click', addComment);
     });
-
-    function initAuth() {
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          currentUser = user;
-          loadMovieData();
-          checkWatchlistStatus();
-        } else {
-          window.location.href = 'login.html';
-        }
-      });
-    }
 
     async function loadMovieData() {
       if (!movieId) {
@@ -386,7 +378,6 @@
         return;
       }
 
-      showLoading();
       try {
         const movieRef = doc(db, 'movies', movieId);
         const movieSnap = await getDoc(movieRef);
@@ -403,15 +394,15 @@
 
         renderMovieDetails();
         loadComments();
+        checkWatchlistStatus();
       } catch (error) {
         alert('Error loading movie: ' + error.message);
         window.location.href = 'index.html';
-      } finally {
-        hideLoading();
       }
     }
 
     function renderMovieDetails() {
+      playerImage.src = currentMovie.posterImageUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80';
       movieTitle.textContent = currentMovie.title || 'N/A';
       movieMeta.innerHTML = `
         ${currentMovie.genres?.[0] || 'N/A'} |
@@ -419,76 +410,30 @@
         ${currentMovie.releaseYear || 'N/A'}
       `;
       movieDescription.textContent = currentMovie.description || 'No description available.';
-      setupPlayer();
-    }
-
-    function setupPlayer() {
-      if (currentMovie.youtubeTrailerUrl) {
-        const youtubeId = extractYoutubeId(currentMovie.youtubeTrailerUrl);
-        if (youtubeId) {
-          player = new YT.Player('youtube-player', {
-            height: '100%',
-            width: '100%',
-            videoId: youtubeId,
-            playerVars: {
-              'autoplay': 0,
-              'controls': 0,
-              'rel': 0,
-              'showinfo': 0,
-              'mute': 0
-            },
-            events: {
-              'onReady': onPlayerReady,
-              'onError': onPlayerError
-            }
-          });
-        } else {
-          playerContainer.innerHTML = '<p>Invalid trailer URL</p>';
-        }
-      } else {
-        playerContainer.innerHTML = '<p>Trailer not available</p>';
-      }
-    }
-
-    function onPlayerReady(event) {
-      playBtn.addEventListener('click', () => {
-        if (isPlaying) {
-          player.pauseVideo();
-          playBtn.innerHTML = '<i class="fas fa-play"></i>';
-        } else {
-          player.playVideo();
-          playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-        }
-        isPlaying = !isPlaying;
-      });
-    }
-
-    function onPlayerError(event) {
-      console.error('YouTube Player Error:', event.data);
-      playerContainer.innerHTML = '<p>Error loading trailer. It might not be embeddable.</p>';
-    }
-
-    function extractYoutubeId(url) {
-      const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-      const match = url.match(regExp);
-      return match ? match[1] : null;
     }
 
     async function checkWatchlistStatus() {
-      if (!currentUser) return;
-      const watchlistRef = doc(db, 'watchlists', currentUser.uid);
-      onSnapshot(watchlistRef, (docSnap) => {
-        if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
-          watchlistBtn.classList.add('watchlist-added');
-          watchlistBtn.innerHTML = '<i class="fas fa-check"></i> Remove from watchlist';
-        } else {
-          watchlistBtn.classList.remove('watchlist-added');
-          watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to watchlist';
-        }
-        watchlistBtn.onclick = toggleWatchlist;
-      }, (error) => {
-        console.error('Error checking watchlist:', error);
-      });
+      const user = auth.currentUser;
+      if (user) {
+        currentUser = user;
+        const watchlistRef = doc(db, 'watchlists', currentUser.uid);
+        onSnapshot(watchlistRef, (docSnap) => {
+          if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
+            watchlistBtn.classList.add('watchlist-added');
+            watchlistBtn.innerHTML = '<i class="fas fa-check"></i> Remove from watchlist';
+          } else {
+            watchlistBtn.classList.remove('watchlist-added');
+            watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to watchlist';
+          }
+          watchlistBtn.onclick = toggleWatchlist;
+        }, (error) => {
+          console.error('Error checking watchlist:', error);
+        });
+      } else {
+        watchlistBtn.classList.remove('watchlist-added');
+        watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to watchlist (Log in to use)';
+        watchlistBtn.onclick = () => alert('Please log in to add to watchlist.');
+      }
     }
 
     async function toggleWatchlist() {
@@ -541,32 +486,24 @@
         return;
       }
 
-      if (!currentUser) {
-        alert('Please log in to comment.');
-        return;
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          await addDoc(collection(db, 'comments'), {
+            movieId: movieId,
+            userId: user.uid,
+            userEmail: user.email,
+            text: text,
+            timestamp: serverTimestamp()
+          });
+          commentInput.value = '';
+          alert('Comment added successfully!');
+        } catch (error) {
+          alert('Error adding comment: ' + error.message);
+        }
+      } else {
+        alert('Please log in to add a comment.');
       }
-
-      try {
-        await addDoc(collection(db, 'comments'), {
-          movieId: movieId,
-          userId: currentUser.uid,
-          userEmail: currentUser.email,
-          text: text,
-          timestamp: serverTimestamp()
-        });
-        commentInput.value = '';
-        alert('Comment added successfully!');
-      } catch (error) {
-        alert('Error adding comment: ' + error.message);
-      }
-    }
-
-    function showLoading() {
-      loadingSpinner.style.display = 'block';
-    }
-
-    function hideLoading() {
-      loadingSpinner.style.display = 'none';
     }
   </script>
 </body>
