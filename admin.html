@@ -148,6 +148,31 @@
       height: 150px;
     }
 
+    .form-group .series-input-group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+
+    .form-group .series-input {
+      flex: 1;
+    }
+
+    .form-group .add-series-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+    }
+
+    .form-group .add-series-btn:hover {
+      background-color: #f40612;
+    }
+
     .submit-btn {
       background-color: var(--primary);
       color: white;
@@ -281,6 +306,16 @@
           </select>
         </div>
         <div class="form-group">
+          <label for="series">Series (optional)</label>
+          <select id="series" name="series">
+            <option value="">None (Standalone Movie)</option>
+          </select>
+          <div class="series-input-group">
+            <input type="text" id="new-series" class="series-input" placeholder="Enter new series name..." />
+            <button type="button" id="add-series-btn" class="add-series-btn">Add Series</button>
+          </div>
+        </div>
+        <div class="form-group">
           <label for="releaseYear">Release Year</label>
           <input type="number" id="releaseYear" name="releaseYear" min="1900" max="2025" />
         </div>
@@ -318,7 +353,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
@@ -337,6 +372,9 @@
     const movieForm = document.getElementById('movie-form');
     const loadingSpinner = document.getElementById('loading-spinner');
     const authButtons = document.getElementById('auth-buttons');
+    const seriesSelect = document.getElementById('series');
+    const newSeriesInput = document.getElementById('new-series');
+    const addSeriesBtn = document.getElementById('add-series-btn');
     const toast = document.createElement('div');
     toast.className = 'toast';
     document.body.appendChild(toast);
@@ -344,6 +382,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       initAuth();
       initUI();
+      loadSeries();
     });
 
     function initAuth() {
@@ -369,6 +408,7 @@
       }
 
       movieForm.addEventListener('submit', handleFormSubmit);
+      addSeriesBtn.addEventListener('click', createSeries);
     }
 
     function updateAuthUI(user) {
@@ -401,13 +441,44 @@
       }
     }
 
-    function showToast(message, type = 'info') {
-      toast.textContent = message;
-      toast.className = 'toast';
-      toast.classList.add(type, 'show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
+    async function loadSeries() {
+      try {
+        const q = query(collection(db, 'series'), orderBy('name'));
+        const querySnapshot = await getDocs(q);
+        seriesSelect.innerHTML = '<option value="">None (Standalone Movie)</option>';
+        querySnapshot.forEach(doc => {
+          const series = doc.data();
+          const option = document.createElement('option');
+          option.value = doc.id;
+          option.textContent = series.name;
+          seriesSelect.appendChild(option);
+        });
+      } catch (error) {
+        showToast('Error loading series: ' + error.message, 'error');
+      }
+    }
+
+    async function createSeries() {
+      const seriesName = newSeriesInput.value.trim();
+      if (!seriesName) {
+        showToast('Please enter a series name', 'error');
+        return;
+      }
+      showLoading();
+      try {
+        const docRef = await addDoc(collection(db, 'series'), {
+          name: seriesName,
+          dateAdded: new Date()
+        });
+        showToast('Series added successfully', 'success');
+        newSeriesInput.value = '';
+        await loadSeries(); // Refresh the series dropdown
+        seriesSelect.value = docRef.id; // Select the newly added series
+      } catch (error) {
+        showToast('Error adding series: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
     }
 
     async function handleFormSubmit(e) {
@@ -417,6 +488,7 @@
         const title = document.getElementById('title').value.trim();
         const description = document.getElementById('description').value.trim();
         const genres = Array.from(document.getElementById('genres').selectedOptions).map(option => option.value);
+        const seriesId = document.getElementById('series').value || null;
         const releaseYear = parseInt(document.getElementById('releaseYear').value) || null;
         const rating = parseFloat(document.getElementById('rating').value) || null;
         const coverImageUrl = document.getElementById('coverImageUrl').value.trim();
@@ -428,6 +500,7 @@
           title,
           description: description || null,
           genres: genres.length > 0 ? genres : null,
+          seriesId,
           releaseYear,
           rating,
           coverImageUrl: coverImageUrl || null,
@@ -440,6 +513,7 @@
 
         showToast('Movie added successfully', 'success');
         movieForm.reset();
+        seriesSelect.value = ''; // Reset series dropdown
       } catch (error) {
         showToast('Error adding movie: ' + error.message, 'error');
       } finally {
@@ -453,6 +527,15 @@
 
     function hideLoading() {
       loadingSpinner.classList.remove('active');
+    }
+
+    function showToast(message, type = 'info') {
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type, 'show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
     }
   </script>
 </body>
