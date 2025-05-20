@@ -826,843 +826,858 @@
   </div>
 
   <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
-    import { 
-      getAuth, 
-      signOut, 
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
-    import { 
-      getFirestore,
-      collection,
-      doc,
-      getDoc,
-      getDocs,
-      query,
-      where,
-      orderBy,
-      limit,
-      updateDoc,
-      arrayUnion,
-      arrayRemove,
-      increment
-    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
+  import { 
+    getAuth, 
+    signOut, 
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+  import { 
+    getFirestore,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    where,
+    orderBy,
+    limit,
+    updateDoc,
+    arrayUnion,
+    arrayRemove,
+    increment
+  } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
-      authDomain: "kinaflix.firebaseapp.com",
-      projectId: "kinaflix",
-      storageBucket: "kinaflix.appspot.com",
-      messagingSenderId: "318239806217",
-      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
-      measurementId: "G-DC1T9B6B9W"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+    authDomain: "kinaflix.firebaseapp.com",
+    projectId: "kinaflix",
+    storageBucket: "kinaflix.appspot.com",
+    messagingSenderId: "318239806217",
+    appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+    measurementId: "G-DC1T9B6B9W"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const mainContent = document.getElementById('main-content');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    document.body.appendChild(toast);
-    const authButtons = document.getElementById('auth-buttons');
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const sidebar = document.querySelector('.sidebar');
+  const mainContent = document.getElementById('main-content');
+  const loadingSpinner = document.getElementById('loading-spinner');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  document.body.appendChild(toast);
+  const authButtons = document.getElementById('auth-buttons');
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const sidebar = document.querySelector('.sidebar');
 
-    let currentUser = null;
-    let movies = [];
-    let genres = [];
-    let featuredMovie = null;
-    let watchHistory = [];
-    let watchlist = [];
-    let lastViewTimestamps = {};
-    let allYears = [];
+  let currentUser = null;
+  let movies = [];
+  let genres = [];
+  let featuredMovie = null;
+  let watchHistory = [];
+  let watchlist = [];
+  let lastViewTimestamps = {};
+  let allYears = [];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initAuth();
-      initUI();
-      loadHomePage();
-      loadWatchHistoryFromCookies();
+  document.addEventListener('DOMContentLoaded', () => {
+    initAuth();
+    initUI();
+    loadHomePage();
+    loadWatchHistoryFromCookies();
+  });
+
+  function initAuth() {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        updateAuthUI(user);
+        await loadUserData(user.uid);
+      } else {
+        currentUser = null;
+        updateAuthUI(null);
+      }
+    });
+  }
+
+  function initUI() {
+    const themeToggle = document.querySelector('.theme-toggle');
+    themeToggle.addEventListener('click', toggleTheme);
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-mode');
+      document.querySelectorAll('.theme-toggle i').forEach(icon => {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      });
+      document.querySelector('.sidebar-footer .theme-toggle i').classList.remove('fa-moon');
+      document.querySelector('.sidebar-footer .theme-toggle i').classList.add('fa-sun');
+      document.querySelector('.sidebar-footer .theme-toggle').textContent = ' L';
+      document.querySelector('.sidebar-footer .theme-toggle').insertAdjacentHTML('afterbegin', '<i class="fas fa-sun"></i>');
+    }
+
+    document.querySelectorAll('.nav-item, .footer-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = link.getAttribute('data-page');
+        navigateTo(page);
+        
+        document.querySelectorAll('.nav-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        link.classList.add('active');
+      });
     });
 
-    function initAuth() {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          currentUser = user;
-          updateAuthUI(user);
-          await loadUserData(user.uid);
-        } else {
-          currentUser = null;
-          updateAuthUI(null);
-        }
-      });
-    }
+    mobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('show');
+    });
 
-    function initUI() {
-      const themeToggle = document.querySelector('.theme-toggle');
-      themeToggle.addEventListener('click', toggleTheme);
-
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-        document.querySelectorAll('.theme-toggle i').forEach(icon => {
-          icon.classList.remove('fa-moon');
-          icon.classList.add('fa-sun');
-        });
-        document.querySelector('.sidebar-footer .theme-toggle i').classList.remove('fa-moon');
-        document.querySelector('.sidebar-footer .theme-toggle i').classList.add('fa-sun');
-        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' L';
-        document.querySelector('.sidebar-footer .theme-toggle').insertAdjacentHTML('afterbegin', '<i class="fas fa-sun"></i>');
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+        sidebar.classList.remove('show');
       }
+    });
+  }
 
-      document.querySelectorAll('.nav-item, .footer-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const page = link.getAttribute('data-page');
-          navigateTo(page);
-          
-          // Update active state in sidebar
-          document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-          });
-          link.classList.add('active');
-        });
-      });
-
-      mobileMenuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('show');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-          sidebar.classList.remove('show');
-        }
-      });
-    }
-
-    function navigateTo(page) {
-      showLoading();
-      switch(page) {
-        case 'home':
-          loadHomePage();
-          break;
-        case 'new-releases':
-          loadAllMovies('latest');
-          break;
-        case 'popular':
-          loadAllMovies('popular');
-          break;
-        case 'for-you':
-          loadForYou();
-          break;
-        case 'profile':
-          if (currentUser) {
-            window.location.href = 'profile.html';
-          } else {
-            window.location.href = 'login.html';
-          }
-          break;
-        case 'watchlist':
-          loadWatchlist();
-          break;
-        case 'history':
-          loadHistory();
-          break;
-        default:
-          loadHomePage();
-      }
-    }
-
-    function updateAuthUI(user) {
-      if (user) {
-        authButtons.innerHTML = `
-          <button class="auth-btn profile-btn">
-            <i class="fas fa-user"></i> ${user.displayName || 'Profile'}
-          </button>
-          <button class="auth-btn logout-btn">Logout</button>
-          <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
-        `;
-        
-        document.querySelector('.logout-btn').addEventListener('click', () => {
-          signOut(auth).then(() => {
-            showToast('Logged out successfully', 'success');
-          }).catch((error) => {
-            showToast(error.message, 'error');
-          });
-        });
-
-        document.querySelector('.profile-btn').addEventListener('click', () => {
+  function navigateTo(page) {
+    showLoading();
+    switch(page) {
+      case 'home':
+        loadHomePage();
+        break;
+      case 'new-releases':
+        loadAllMovies('latest');
+        break;
+      case 'popular':
+        loadAllMovies('popular');
+        break;
+      case 'for-you':
+        loadForYou();
+        break;
+      case 'profile':
+        if (currentUser) {
           window.location.href = 'profile.html';
-        });
-
-        document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
-      } else {
-        authButtons.innerHTML = `
-          <button class="auth-btn login-btn">Login</button>
-          <button class="auth-btn register-btn">Register</button>
-          <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
-        `;
-        
-        document.querySelector('.login-btn').addEventListener('click', () => {
+        } else {
           window.location.href = 'login.html';
-        });
-        
-        document.querySelector('.register-btn').addEventListener('click', () => {
-          window.location.href = 'register.html';
-        });
-        
-        document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
-      }
+        }
+        break;
+      case 'watchlist':
+        loadWatchlist();
+        break;
+      case 'history':
+        loadHistory();
+        break;
+      default:
+        loadHomePage();
     }
+  }
 
-    function toggleTheme() {
-      document.body.classList.toggle('light-mode');
-      const icon = document.querySelector('.theme-toggle i');
-      const sidebarIcon = document.querySelector('.sidebar-footer .theme-toggle i');
+  function updateAuthUI(user) {
+    if (user) {
+      authButtons.innerHTML = `
+        <button class="auth-btn profile-btn">
+          <i class="fas fa-user"></i> ${user.displayName || 'Profile'}
+        </button>
+        <button class="auth-btn logout-btn">Logout</button>
+        <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
+      `;
       
+      document.querySelector('.logout-btn').addEventListener('click', () => {
+        signOut(auth).then(() => {
+          showToast('Logged out successfully', 'success');
+        }).catch((error) => {
+          showToast(error.message, 'error');
+        });
+      });
+
+      document.querySelector('.profile-btn').addEventListener('click', () => {
+        window.location.href = 'profile.html';
+      });
+
+      document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
+    } else {
+      authButtons.innerHTML = `
+        <button class="auth-btn login-btn">Login</button>
+        <button class="auth-btn register-btn">Register</button>
+        <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
+      `;
+      
+      document.querySelector('.login-btn').addEventListener('click', () => {
+        window.location.href = 'login.html';
+      });
+      
+      document.querySelector('.register-btn').addEventListener('click', () => {
+        window.location.href = 'register.html';
+      });
+      
+      document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
+    }
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    const icon = document.querySelector('.theme-toggle i');
+    const sidebarIcon = document.querySelector('.sidebar-footer .theme-toggle i');
+    
+    if (document.body.classList.contains('light-mode')) {
+      icon.classList.remove('fa-moon');
+      icon.classList.add('fa-sun');
+      sidebarIcon.classList.remove('fa-moon');
+      sidebarIcon.classList.add('fa-sun');
+      document.querySelector('.sidebar-footer .theme-toggle').textContent = ' L';
+      localStorage.setItem('theme', 'light');
+    } else {
+      icon.classList.remove('fa-sun');
+      icon.classList.add('fa-moon');
+      sidebarIcon.classList.remove('fa-sun');
+      sidebarIcon.classList.add('fa-moon');
+      document.querySelector('.sidebar-footer .theme-toggle').textContent = ' D';
+      localStorage.setItem('theme', 'dark');
+    }
+    
+    document.querySelectorAll('.theme-toggle i').forEach(icon => {
       if (document.body.classList.contains('light-mode')) {
         icon.classList.remove('fa-moon');
         icon.classList.add('fa-sun');
-        sidebarIcon.classList.remove('fa-moon');
-        sidebarIcon.classList.add('fa-sun');
-        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' L';
-        localStorage.setItem('theme', 'light');
       } else {
         icon.classList.remove('fa-sun');
         icon.classList.add('fa-moon');
-        sidebarIcon.classList.remove('fa-sun');
-        sidebarIcon.classList.add('fa-moon');
-        document.querySelector('.sidebar-footer .theme-toggle').textContent = ' D';
-        localStorage.setItem('theme', 'dark');
       }
+    });
+  }
+
+  function showToast(message, type = 'info') {
+    toast.textContent = message;
+    toast.className = 'toast';
+    toast.classList.add(type, 'show');
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  async function loadHomePage() {
+    showLoading();
+    
+    try {
+      const [moviesData, genresData, featuredData] = await Promise.all([
+        fetchMovies(),
+        fetchGenres(),
+        fetchFeaturedMovie()
+      ]);
       
-      document.querySelectorAll('.theme-toggle i').forEach(icon => {
-        if (document.body.classList.contains('light-mode')) {
-          icon.classList.remove('fa-moon');
-          icon.classList.add('fa-sun');
-        } else {
-          icon.classList.remove('fa-sun');
-          icon.classList.add('fa-moon');
+      movies = moviesData;
+      genres = genresData;
+      featuredMovie = featuredData;
+      
+      allYears = [...new Set(movies.map(movie => movie.releaseYear))].sort((a, b) => b - a);
+      
+      renderHomePage();
+      hideLoading();
+    } catch (error) {
+      showToast('Error loading content: ' + error.message, 'error');
+      hideLoading();
+    }
+  }
+
+  async function fetchMovies() {
+    try {
+      const q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(50));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
+          timestamp: doc.data().dateAdded?.toDate() || new Date()
+        }))
+        .filter(movie => movie.title);
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+      throw error;
+    }
+  }
+
+  async function fetchGenres() {
+    try {
+      const q = query(collection(db, 'genres'), orderBy('name'));
+      const querySnapshot = await getDocs(q);
+      const genres = querySnapshot.docs.map(doc => doc.data().name);
+      return genres;
+    } catch (error) {
+      console.error('Error fetching genres:', error);
+      throw error;
+    }
+  }
+
+  async function fetchFeaturedMovie() {
+    try {
+      const q = query(collection(db, 'movies'), orderBy('views', 'desc'), limit(1));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.empty ? null : { 
+        id: querySnapshot.docs[0].id, 
+        ...querySnapshot.docs[0].data(),
+        timestamp: querySnapshot.docs[0].data().dateAdded?.toDate() || new Date()
+      };
+    } catch (error) {
+      console.error('Error fetching featured movie:', error);
+      throw error;
+    }
+  }
+
+  async function renderHomePage() {
+    let sortField = 'dateAdded';
+    let sortOrder = 'desc';
+    if (currentUser) {
+      const userRef = doc(db, 'users', currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const preferences = userSnap.data().displayPreferences || {};
+        sortField = preferences.sortField || 'dateAdded';
+        sortOrder = preferences.sortOrder || 'desc';
+      }
+    }
+
+    let html = '';
+
+    if (featuredMovie) {
+      html += `
+        <section class="hero" style="--hero-background: url('${featuredMovie.coverImageUrl || 'https://via.placeholder.com/1920x1080?text=Featured+Movie'}')">
+          <div class="hero-content">
+            <h1>${featuredMovie.title}</h1>
+            <p>${featuredMovie.description?.substring(0, 150) || 'No description available.'}...</p>
+            <div class="hero-buttons">
+              <button class="watch-btn" data-movie-id="${featuredMovie.id}">
+                <i class="fas fa-play"></i> Watch Now
+              </button>
+              <button class="info-btn" data-movie-id="${featuredMovie.id}">
+                <i class="fas fa-info-circle"></i> More Info
+              </button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    if (watchHistory.length > 0) {
+      const favoriteGenre = getFavoriteGenre();
+      const forYouMovies = movies.filter(movie => 
+        Array.isArray(movie.genres) && movie.genres.includes(favoriteGenre)
+      ).slice(0, 5);
+
+      if (forYouMovies.length > 0) {
+        html += `
+          <section class="section">
+            <h2 class="section-title">For You <small>(Based on your preferences)</small></h2>
+            <div class="movies-grid">
+              ${forYouMovies.map(movie => renderMovieCard(movie)).join('')}
+            </div>
+          </section>
+        `;
+      }
+    }
+
+    if (movies.length > 0) {
+      const popularMovies = [...movies].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+      html += `
+        <section class="section">
+          <h2 class="section-title">Popular Movies <a href="#" class="view-all" data-sort="popular">See All</a></h2>
+          <div class="movies-grid">
+            ${popularMovies.map(movie => renderMovieCard(movie)).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    if (movies.length > 0) {
+      const latestMovies = [...movies].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
+      html += `
+        <section class="section">
+          <h2 class="section-title">Latest Uploads <a href="#" class="view-all" data-sort="latest">See All</a></h2>
+          <div class="movies-grid">
+            ${latestMovies.map(movie => renderMovieCard(movie)).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    if (genres.length > 0) {
+      genres.forEach(genre => {
+        let genreMovies = movies.filter(movie => 
+          Array.isArray(movie.genres) && movie.genres.includes(genre)
+        );
+        genreMovies = sortMovies(genreMovies, sortField, sortOrder).slice(0, 5);
+
+        if (genreMovies.length > 0) {
+          html += `
+            <section class="section genre-section">
+              <div class="genre-header">
+                <h2 class="genre-title">${genre} Movies</h2>
+                <a href="#" class="view-all" data-genre="${genre}">See All</a>
+              </div>
+              <div class="movies-grid">
+                ${genreMovies.map(movie => renderMovieCard(movie)).join('')}
+              </div>
+            </section>
+          `;
         }
       });
     }
 
-    function showToast(message, type = 'info') {
-      toast.textContent = message;
-      toast.className = 'toast';
-      toast.classList.add(type, 'show');
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
+    mainContent.innerHTML = html;
 
-    async function loadHomePage() {
-      showLoading();
-      
-      try {
-        const [moviesData, genresData, featuredData] = await Promise.all([
-          fetchMovies(),
-          fetchGenres(),
-          fetchFeaturedMovie()
-        ]);
-        
-        movies = moviesData;
-        genres = genresData;
-        featuredMovie = featuredData;
-        
-        allYears = [...new Set(movies.map(movie => movie.releaseYear))].sort((a, b) => b - a);
-        
-        renderHomePage();
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading content: ' + error.message, 'error');
-        hideLoading();
+    attachMovieCardEvents();
+    document.querySelectorAll('.view-all').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sort = link.getAttribute('data-sort');
+        const genre = link.getAttribute('data-genre');
+        if (genre) {
+          loadMoviesByGenre(genre);
+        } else if (sort) {
+          loadAllMovies(sort);
+        }
+      });
+    });
+  }
+
+  function sortMovies(movies, field, order) {
+    const sorted = [...movies];
+    const isAsc = order === 'asc';
+    switch (field) {
+      case 'title':
+        sorted.sort((a, b) => isAsc 
+          ? a.title.localeCompare(b.title) 
+          : b.title.localeCompare(a.title));
+        break;
+      case 'rating':
+        sorted.sort((a, b) => isAsc 
+          ? (a.rating || 0) - (b.rating || 0) 
+          : (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'releaseYear':
+        sorted.sort((a, b) => isAsc 
+          ? (a.releaseYear || 0) - (b.releaseYear || 0) 
+          : (b.releaseYear || 0) - (a.releaseYear || 0));
+        break;
+      default:
+        sorted.sort((a, b) => isAsc 
+          ? a.timestamp - b.timestamp 
+          : b.timestamp - a.timestamp);
+    }
+    return sorted;
+  }
+
+  function formatTimeSince(timestamp) {
+    const now = new Date();
+    const seconds = Math.floor((now - timestamp) / 1000);
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return `${interval} year${interval === 1 ? '' : 's'} ago`;
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return `${interval} month${interval === 1 ? '' : 's'} ago`;
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return `${interval} day${interval === 1 ? '' : 's'} ago`;
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return `${interval} hour${interval === 1 ? '' : 's'} ago`;
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return `${interval} minute${interval === 1 ? '' : 's'} ago`;
+    return `${Math.floor(seconds)} second${seconds === 1 ? '' : 's'} ago`;
+  }
+
+  function getFavoriteGenre() {
+    const genreCounts = {};
+    let maxCount = 0;
+    let favoriteGenre = genres[0] || 'Action';
+    watchHistory.forEach(movieId => {
+      const movie = movies.find(m => m.id === movieId);
+      if (movie) {
+        if (!Array.isArray(movie.genres)) {
+          console.warn(`Invalid genres for movie ID ${movieId}:`, movie.genres);
+          return;
+        }
+        movie.genres.forEach(genre => {
+          genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+          if (genreCounts[genre] > maxCount) {
+            maxCount = genreCounts[genre];
+            favoriteGenre = genre;
+          }
+        });
+      } else {
+        console.warn(`Movie not found for ID: ${movieId}`);
       }
-    }
+    });
+    return favoriteGenre;
+  }
 
-    async function fetchMovies() {
-      try {
-        const q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(50));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data(),
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
-        }));
-      } catch (error) {
-        console.error('Error fetching movies:', error);
-        throw error;
+  async function loadForYou() {
+    showLoading();
+    try {
+      if (watchHistory.length === 0) {
+        await loadAllMovies('popular');
+        return;
       }
-    }
-
-    async function fetchGenres() {
-      try {
-        const q = query(collection(db, 'genres'), orderBy('name'));
-        const querySnapshot = await getDocs(q);
-        const genres = querySnapshot.docs.map(doc => doc.data().name);
-        return genres;
-      } catch (error) {
-        console.error('Error fetching genres:', error);
-        throw error;
-      }
-    }
-
-    async function fetchFeaturedMovie() {
-      try {
-        const q = query(collection(db, 'movies'), orderBy('views', 'desc'), limit(1));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.empty ? null : { 
-          id: querySnapshot.docs[0].id, 
-          ...querySnapshot.docs[0].data(),
-          timestamp: querySnapshot.docs[0].data().dateAdded?.toDate() || new Date()
-        };
-      } catch (error) {
-        console.error('Error fetching featured movie:', error);
-        throw error;
-      }
-    }
-
-    async function renderHomePage() {
-      let sortField = 'dateAdded';
-      let sortOrder = 'desc';
+      const favoriteGenre = getFavoriteGenre();
+      const q = query(
+        collection(db, 'movies'),
+        where('genres', 'array-contains', favoriteGenre),
+        orderBy('views', 'desc'),
+        limit(20)
+      );
+      const querySnapshot = await getDocs(q);
+      let forYouMovies = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data(),
+        genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
+        timestamp: doc.data().dateAdded?.toDate() || new Date()
+      }));
       if (currentUser) {
         const userRef = doc(db, 'users', currentUser.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const preferences = userSnap.data().displayPreferences || {};
-          sortField = preferences.sortField || 'dateAdded';
-          sortOrder = preferences.sortOrder || 'desc';
+          forYouMovies = sortMovies(forYouMovies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
         }
       }
-
-      let html = '';
-      
-      if (featuredMovie) {
-        html += `
-          <section class="hero" style="--hero-background: url('${featuredMovie.coverImageUrl || 'https://via.placeholder.com/1920x1080?text=Featured+Movie'}')">
-            <div class="hero-content">
-              <h1>${featuredMovie.title}</h1>
-              <p>${featuredMovie.description?.substring(0, 150) || 'No description available.'}...</p>
-              <div class="hero-buttons">
-                <button class="watch-btn" data-movie-id="${featuredMovie.id}">
-                  <i class="fas fa-play"></i> Watch Now
-                </button>
-                <button class="info-btn" data-movie-id="${featuredMovie.id}">
-                  <i class="fas fa-info-circle"></i> More Info
-                </button>
-              </div>
-            </div>
-          </section>
-        `;
-      }
-      
-      if (watchHistory.length > 0) {
-        const favoriteGenre = getFavoriteGenre();
-        const forYouMovies = movies.filter(movie => 
-          movie.genres && movie.genres.includes(favoriteGenre)
-        ).slice(0, 5);
-        
-        if (forYouMovies.length > 0) {
-          html += `
-            <section class="section">
-              <h2 class="section-title">For You <small>(Based on your preferences)</small></h2>
-              <div class="movies-grid">
-                ${forYouMovies.map(movie => renderMovieCard(movie)).join('')}
-              </div>
-            </section>
-          `;
-        }
-      }
-      
-      if (movies.length > 0) {
-        const popularMovies = [...movies].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
-        html += `
-          <section class="section">
-            <h2 class="section-title">Popular Movies <a href="#" class="view-all" data-sort="popular">See All</a></h2>
-            <div class="movies-grid">
-              ${popularMovies.map(movie => renderMovieCard(movie)).join('')}
-            </div>
-          </section>
-        `;
-      }
-      
-      if (movies.length > 0) {
-        const latestMovies = [...movies].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
-        html += `
-          <section class="section">
-            <h2 class="section-title">Latest Uploads <a href="#" class="view-all" data-sort="latest">See All</a></h2>
-            <div class="movies-grid">
-              ${latestMovies.map(movie => renderMovieCard(movie)).join('')}
-            </div>
-          </section>
-        `;
-      }
-      
-      if (genres.length > 0) {
-        genres.forEach(genre => {
-          let genreMovies = movies.filter(movie => 
-            movie.genres && movie.genres.includes(genre)
-          );
-          genreMovies = sortMovies(genreMovies, sortField, sortOrder).slice(0, 5);
-          
-          if (genreMovies.length > 0) {
-            html += `
-              <section class="section genre-section">
-                <div class="genre-header">
-                  <h2 class="genre-title">${genre} Movies</h2>
-                  <a href="#" class="view-all" data-genre="${genre}">See All</a>
-                </div>
-                <div class="movies-grid">
-                  ${genreMovies.map(movie => renderMovieCard(movie)).join('')}
-                </div>
-              </section>
-            `;
-          }
-        });
-      }
-      
-      mainContent.innerHTML = html;
-      
-      attachMovieCardEvents();
-      document.querySelectorAll('.view-all').forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const sort = link.getAttribute('data-sort');
-          const genre = link.getAttribute('data-genre');
-          if (genre) {
-            loadMoviesByGenre(genre);
-          } else if (sort) {
-            loadAllMovies(sort);
-          }
-        });
-      });
+      renderMovieList(forYouMovies, 'For You (Recommended)');
+      hideLoading();
+    } catch (error) {
+      showToast('Error loading recommendations: ' + error.message, 'error');
+      hideLoading();
     }
+  }
 
-    function sortMovies(movies, field, order) {
-      const sorted = [...movies];
-      const isAsc = order === 'asc';
-      switch (field) {
-        case 'title':
-          sorted.sort((a, b) => isAsc 
-            ? a.title.localeCompare(b.title) 
-            : b.title.localeCompare(a.title));
-          break;
-        case 'rating':
-          sorted.sort((a, b) => isAsc 
-            ? (a.rating || 0) - (b.rating || 0) 
-            : (b.rating || 0) - (a.rating || 0));
-          break;
-        case 'releaseYear':
-          sorted.sort((a, b) => isAsc 
-            ? (a.releaseYear || 0) - (b.releaseYear || 0) 
-            : (b.releaseYear || 0) - (a.releaseYear || 0));
-          break;
-        default:
-          sorted.sort((a, b) => isAsc 
-            ? a.timestamp - b.timestamp 
-            : b.timestamp - a.timestamp);
-      }
-      return sorted;
-    }
+  function renderMovieCard(movie) {
+    const inWatchlist = currentUser && watchlist.includes(movie.id);
+    const timeSince = formatTimeSince(movie.timestamp);
+    return `
+      <div class="movie-card" data-movie-id="${movie.id}">
+        ${movie.umusobanuzi ? `<span class="umusobanuzi">${movie.umusobanuzi}</span>` : ''}
+        <img src="${movie.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
+             alt="${movie.title}" class="movie-poster" />
+        <div class="movie-info">
+          <h3 class="movie-title">${movie.title}</h3>
+          <div class="movie-meta">
+            <span>${movie.releaseYear || 'N/A'}</span>
+            ${movie.rating ? `<span class="movie-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
+          </div>
+          ${movie.views ? `<div class="view-count"><i class="fas fa-eye"></i> ${movie.views}</div>` : ''}
+          <div class="time-indicator">${timeSince}</div>
+        </div>
+        <div class="movie-overlay">
+          <h3 class="overlay-title">${movie.title}</h3>
+          ${Array.isArray(movie.genres) && movie.genres.length ? `
+            <div class="overlay-genres">
+              ${movie.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
+            </div>
+          ` : ''}
+          <p>${movie.description?.substring(0, 100) || 'No description available'}...</p>
+          <button class="overlay-btn" data-movie-id="${movie.id}">
+            <i class="fas fa-play"></i> Watch Now
+          </button>
+          ${currentUser ? `
+            <button class="overlay-btn watchlist-btn ${inWatchlist ? 'in-watchlist' : ''}" 
+                    data-movie-id="${movie.id}">
+              <i class="fas ${inWatchlist ? 'fa-check' : 'fa-plus'}"></i> 
+              ${inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
 
-    function formatTimeSince(timestamp) {
-      const now = new Date();
-      const seconds = Math.floor((now - timestamp) / 1000);
-      let interval = Math.floor(seconds / 31536000);
-      if (interval >= 1) return `${interval} year${interval === 1 ? '' : 's'} ago`;
-      interval = Math.floor(seconds / 2592000);
-      if (interval >= 1) return `${interval} month${interval === 1 ? '' : 's'} ago`;
-      interval = Math.floor(seconds / 86400);
-      if (interval >= 1) return `${interval} day${interval === 1 ? '' : 's'} ago`;
-      interval = Math.floor(seconds / 3600);
-      if (interval >= 1) return `${interval} hour${interval === 1 ? '' : 's'} ago`;
-      interval = Math.floor(seconds / 60);
-      if (interval >= 1) return `${interval} minute${interval === 1 ? '' : 's'} ago`;
-      return `${Math.floor(seconds)} second${seconds === 1 ? '' : 's'} ago`;
-    }
-
-    function getFavoriteGenre() {
-      const genreCounts = {};
-      let maxCount = 0;
-      let favoriteGenre = genres[0] || 'Action';
-      watchHistory.forEach(movieId => {
-        const movie = movies.find(m => m.id === movieId);
-        if (movie && movie.genres) {
-          movie.genres.forEach(genre => {
-            genreCounts[genre] = (genreCounts[genre] || 0) + 1;
-            if (genreCounts[genre] > maxCount) {
-              maxCount = genreCounts[genre];
-              favoriteGenre = genre;
+  function attachMovieCardEvents() {
+    document.querySelectorAll('.movie-card, .watch-btn, .info-btn, .overlay-btn:not(.watchlist-btn)').forEach(element => {
+      element.addEventListener('click', async (e) => {
+        const movieId = element.getAttribute('data-movie-id') || 
+                       element.closest('.movie-card')?.getAttribute('data-movie-id');
+        if (movieId) {
+          await countView(movieId);
+          if (currentUser) {
+            const userRef = doc(db, 'users', currentUser.uid);
+            if (!watchHistory.includes(movieId)) {
+              watchHistory.unshift(movieId);
+              watchHistory = watchHistory.slice(0, 50);
+              await updateDoc(userRef, {
+                history: watchHistory
+              });
+              saveWatchHistoryToCookies(watchHistory);
             }
-          });
+          }
+          window.location.href = `see.html?id=${movieId}`;
         }
       });
-      return favoriteGenre;
-    }
-
-    async function loadForYou() {
-      showLoading();
-      try {
-        if (watchHistory.length === 0) {
-          await loadAllMovies('popular');
+    });
+    
+    document.querySelectorAll('.watchlist-btn').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const movieId = button.getAttribute('data-movie-id');
+        if (!currentUser) {
+          showToast('Please login to use watchlist', 'error');
+          window.location.href = 'login.html';
           return;
         }
-        const favoriteGenre = getFavoriteGenre();
-        const q = query(
-          collection(db, 'movies'),
-          where('genres', 'array-contains', favoriteGenre),
-          orderBy('views', 'desc'),
-          limit(20)
-        );
-        const querySnapshot = await getDocs(q);
-        let forYouMovies = querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data(),
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
-        }));
-        if (currentUser) {
-          const userRef = doc(db, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            forYouMovies = sortMovies(forYouMovies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
-          }
-        }
-        renderMovieList(forYouMovies, 'For You (Recommended)');
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading recommendations: ' + error.message, 'error');
-        hideLoading();
-      }
-    }
-
-    function renderMovieCard(movie) {
-      const inWatchlist = currentUser && watchlist.includes(movie.id);
-      const timeSince = formatTimeSince(movie.timestamp);
-      return `
-        <div class="movie-card" data-movie-id="${movie.id}">
-          ${movie.umusobanuzi ? `<span class="umusobanuzi">${movie.umusobanuzi}</span>` : ''}
-          <img src="${movie.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
-               alt="${movie.title}" class="movie-poster" />
-          <div class="movie-info">
-            <h3 class="movie-title">${movie.title}</h3>
-            <div class="movie-meta">
-              <span>${movie.releaseYear || 'N/A'}</span>
-              ${movie.rating ? `<span class="movie-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
-            </div>
-            ${movie.views ? `<div class="view-count"><i class="fas fa-eye"></i> ${movie.views}</div>` : ''}
-            <div class="time-indicator">${timeSince}</div>
-          </div>
-          <div class="movie-overlay">
-            <h3 class="overlay-title">${movie.title}</h3>
-            ${movie.genres ? `
-              <div class="overlay-genres">
-                ${movie.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
-              </div>
-            ` : ''}
-            <p>${movie.description?.substring(0, 100) || 'No description available'}...</p>
-            <button class="overlay-btn" data-movie-id="${movie.id}">
-              <i class="fas fa-play"></i> Watch Now
-            </button>
-            ${currentUser ? `
-              <button class="overlay-btn watchlist-btn ${inWatchlist ? 'in-watchlist' : ''}" 
-                      data-movie-id="${movie.id}">
-                <i class="fas ${inWatchlist ? 'fa-check' : 'fa-plus'}"></i> 
-                ${inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      `;
-    }
-
-    function attachMovieCardEvents() {
-      document.querySelectorAll('.movie-card, .watch-btn, .info-btn, .overlay-btn:not(.watchlist-btn)').forEach(element => {
-        element.addEventListener('click', async (e) => {
-          const movieId = element.getAttribute('data-movie-id') || 
-                         element.closest('.movie-card')?.getAttribute('data-movie-id');
-          if (movieId) {
-            await countView(movieId);
-            if (currentUser) {
-              const userRef = doc(db, 'users', currentUser.uid);
-              if (!watchHistory.includes(movieId)) {
-                watchHistory.unshift(movieId);
-                watchHistory = watchHistory.slice(0, 50); // Limit history to 50 items
-                await updateDoc(userRef, {
-                  history: watchHistory
-                });
-                saveWatchHistoryToCookies(watchHistory);
-              }
-            }
-            window.location.href = `see.html?id=${movieId}`;
-          }
-        });
-      });
-      
-      document.querySelectorAll('.watchlist-btn').forEach(button => {
-        button.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const movieId = button.getAttribute('data-movie-id');
-          if (!currentUser) {
-            showToast('Please login to use watchlist', 'error');
-            window.location.href = 'login.html';
-            return;
-          }
-          try {
-            const userRef = doc(db, 'users', currentUser.uid);
-            if (watchlist.includes(movieId)) {
-              await updateDoc(userRef, {
-                watchlist: arrayRemove(movieId)
-              });
-              watchlist = watchlist.filter(id => id !== movieId);
-              showToast('Removed from watchlist', 'success');
-              button.classList.remove('in-watchlist');
-              button.innerHTML = `<i class="fas fa-plus"></i> Add to Watchlist`;
-            } else {
-              await updateDoc(userRef, {
-                watchlist: arrayUnion(movieId)
-              });
-              watchlist.push(movieId);
-              showToast('Added to watchlist', 'success');
-              button.classList.add('in-watchlist');
-              button.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
-            }
-          } catch (error) {
-            showToast('Error updating watchlist: ' + error.message, 'error');
-          }
-        });
-      });
-    }
-
-    async function countView(movieId) {
-      const now = Date.now();
-      const lastViewTime = lastViewTimestamps[movieId] || 0;
-      if (now - lastViewTime > 3600000) { // 1 hour cooldown
         try {
-          const movieRef = doc(db, 'movies', movieId);
-          await updateDoc(movieRef, {
-            views: increment(1)
-          });
-          lastViewTimestamps[movieId] = now;
-          const movieIndex = movies.findIndex(m => m.id === movieId);
-          if (movieIndex !== -1) {
-            movies[movieIndex].views = (movies[movieIndex].views || 0) + 1;
+          const userRef = doc(db, 'users', currentUser.uid);
+          if (watchlist.includes(movieId)) {
+            await updateDoc(userRef, {
+              watchlist: arrayRemove(movieId)
+            });
+            watchlist = watchlist.filter(id => id !== movieId);
+            showToast('Removed from watchlist', 'success');
+            button.classList.remove('in-watchlist');
+            button.innerHTML = `<i class="fas fa-plus"></i> Add to Watchlist`;
+          } else {
+            await updateDoc(userRef, {
+              watchlist: arrayUnion(movieId)
+            });
+            watchlist.push(movieId);
+            showToast('Added to watchlist', 'success');
+            button.classList.add('in-watchlist');
+            button.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
           }
         } catch (error) {
-          console.error('Error counting view:', error);
+          showToast('Error updating watchlist: ' + error.message, 'error');
         }
-      }
-    }
+      });
+    });
+  }
 
-    async function loadMoviesByGenre(genre) {
-      showLoading();
+  async function countView(movieId) {
+    const now = Date.now();
+    const lastViewTime = lastViewTimestamps[movieId] || 0;
+    if (now - lastViewTime > 3600000) {
       try {
-        const q = query(
-          collection(db, 'movies'),
-          where('genres', 'array-contains', genre),
-          orderBy('dateAdded', 'desc'),
-          limit(20)
-        );
-        const querySnapshot = await getDocs(q);
-        let genreMovies = querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data(),
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
-        }));
-        if (currentUser) {
-          const userRef = doc(db, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            genreMovies = sortMovies(genreMovies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
-          }
+        const movieRef = doc(db, 'movies', movieId);
+        await updateDoc(movieRef, {
+          views: increment(1)
+        });
+        lastViewTimestamps[movieId] = now;
+        const movieIndex = movies.findIndex(m => m.id === movieId);
+        if (movieIndex !== -1) {
+          movies[movieIndex].views = (movies[movieIndex].views || 0) + 1;
         }
-        renderMovieList(genreMovies, `${genre} Movies`);
-        hideLoading();
       } catch (error) {
-        showToast('Error loading movies: ' + error.message, 'error');
-        hideLoading();
+        console.error('Error counting view:', error);
       }
     }
+  }
 
-    async function loadAllMovies(sort = 'latest') {
-      showLoading();
-      try {
-        let q;
-        if (sort === 'popular') {
-          q = query(collection(db, 'movies'), orderBy('views', 'desc'), limit(20));
-        } else {
-          q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(20));
-        }
-        const querySnapshot = await getDocs(q);
-        let allMovies = querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data(),
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
-        }));
-        if (currentUser) {
-          const userRef = doc(db, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            allMovies = sortMovies(allMovies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
-          }
-        }
-        renderMovieList(allMovies, sort === 'popular' ? 'Popular Movies' : 'Latest Movies');
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading movies: ' + error.message, 'error');
-        hideLoading();
-      }
-    }
-
-    function renderMovieList(movies, title) {
-      const html = `
-        <section class="section">
-          <h2 class="section-title">${title}</h2>
-          ${movies.length > 0 ? `
-            <div class="movies-grid">
-              ${movies.map(movie => renderMovieCard(movie)).join('')}
-            </div>
-          ` : '<p>No movies found.</p>'}
-        </section>
-      `;
-      mainContent.innerHTML = html;
-      attachMovieCardEvents();
-    }
-
-    async function loadUserData(userId) {
-      try {
-        const userRef = doc(db, 'users', userId);
+  async function loadMoviesByGenre(genre) {
+    showLoading();
+    try {
+      const q = query(
+        collection(db, 'movies'),
+        where('genres', 'array-contains', genre),
+        orderBy('dateAdded', 'desc'),
+        limit(20)
+      );
+      const querySnapshot = await getDocs(q);
+      let genreMovies = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data(),
+        genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
+        timestamp: doc.data().dateAdded?.toDate() || new Date()
+      }));
+      if (currentUser) {
+        const userRef = doc(db, 'users', currentUser.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
-          const userData = userSnap.data();
-          watchlist = userData.watchlist || [];
-          watchHistory = userData.history || [];
-          saveWatchHistoryToCookies(watchHistory);
+          const preferences = userSnap.data().displayPreferences || {};
+          genreMovies = sortMovies(genreMovies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
         }
-      } catch (error) {
-        console.error('Error loading user data:', error);
       }
+      renderMovieList(genreMovies, `${genre} Movies`);
+      hideLoading();
+    } catch (error) {
+      showToast('Error loading movies: ' + error.message, 'error');
+      hideLoading();
     }
+  }
 
-    async function loadWatchlist() {
-      if (!currentUser) {
-        showToast('Please login to view your watchlist', 'error');
-        window.location.href = 'login.html';
+  async function loadAllMovies(sort = 'latest') {
+    showLoading();
+    try {
+      let q;
+      if (sort === 'popular') {
+        q = query(collection(db, 'movies'), orderBy('views', 'desc'), limit(20));
+      } else {
+        q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(20));
+      }
+      const querySnapshot = await getDocs(q);
+      let allMovies = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data(),
+        genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
+        timestamp: doc.data().dateAdded?.toDate() || new Date()
+      }));
+      if (currentUser) {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const preferences = userSnap.data().displayPreferences || {};
+          allMovies = sortMovies(allMovies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
+        }
+      }
+      renderMovieList(allMovies, sort === 'popular' ? 'Popular Movies' : 'Latest Movies');
+      hideLoading();
+    } catch (error) {
+      showToast('Error loading movies: ' + error.message, 'error');
+      hideLoading();
+    }
+  }
+
+  function renderMovieList(movies, title) {
+    const html = `
+      <section class="section">
+        <h2 class="section-title">${title}</h2>
+        ${movies.length > 0 ? `
+          <div class="movies-grid">
+            ${movies.map(movie => renderMovieCard(movie)).join('')}
+          </div>
+        ` : '<p>No movies found.</p>'}
+      </section>
+    `;
+    mainContent.innerHTML = html;
+    attachMovieCardEvents();
+  }
+
+  async function loadUserData(userId) {
+    try {
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        watchlist = userData.watchlist || [];
+        const validMovieIds = movies.map(m => m.id);
+        watchHistory = (userData.history || []).filter(id => validMovieIds.includes(id));
+        await updateDoc(userRef, { history: watchHistory });
+        saveWatchHistoryToCookies(watchHistory);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  }
+
+  async function loadWatchlist() {
+    if (!currentUser) {
+      showToast('Please login to view your watchlist', 'error');
+      window.location.href = 'login.html';
+      return;
+    }
+    showLoading();
+    try {
+      if (watchlist.length === 0) {
+        mainContent.innerHTML = `
+          <section class="section">
+            <h2 class="section-title">Your Watchlist</h2>
+            <p>Your watchlist is empty. Add movies to watch later!</p>
+          </section>
+        `;
+        hideLoading();
         return;
       }
-      showLoading();
-      try {
-        if (watchlist.length === 0) {
-          mainContent.innerHTML = `
-            <section class="section">
-              <h2 class="section-title">Your Watchlist</h2>
-              <p>Your watchlist is empty. Add movies to watch later!</p>
-            </section>
-          `;
-          hideLoading();
-          return;
+      const moviePromises = watchlist.map(movieId => 
+        getDoc(doc(db, 'movies', movieId)).then(docSnap => 
+          docSnap.exists() ? { 
+            id: docSnap.id, 
+            ...docSnap.data(),
+            genres: Array.isArray(docSnap.data().genres) ? docSnap.data().genres : [],
+            timestamp: docSnap.data().dateAdded?.toDate() || new Date()
+          } : null
+        )
+      );
+      let movies = (await Promise.all(moviePromises)).filter(Boolean);
+      if (currentUser) {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const preferences = userSnap.data().displayPreferences || {};
+          movies = sortMovies(movies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
         }
-        const moviePromises = watchlist.map(movieId => 
-          getDoc(doc(db, 'movies', movieId)).then(docSnap => 
-            docSnap.exists() ? { 
-              id: docSnap.id, 
-              ...docSnap.data(),
-              timestamp: docSnap.data().dateAdded?.toDate() || new Date()
-            } : null
-          )
-        );
-        let movies = (await Promise.all(moviePromises)).filter(Boolean);
-        if (currentUser) {
-          const userRef = doc(db, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            movies = sortMovies(movies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
-          }
-        }
-        renderMovieList(movies, 'Your Watchlist');
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading watchlist: ' + error.message, 'error');
-        hideLoading();
       }
+      renderMovieList(movies, 'Your Watchlist');
+      hideLoading();
+    } catch (error) {
+      showToast('Error loading watchlist: ' + error.message, 'error');
+      hideLoading();
     }
+  }
 
-    async function loadHistory() {
-      if (!currentUser) {
-        showToast('Please login to view your history', 'error');
-        window.location.href = 'login.html';
+  async function loadHistory() {
+    if (!currentUser) {
+      showToast('Please login to view your history', 'error');
+      window.location.href = 'login.html';
+      return;
+    }
+    showLoading();
+    try {
+      if (watchHistory.length === 0) {
+        mainContent.innerHTML = `
+          <section class="section">
+            <h2 class="section-title">Your Watch History</h2>
+            <p>You haven't watched any movies yet.</p>
+          </section>
+        `;
+        hideLoading();
         return;
       }
-      showLoading();
+      const moviePromises = watchHistory.map(movieId => 
+        getDoc(doc(db, 'movies', movieId)).then(docSnap => 
+          docSnap.exists() ? { 
+            id: docSnap.id, 
+            ...docSnap.data(),
+            genres: Array.isArray(docSnap.data().genres) ? docSnap.data().genres : [],
+            timestamp: docSnap.data().dateAdded?.toDate() || new Date()
+          } : null
+        )
+      );
+      let movies = (await Promise.all(moviePromises)).filter(Boolean);
+      if (currentUser) {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const preferences = userSnap.data().displayPreferences || {};
+          movies = sortMovies(movies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
+        }
+      }
+      renderMovieList(movies, 'Your Watch History');
+      hideLoading();
+    } catch (error) {
+      showToast('Error loading history: ' + error.message, 'error');
+      hideLoading();
+    }
+  }
+
+  function saveWatchHistoryToCookies(history) {
+    document.cookie = `watchHistory=${JSON.stringify(history)}; path=/; max-age=${30 * 24 * 60 * 60}`;
+  }
+
+  function loadWatchHistoryFromCookies() {
+    const cookies = document.cookie.split('; ');
+    const historyCookie = cookies.find(c => c.startsWith('watchHistory='));
+    if (historyCookie) {
       try {
-        if (watchHistory.length === 0) {
-          mainContent.innerHTML = `
-            <section class="section">
-              <h2 class="section-title">Your Watch History</h2>
-              <p>You haven't watched any movies yet.</p>
-            </section>
-          `;
-          hideLoading();
-          return;
-        }
-        const moviePromises = watchHistory.map(movieId => 
-          getDoc(doc(db, 'movies', movieId)).then(docSnap => 
-            docSnap.exists() ? { 
-              id: docSnap.id, 
-              ...docSnap.data(),
-              timestamp: docSnap.data().dateAdded?.toDate() || new Date()
-            } : null
-          )
-        );
-        let movies = (await Promise.all(moviePromises)).filter(Boolean);
-        if (currentUser) {
-          const userRef = doc(db, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            movies = sortMovies(movies, preferences.sortField || 'dateAdded', preferences.sortOrder || 'desc');
-          }
-        }
-        renderMovieList(movies, 'Your Watch History');
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading history: ' + error.message, 'error');
-        hideLoading();
+        watchHistory = JSON.parse(historyCookie.split('=')[1]) || [];
+      } catch (e) {
+        watchHistory = [];
       }
     }
+  }
 
-    function saveWatchHistoryToCookies(history) {
-      document.cookie = `watchHistory=${JSON.stringify(history)}; path=/; max-age=${30 * 24 * 60 * 60}`;
-    }
+  function showLoading() {
+    loadingSpinner.classList.add('active');
+  }
 
-    function loadWatchHistoryFromCookies() {
-      const cookies = document.cookie.split('; ');
-      const historyCookie = cookies.find(c => c.startsWith('watchHistory='));
-      if (historyCookie) {
-        try {
-          watchHistory = JSON.parse(historyCookie.split('=')[1]) || [];
-        } catch (e) {
-          watchHistory = [];
-        }
-      }
-    }
-
-    function showLoading() {
-      loadingSpinner.classList.add('active');
-    }
-
-    function hideLoading() {
-      loadingSpinner.classList.remove('active');
-    }
-  </script>
+  function hideLoading() {
+    loadingSpinner.classList.remove('active');
+  }
+</script>
 </body>
 </html>
