@@ -382,8 +382,10 @@
   </style>
 </head>
 <body>
+  <!-- KINAFLIX logo linking back to homepage -->
   <a href="index.html" class="logo">KINAFLIX</a>
 
+  <!-- Main player section displaying movie banner and details -->
   <div class="player-section">
     <div class="player-container" id="player-container">
       <img src="" alt="Movie Poster" id="player-image" class="player-image" />
@@ -401,11 +403,13 @@
     </div>
   </div>
 
+  <!-- Series section for related movies in a series, hidden by default -->
   <div class="series-section" id="series-section" style="display: none;">
     <h2 class="series-title" id="series-title"></h2>
     <div class="series-movies" id="series-movies"></div>
   </div>
 
+  <!-- Content section with trailer and comments -->
   <div class="content-section">
     <div class="trailer-section" id="trailer-section">
       <h2 class="trailer-title">Trailer</h2>
@@ -422,12 +426,14 @@
   </div>
 
   <script type="module">
+    // Import Firebase SDK modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import {
       getFirestore,
       doc,
       getDoc,
       setDoc,
+      addDoc,
       arrayUnion,
       arrayRemove,
       onSnapshot,
@@ -440,6 +446,7 @@
     } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
 
+    // Firebase configuration for KINAFLIX project
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
@@ -450,13 +457,16 @@
       measurementId: "G-DC1T9B6B9W"
     };
 
+    // Initialize Firebase app and services
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
+    // Get movie ID from URL query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
 
+    // DOM elements for movie details and interactions
     const playerImage = document.getElementById('player-image');
     const movieTitle = document.getElementById('movie-title');
     const movieMeta = document.getElementById('movie-meta');
@@ -476,8 +486,12 @@
     let currentMovie = null;
     let currentUser = null;
 
+    // Initialize page when DOM is fully loaded
     document.addEventListener('DOMContentLoaded', () => {
+      // Load movie data and set up event listeners
       loadMovieData();
+
+      // Watch movie button: opens Google Drive link in preview mode
       watchNowBtn.addEventListener('click', () => {
         if (currentMovie.googleDriveLink) {
           const playableLink = currentMovie.googleDriveLink.includes('/view')
@@ -488,6 +502,8 @@
           alert('Google Drive link not available.');
         }
       });
+
+      // Play on Drive button: opens raw Google Drive link
       playOnDriveBtn.addEventListener('click', () => {
         if (currentMovie.googleDriveLink) {
           window.open(currentMovie.googleDriveLink, '_blank');
@@ -495,13 +511,18 @@
           alert('Google Drive link not available.');
         }
       });
+
+      // Share button: copies current page URL to clipboard
       shareBtn.addEventListener('click', () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
       });
+
+      // Submit comment button: adds new comment to Firestore
       submitCommentBtn.addEventListener('click', addComment);
     });
 
+    // Load movie data from Firestore based on movieId
     async function loadMovieData() {
       if (!movieId) {
         alert('No movie ID provided');
@@ -517,15 +538,19 @@
           throw new Error('Movie not found');
         }
 
+        // Store movie data in global variable
         currentMovie = {
           id: movieSnap.id,
           ...movieSnap.data(),
           timestamp: movieSnap.data().dateAdded?.toDate() || new Date()
         };
 
+        // Render movie details, comments, and watchlist status
         renderMovieDetails();
         loadComments();
         checkWatchlistStatus();
+
+        // Load series data if movie belongs to a series
         if (currentMovie.seriesId) {
           await loadSeriesData(currentMovie.seriesId);
         }
@@ -535,9 +560,10 @@
       }
     }
 
+    // Load series data for movies in the same series
     async function loadSeriesData(seriesId) {
       try {
-        // Fetch series name
+        // Fetch series name from Firestore
         const seriesRef = doc(db, 'series', seriesId);
         const seriesSnap = await getDoc(seriesRef);
         if (seriesSnap.exists()) {
@@ -548,7 +574,7 @@
           return;
         }
 
-        // Fetch all movies in the series
+        // Fetch all movies in the series, ordered by title
         const seriesMoviesQuery = query(
           collection(db, 'movies'),
           where('seriesId', '==', seriesId),
@@ -577,6 +603,7 @@
       }
     }
 
+    // Render movie details on the page
     function renderMovieDetails() {
       playerImage.src = currentMovie.coverImageUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80';
       movieTitle.textContent = currentMovie.title || 'N/A';
@@ -587,7 +614,7 @@
       `;
       movieDescription.textContent = currentMovie.description || 'No description available.';
       
-      // Render YouTube trailer
+      // Render YouTube trailer if available
       if (currentMovie.youtubeTrailerUrl) {
         const videoId = extractYouTubeVideoId(currentMovie.youtubeTrailerUrl);
         if (videoId) {
@@ -605,12 +632,14 @@
       }
     }
 
+    // Extract YouTube video ID from URL
     function extractYouTubeVideoId(url) {
       const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
       const match = url.match(regex);
       return match ? match[1] : null;
     }
 
+    // Check if movie is in user's watchlist and update button state
     async function checkWatchlistStatus() {
       const user = auth.currentUser;
       if (user) {
@@ -635,6 +664,7 @@
       }
     }
 
+    // Toggle movie in/out of user's watchlist
     async function toggleWatchlist() {
       if (!currentUser) {
         alert('Please log in to manage your watchlist.');
@@ -658,26 +688,38 @@
       }
     }
 
+    // Load comments for the current movie from Firestore
     async function loadComments() {
-      const commentsRef = collection(db, 'comments');
-      const q = query(commentsRef, where('movieId', '==', movieId));
-      onSnapshot(q, (snapshot) => {
-        commentsList.innerHTML = '';
-        snapshot.forEach(doc => {
-          const comment = doc.data();
-          const commentElement = document.createElement('div');
-          commentElement.className = 'comment';
-          commentElement.innerHTML = `
-            <span class="user">${comment.userEmail || 'Anonymous'}</span>
-            <p class="text">${comment.text}</p>
-          `;
-          commentsList.appendChild(commentElement);
+      try {
+        const commentsRef = collection(db, 'comments');
+        const q = query(
+          commentsRef,
+          where('movieId', '==', movieId),
+          orderBy('timestamp', 'desc') // Order comments newest first
+        );
+        onSnapshot(q, (snapshot) => {
+          commentsList.innerHTML = '';
+          snapshot.forEach(doc => {
+            const comment = doc.data();
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment';
+            commentElement.innerHTML = `
+              <span class="user">${comment.userEmail || 'Anonymous'}</span>
+              <p class="text">${comment.text}</p>
+            `;
+            commentsList.appendChild(commentElement);
+          });
+        }, (error) => {
+          console.error('Error loading comments:', error);
+          commentsList.innerHTML = '<p>Error loading comments.</p>';
         });
-      }, (error) => {
-        console.error('Error loading comments:', error);
-      });
+      } catch (error) {
+        console.error('Error setting up comments listener:', error);
+        commentsList.innerHTML = '<p>Error loading comments.</p>';
+      }
     }
 
+    // Add a new comment to Firestore
     async function addComment() {
       const text = commentInput.value.trim();
       if (!text) {
@@ -686,22 +728,25 @@
       }
 
       const user = auth.currentUser;
-      if (user) {
-        try {
-          await addDoc(collection(db, 'comments'), {
-            movieId: movieId,
-            userId: user.uid,
-            userEmail: user.email,
-            text: text,
-            timestamp: serverTimestamp()
-          });
-          commentInput.value = '';
-          alert('Comment added successfully!');
-        } catch (error) {
-          alert('Error adding comment: ' + error.message);
-        }
-      } else {
+      if (!user) {
         alert('Please log in to add a comment.');
+        return;
+      }
+
+      try {
+        // Add comment to Firestore 'comments' collection
+        await addDoc(collection(db, 'comments'), {
+          movieId: movieId,
+          userId: user.uid,
+          userEmail: user.email || 'Anonymous',
+          text: text,
+          timestamp: serverTimestamp()
+        });
+        commentInput.value = ''; // Clear input field
+        alert('Comment added successfully!');
+      } catch (error) {
+        console.error('Error adding comment:', error);
+        alert('Error adding comment: ' + error.message);
       }
     }
   </script>
