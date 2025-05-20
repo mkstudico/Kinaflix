@@ -156,20 +156,112 @@
       border: 1px solid rgba(0, 255, 0, 0.4);
     }
 
-    .comments-section {
-      padding: 2rem 0;
+    .series-section {
+      padding: 2rem;
       background: var(--dark-gray);
+    }
+
+    .series-title {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .series-movies {
+      display: flex;
+      overflow-x: auto;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) var(--dark-gray);
+    }
+
+    .series-movies::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .series-movies::-webkit-scrollbar-track {
+      background: var(--dark-gray);
+    }
+
+    .series-movies::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .series-movie-card {
+      flex: 0 0 auto;
+      width: 150px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .series-movie-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .series-movie-poster {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .series-movie-title {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      text-align: center;
+      color: var(--light);
+    }
+
+    .content-section {
+      display: flex;
+      padding: 2rem;
+      gap: 2rem;
+      background: var(--dark-gray);
+    }
+
+    .trailer-section {
+      flex: 1;
+      max-width: 50%;
+    }
+
+    .trailer-title {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .trailer-container {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      height: 0;
+      overflow: hidden;
+    }
+
+    .trailer-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .comments-section {
+      flex: 1;
+      max-width: 50%;
     }
 
     .comments-title {
       font-size: 1.5rem;
       color: var(--light);
       margin-bottom: 1rem;
-      padding-left: 1rem;
     }
 
     .comments-form {
-      padding: 0 1rem;
       margin-bottom: 1rem;
     }
 
@@ -199,7 +291,8 @@
     }
 
     .comments-list {
-      padding: 0 1rem;
+      max-height: 400px;
+      overflow-y: auto;
     }
 
     .comment {
@@ -240,6 +333,21 @@
       .logo {
         font-size: 1.2rem;
       }
+      .content-section {
+        flex-direction: column;
+      }
+      .trailer-section, .comments-section {
+        max-width: 100%;
+      }
+      .series-movies {
+        gap: 0.5rem;
+      }
+      .series-movie-card {
+        width: 120px;
+      }
+      .series-movie-poster {
+        height: 160px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -264,6 +372,12 @@
       .logo {
         font-size: 1rem;
       }
+      .series-movie-card {
+        width: 100px;
+      }
+      .series-movie-poster {
+        height: 140px;
+      }
     }
   </style>
 </head>
@@ -287,13 +401,24 @@
     </div>
   </div>
 
-  <div class="comments-section">
-    <h2 class="comments-title">Comments</h2>
-    <div class="comments-form" id="comments-form">
-      <textarea id="comment-input" placeholder="Write a comment..."></textarea>
-      <button id="submit-comment">Submit</button>
+  <div class="series-section" id="series-section" style="display: none;">
+    <h2 class="series-title" id="series-title"></h2>
+    <div class="series-movies" id="series-movies"></div>
+  </div>
+
+  <div class="content-section">
+    <div class="trailer-section" id="trailer-section">
+      <h2 class="trailer-title">Trailer</h2>
+      <div class="trailer-container" id="trailer-container"></div>
     </div>
-    <div class="comments-list" id="comments-list"></div>
+    <div class="comments-section">
+      <h2 class="comments-title">Comments</h2>
+      <div class="comments-form" id="comments-form">
+        <textarea id="comment-input" placeholder="Write a comment..."></textarea>
+        <button id="submit-comment">Submit</button>
+      </div>
+      <div class="comments-list" id="comments-list"></div>
+    </div>
   </div>
 
   <script type="module">
@@ -309,7 +434,9 @@
       collection,
       query,
       where,
-      serverTimestamp
+      getDocs,
+      serverTimestamp,
+      orderBy
     } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
 
@@ -341,6 +468,10 @@
     const commentInput = document.getElementById('comment-input');
     const submitCommentBtn = document.getElementById('submit-comment');
     const commentsList = document.getElementById('comments-list');
+    const seriesSection = document.getElementById('series-section');
+    const seriesTitle = document.getElementById('series-title');
+    const seriesMovies = document.getElementById('series-movies');
+    const trailerContainer = document.getElementById('trailer-container');
 
     let currentMovie = null;
     let currentUser = null;
@@ -395,9 +526,54 @@
         renderMovieDetails();
         loadComments();
         checkWatchlistStatus();
+        if (currentMovie.seriesId) {
+          await loadSeriesData(currentMovie.seriesId);
+        }
       } catch (error) {
         alert('Error loading movie: ' + error.message);
         window.location.href = 'index.html';
+      }
+    }
+
+    async function loadSeriesData(seriesId) {
+      try {
+        // Fetch series name
+        const seriesRef = doc(db, 'series', seriesId);
+        const seriesSnap = await getDoc(seriesRef);
+        if (seriesSnap.exists()) {
+          seriesTitle.textContent = `Series: ${seriesSnap.data().name}`;
+          seriesSection.style.display = 'block';
+        } else {
+          seriesSection.style.display = 'none';
+          return;
+        }
+
+        // Fetch all movies in the series
+        const seriesMoviesQuery = query(
+          collection(db, 'movies'),
+          where('seriesId', '==', seriesId),
+          orderBy('title')
+        );
+        const seriesMoviesSnap = await getDocs(seriesMoviesQuery);
+        seriesMovies.innerHTML = '';
+        seriesMoviesSnap.forEach(doc => {
+          const movie = { id: doc.id, ...doc.data() };
+          const movieCard = document.createElement('div');
+          movieCard.className = 'series-movie-card';
+          movieCard.setAttribute('data-movie-id', movie.id);
+          movieCard.innerHTML = `
+            <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
+                 alt="${movie.title}" class="series-movie-poster" />
+            <div class="series-movie-title">${movie.title}</div>
+          `;
+          seriesMovies.appendChild(movieCard);
+          movieCard.addEventListener('click', () => {
+            window.location.href = `see.html?id=${movie.id}`;
+          });
+        });
+      } catch (error) {
+        console.error('Error loading series data:', error);
+        seriesSection.style.display = 'none';
       }
     }
 
@@ -410,6 +586,29 @@
         ${currentMovie.releaseYear || 'N/A'}
       `;
       movieDescription.textContent = currentMovie.description || 'No description available.';
+      
+      // Render YouTube trailer
+      if (currentMovie.youtubeTrailerUrl) {
+        const videoId = extractYouTubeVideoId(currentMovie.youtubeTrailerUrl);
+        if (videoId) {
+          trailerContainer.innerHTML = `
+            <iframe src="https://www.youtube.com/embed/${videoId}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen></iframe>
+          `;
+        } else {
+          trailerContainer.innerHTML = '<p>Invalid YouTube trailer URL.</p>';
+        }
+      } else {
+        trailerContainer.innerHTML = '<p>No trailer available.</p>';
+      }
+    }
+
+    function extractYouTubeVideoId(url) {
+      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const match = url.match(regex);
+      return match ? match[1] : null;
     }
 
     async function checkWatchlistStatus() {
