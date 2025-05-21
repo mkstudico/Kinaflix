@@ -268,7 +268,7 @@
     }
   </style>
 </head>
-  <!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DC1T9B6B9W"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -302,17 +302,28 @@
         <div class="form-group">
           <label for="genres">Genres (select multiple)</label>
           <select id="genres" name="genres" multiple>
-            <option value="Action">Action</option>
-            <option value="Adventure">Adventure</option>
-            <option value="Comedy">Comedy</option>
-            <option value="Drama">Drama</option>
-            <option value="Horror">Horror</option>
-            <option value="Sci-Fi">Sci-Fi</option>
-            <option value="Romance">Romance</option>
-            <option value="Thriller">Thriller</option>
-            <option value="Animation">Animation</option>
-            <option value="Documentary">Documentary</option>
-          </select>
+                     <option value="Action">Action</option>
+<option value="Adventure">Adventure</option>
+<option value="Animation">Animation</option>
+<option value="Biography">Biography</option>
+<option value="Comedy">Comedy</option>
+<option value="Crime">Crime</option>
+<option value="Documentary">Documentary</option>
+<option value="Drama">Drama</option>
+<option value="Family">Family</option>
+<option value="Fantasy">Fantasy</option>
+<option value="History">History</option>
+<option value="Horror">Horror</option>
+<option value="Musical">Musical</option>
+<option value="Mystery">Mystery</option>
+<option value="Romance">Romance</option>
+<option value="Sci-Fi">Sci-Fi</option>
+<option value="Sport">Sport</option>
+<option value="Thriller">Thriller</option>
+<option value="War">War</option>
+<option value="Western">Western</option>
+<option value="indian">Indian</option>
+          </select required>
         </div>
         <div class="form-group">
           <label for="series">Series (optional)</label>
@@ -326,19 +337,19 @@
         </div>
         <div class="form-group">
           <label for="releaseYear">Release Year</label>
-          <input type="number" id="releaseYear" name="releaseYear" min="1900" max="2025" />
+          <input type="number" id="releaseYear" name="releaseYear" min="1900" max="2025" required />
         </div>
         <div class="form-group">
           <label for="rating">Rating (0-10)</label>
-          <input type="number" id="rating" name="rating" min="0" max="10" step="0.1" />
+          <input type="number" id="rating" name="rating" min="0" max="10" step="0.1" required />
         </div>
         <div class="form-group">
           <label for="posterImageUrl">Poster Image URL</label>
-          <input type="url" id="coverImageUrl" name="coverImageUrl" />
+          <input type="url" id="coverImageUrl" name="coverImageUrl" required />
         </div>
         <div class="form-group">
           <label for="googleDriveLink">Google Drive Link (Full Movie)</label>
-          <input type="url" id="googleDriveLink" name="googleDriveLink" />
+          <input type="url" id="googleDriveLink" name="googleDriveLink" required />
         </div>
         <div class="form-group">
           <label for="youtubeTrailerUrl">YouTube Trailer URL</label>
@@ -346,7 +357,7 @@
         </div>
         <div class="form-group">
           <label for="umusobanuzi">Umusobanuzi</label>
-          <input type="text" id="umusobanuzi" name="umusobanuzi" />
+          <input type="text" id="umusobanuzi" name="umusobanuzi" required />
         </div>
         <button type="submit" class="submit-btn">Add Movie</button>
       </form>
@@ -357,6 +368,12 @@
     <div class="footer-bottom">
       <p>© 2025 KINAFLIX. All rights reserved.</p>
     </div>
+    <a href="edit.html">
+  <button>MANAGE MOVIES</button>
+</a>
+ <a href="https://analytics.google.com/analytics/web/#/p490006864/reports/intelligenthome?params=_u..nav%3Dmaui">
+  <button>SITE ANALYTICS</button>
+</a>
   </footer>
 
   <script type="module">
