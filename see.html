@@ -133,6 +133,7 @@
       font-size: 1rem;
       text-transform: uppercase;
       letter-spacing: 1px;
+      touch-action: manipulation; /* Improves touch responsiveness */
     }
 
     .action-btn:hover {
@@ -147,6 +148,16 @@
     }
 
     .action-btn.play:hover {
+      background: #f40612;
+      transform: translateY(-2px);
+    }
+
+    .action-btn.download {
+      background: var(--primary);
+      border: none;
+    }
+
+    .action-btn.download:hover {
       background: #f40612;
       transform: translateY(-2px);
     }
@@ -311,12 +322,48 @@
       margin-top: 0.2rem;
     }
 
+    /* Toast Notification Styles */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--dark);
+      color: white;
+      padding: 1rem;
+      border-radius: 4px;
+      box-shadow: var(--shadow);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+      max-width: 300px;
+      font-size: 0.9rem;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: #4CAF50;
+    }
+
+    .toast.error {
+      background: #f44336;
+    }
+
+    .toast.info {
+      background: #2196F3;
+    }
+
+    /* Enhanced Mobile Styles */
     @media (max-width: 768px) {
       .player-section {
         height: 60vh;
       }
       .movie-info {
-        max-width: 70%;
+        max-width: 80%;
         left: 1rem;
         padding: 1rem;
       }
@@ -327,8 +374,9 @@
         font-size: 0.95rem;
       }
       .action-btn {
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.2rem;
         font-size: 0.9rem;
+        min-width: 120px; /* Ensure touch target size */
       }
       .logo {
         font-size: 1.2rem;
@@ -348,6 +396,9 @@
       .series-movie-poster {
         height: 160px;
       }
+      .series-section {
+        display: none; /* Hide series section on tablets for simplicity */
+      }
     }
 
     @media (max-width: 480px) {
@@ -355,9 +406,11 @@
         height: 50vh;
       }
       .movie-info {
-        max-width: 90%;
+        max-width: 100%;
         left: 0.5rem;
+        right: 0.5rem;
         padding: 0.8rem;
+        background: rgba(0, 0, 0, 0.7); /* Semi-transparent background for readability */
       }
       .movie-title {
         font-size: 1.5rem;
@@ -366,8 +419,9 @@
         font-size: 0.85rem;
       }
       .action-btn {
-        padding: 0.4rem 0.8rem;
+        padding: 0.5rem 1rem;
         font-size: 0.8rem;
+        min-width: 100px;
       }
       .logo {
         font-size: 1rem;
@@ -377,6 +431,12 @@
       }
       .series-movie-poster {
         height: 140px;
+      }
+      .toast {
+        bottom: 10px;
+        right: 10px;
+        max-width: 90%;
+        font-size: 0.8rem;
       }
     }
   </style>
@@ -396,7 +456,7 @@
         <div class="action-buttons" id="action-buttons">
           <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
           <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> Add to watchlist</button>
-          <button class="action-btn" id="play-on-drive-btn">Play on Drive</button>
+          <button class="action-btn download" id="download-btn"><i class="fas fa-download"></i> Download</button>
           <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Share</button>
         </div>
       </div>
@@ -473,7 +533,7 @@
     const movieDescription = document.getElementById('movie-description');
     const watchNowBtn = document.getElementById('watch-now-btn');
     const watchlistBtn = document.getElementById('watchlist-btn');
-    const playOnDriveBtn = document.getElementById('play-on-drive-btn');
+    const downloadBtn = document.getElementById('download-btn');
     const shareBtn = document.getElementById('share-btn');
     const commentInput = document.getElementById('comment-input');
     const submitCommentBtn = document.getElementById('submit-comment');
@@ -485,6 +545,20 @@
 
     let currentMovie = null;
     let currentUser = null;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type, 'show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
 
     // Initialize page when DOM is fully loaded
     document.addEventListener('DOMContentLoaded', () => {
@@ -492,41 +566,79 @@
       loadMovieData();
 
       // Watch movie button: opens Google Drive link in preview mode
-      watchNowBtn.addEventListener('click', () => {
+      const watchHandler = () => {
         if (currentMovie.googleDriveLink) {
-          const playableLink = currentMovie.googleDriveLink.includes('/view')
+          let playableLink = currentMovie.googleDriveLink.includes('/view')
             ? currentMovie.googleDriveLink.replace('/view', '/preview')
             : currentMovie.googleDriveLink;
+          // Use mobile-specific link format if on mobile
+          if (isMobile) {
+            const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
+            if (fileIdMatch && fileIdMatch[1]) {
+              playableLink = `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+            }
+          }
           window.open(playableLink, '_blank');
         } else {
-          alert('Google Drive link not available.');
+          showToast('Google Drive link not available.', 'error');
         }
-      });
+      };
 
-      // Play on Drive button: opens raw Google Drive link
-      playOnDriveBtn.addEventListener('click', () => {
+      watchNowBtn.addEventListener('click', watchHandler);
+      if (isMobile) {
+        watchNowBtn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          watchHandler();
+        });
+      }
+
+      // Download button: initiates file download from Google Drive (logged-in users only)
+      downloadBtn.addEventListener('click', () => {
+        if (!currentUser) {
+          showToast('Please log in to download this movie.', 'error');
+          setTimeout(() => window.location.href = 'login.html', 1000);
+          return;
+        }
         if (currentMovie.googleDriveLink) {
-          window.open(currentMovie.googleDriveLink, '_blank');
+          const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
+          if (fileIdMatch && fileIdMatch[1]) {
+            const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `${currentMovie.title || 'movie'}.mp4`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } else {
+            showToast('Invalid Google Drive link format.', 'error');
+          }
         } else {
-          alert('Google Drive link not available.');
+          showToast('Download link not available.', 'error');
         }
       });
 
       // Share button: copies current page URL to clipboard
       shareBtn.addEventListener('click', () => {
         const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
+        navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard!', 'success'));
       });
 
       // Submit comment button: adds new comment to Firestore
       submitCommentBtn.addEventListener('click', addComment);
+
+      // Adjust UI for mobile devices
+      if (isMobile) {
+        document.querySelectorAll('.action-btn').forEach(btn => {
+          btn.style.touchAction = 'manipulation'; // Prevent zoom on double-tap
+        });
+      }
     });
 
     // Load movie data from Firestore based on movieId
     async function loadMovieData() {
       if (!movieId) {
-        alert('No movie ID provided');
-        window.location.href = 'index.html';
+        showToast('No movie ID provided.', 'error');
+        setTimeout(() => window.location.href = 'index.html', 1000);
         return;
       }
 
@@ -538,32 +650,29 @@
           throw new Error('Movie not found');
         }
 
-        // Store movie data in global variable
         currentMovie = {
           id: movieSnap.id,
           ...movieSnap.data(),
           timestamp: movieSnap.data().dateAdded?.toDate() || new Date()
         };
 
-        // Render movie details, comments, and watchlist status
         renderMovieDetails();
         loadComments();
         checkWatchlistStatus();
-
-        // Load series data if movie belongs to a series
-        if (currentMovie.seriesId) {
+        if (currentMovie.seriesId && !isMobile) {
           await loadSeriesData(currentMovie.seriesId);
+        } else {
+          seriesSection.style.display = 'none';
         }
       } catch (error) {
-        alert('Error loading movie: ' + error.message);
-        window.location.href = 'index.html';
+        showToast(`Error loading movie: ${error.message}`, 'error');
+        setTimeout(() => window.location.href = 'index.html', 1000);
       }
     }
 
     // Load series data for movies in the same series
     async function loadSeriesData(seriesId) {
       try {
-        // Fetch series name from Firestore
         const seriesRef = doc(db, 'series', seriesId);
         const seriesSnap = await getDoc(seriesRef);
         if (seriesSnap.exists()) {
@@ -574,7 +683,6 @@
           return;
         }
 
-        // Fetch all movies in the series, ordered by title
         const seriesMoviesQuery = query(
           collection(db, 'movies'),
           where('seriesId', '==', seriesId),
@@ -596,6 +704,12 @@
           movieCard.addEventListener('click', () => {
             window.location.href = `see.html?id=${movie.id}`;
           });
+          if (isMobile) {
+            movieCard.addEventListener('touchstart', (e) => {
+              e.preventDefault();
+              window.location.href = `see.html?id=${movie.id}`;
+            });
+          }
         });
       } catch (error) {
         console.error('Error loading series data:', error);
@@ -614,7 +728,6 @@
       `;
       movieDescription.textContent = currentMovie.description || 'No description available.';
       
-      // Render YouTube trailer if available
       if (currentMovie.youtubeTrailerUrl) {
         const videoId = extractYouTubeVideoId(currentMovie.youtubeTrailerUrl);
         if (videoId) {
@@ -656,18 +769,20 @@
           watchlistBtn.onclick = toggleWatchlist;
         }, (error) => {
           console.error('Error checking watchlist:', error);
+          showToast('Error checking watchlist.', 'error');
         });
       } else {
         watchlistBtn.classList.remove('watchlist-added');
         watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to watchlist (Log in to use)';
-        watchlistBtn.onclick = () => alert('Please log in to add to watchlist.');
+        watchlistBtn.onclick = () => showToast('Please log in to add to watchlist.', 'error');
       }
     }
 
     // Toggle movie in/out of user's watchlist
     async function toggleWatchlist() {
       if (!currentUser) {
-        alert('Please log in to manage your watchlist.');
+        showToast('Please log in to manage your watchlist.', 'error');
+        setTimeout(() => window.location.href = 'login.html', 1000);
         return;
       }
 
@@ -685,6 +800,7 @@
         }
       } catch (error) {
         console.error('Error updating watchlist:', error);
+        showToast('Error updating watchlist.', 'error');
       }
     }
 
@@ -695,7 +811,7 @@
         const q = query(
           commentsRef,
           where('movieId', '==', movieId),
-          orderBy('timestamp', 'desc') // Order comments newest first
+          orderBy('timestamp', 'desc')
         );
         onSnapshot(q, (snapshot) => {
           commentsList.innerHTML = '';
@@ -723,18 +839,18 @@
     async function addComment() {
       const text = commentInput.value.trim();
       if (!text) {
-        alert('Please enter a comment.');
+        showToast('Please enter a comment.', 'error');
         return;
       }
 
       const user = auth.currentUser;
       if (!user) {
-        alert('Please log in to add a comment.');
+        showToast('Please log in to add a comment.', 'error');
+        setTimeout(() => window.location.href = 'login.html', 1000);
         return;
       }
 
       try {
-        // Add comment to Firestore 'comments' collection
         await addDoc(collection(db, 'comments'), {
           movieId: movieId,
           userId: user.uid,
@@ -742,11 +858,11 @@
           text: text,
           timestamp: serverTimestamp()
         });
-        commentInput.value = ''; // Clear input field
-        alert('Comment added successfully!');
+        commentInput.value = '';
+        showToast('Comment added successfully!', 'success');
       } catch (error) {
         console.error('Error adding comment:', error);
-        alert('Error adding comment: ' + error.message);
+        showToast(`Error adding comment: ${error.message}`, 'error');
       }
     }
   </script>
