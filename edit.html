@@ -382,8 +382,6 @@
               <th>Poster URL</th>
               <th>Google Drive</th>
               <th>YouTube</th>
-              <th>Series</th>
-              <th>Views</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -434,10 +432,6 @@
     const genreOptions = [
       'Action', 'Comedy', 'Drama', 'Thriller', 'Sci-Fi',
       'Romance', 'Horror', 'Adventure', 'Documentary'
-    ];
-
-    const seriesOptions = [
-      'None', 'Season 1', 'Season 2', 'Season 3', 'Part 1', 'Part 2'
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -558,16 +552,14 @@
           releaseYear: doc.data().releaseYear || '',
           posterImageUrl: doc.data().posterImageUrl || '',
           googleDriveLink: doc.data().googleDriveLink || '',
-          youtubeLink: doc.data().youtubeLink || '',
-          series: doc.data().series || '',
-          views: doc.data().views || 0
+          youtubeLink: doc.data().youtubeLink || ''
         }));
         renderMovies(allMovies);
         hideLoading();
       } catch (error) {
         console.error("Load movies error:", error);
         showToast("Error loading movies", "error");
-        movieTableBody.innerHTML = '<tr><td colspan="10">Failed to load movies</td></tr>';
+        movieTableBody.innerHTML = '<tr><td colspan="8">Failed to load movies</td></tr>';
         hideLoading();
       }
     }
@@ -589,14 +581,6 @@
             <td><input type="url" value="${movie.posterImageUrl}" data-field="posterImageUrl"></td>
             <td><input type="url" value="${movie.googleDriveLink}" data-field="googleDriveLink"></td>
             <td><input type="url" value="${movie.youtubeLink}" data-field="youtubeLink"></td>
-            <td>
-              <select data-field="series">
-                ${seriesOptions.map(series => `
-                  <option value="${series}" ${movie.series === series ? 'selected' : ''}>${series}</option>
-                `).join('')}
-              </select>
-            </td>
-            <td>${movie.views}</td>
             <td class="action-buttons">
               <button class="action-btn save-btn" data-movie-id="${movie.id}">Save</button>
               <button class="action-btn delete-btn" data-movie-id="${movie.id}">Delete</button>
@@ -627,8 +611,7 @@
                 releaseYear: parseInt(row.querySelector('[data-field="releaseYear"]').value) || 0,
                 posterImageUrl: row.querySelector('[data-field="posterImageUrl"]').value.trim(),
                 googleDriveLink: row.querySelector('[data-field="googleDriveLink"]').value.trim(),
-                youtubeLink: row.querySelector('[data-field="youtubeLink"]').value.trim(),
-                series: row.querySelector('[data-field="series"]').value
+                youtubeLink: row.querySelector('[data-field="youtubeLink"]').value.trim()
               };
               if (!updatedData.title) {
                 showToast("Title is required", "error");
