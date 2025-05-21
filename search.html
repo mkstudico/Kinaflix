@@ -827,10 +827,20 @@
     async function loadGenres() {
       if (genres.length > 0) return;
       try {
-        const q = query(collection(db, 'genres'), orderBy('name'));
+        const q = query(collection(db, 'movies'), limit(100));
         const querySnapshot = await getDocs(q);
-        genres = querySnapshot.docs.map(doc => doc.data().name);
+        const allGenres = querySnapshot.docs
+          .map(doc => doc.data().genres || [])
+          .flat()
+          .filter(genre => genre && typeof genre === 'string');
+        genres = [...new Set(allGenres)].sort();
         
+        if (genres.length === 0) {
+          showToast('No genres found in movies', 'error');
+          return;
+        }
+        
+        genreFilter.innerHTML = '<option value="">All Genres</option>';
         genres.forEach(genre => {
           const option = document.createElement('option');
           option.value = genre;
@@ -839,7 +849,7 @@
         });
       } catch (error) {
         console.error('Error loading genres:', error);
-        showToast('Error loading genres', 'error');
+        showToast('Error loading genres: ' + error.message, 'error');
       }
     }
 
@@ -866,7 +876,11 @@
 
     function handleSearch() {
       const searchQuery = searchInput.value.trim();
-      if (searchQuery || genreFilter.value || yearFilter.value || ratingFilter.value) {
+      const genre = genreFilter.value;
+      const year = yearFilter.value;
+      const rating = ratingFilter.value;
+      
+      if (searchQuery || genre || year || rating) {
         searchMovies(searchQuery);
       } else {
         showToast('Please enter a search term or select a filter', 'error');
@@ -895,8 +909,6 @@
             where('title', '<=', searchQueryUpper + '\uf8ff'),
             orderBy('title')
           );
-        } else {
-          q = query(q, orderBy('title'));
         }
         
         if (genre) {
@@ -904,11 +916,16 @@
         }
         
         if (year) {
-          q = query(q, where('releaseYear', '==', parseInt(year)), orderBy('releaseYear'));
+          q = query(q, where('releaseYear', '==', parseInt(year)));
         }
         
         if (rating) {
           q = query(q, where('rating', '>=', parseFloat(rating)));
+        }
+        
+        // Ensure at least one orderBy for composite queries
+        if (!searchQuery && (genre || year || rating)) {
+          q = query(q, orderBy('title'));
         }
         
         const querySnapshot = await getDocs(q);
@@ -918,7 +935,7 @@
           timestamp: doc.data().dateAdded?.toDate() || new Date()
         }));
         
-        // If no results and searchQuery exists, try case-insensitive search
+        // Fallback for title search if no results
         if (movies.length === 0 && searchQuery) {
           const allMovies = await getDocs(query(collection(db, 'movies'), limit(50)));
           movies = allMovies.docs
