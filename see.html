@@ -133,7 +133,7 @@
       font-size: 1rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      touch-action: manipulation; /* Improves touch responsiveness */
+      touch-action: manipulation;
     }
 
     .action-btn:hover {
@@ -158,6 +158,16 @@
     }
 
     .action-btn.download:hover {
+      background: #f40612;
+      transform: translateY(-2px);
+    }
+
+    .action-btn.whatsapp {
+      background: var(--primary);
+      border: none;
+    }
+
+    .action-btn.whatsapp:hover {
       background: #f40612;
       transform: translateY(-2px);
     }
@@ -247,7 +257,7 @@
 
     .trailer-container {
       position: relative;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      padding-bottom: 56.25%;
       height: 0;
       overflow: hidden;
     }
@@ -322,7 +332,6 @@
       margin-top: 0.2rem;
     }
 
-    /* Toast Notification Styles */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -357,7 +366,6 @@
       background: #2196F3;
     }
 
-    /* Enhanced Mobile Styles */
     @media (max-width: 768px) {
       .player-section {
         height: 60vh;
@@ -376,7 +384,7 @@
       .action-btn {
         padding: 0.6rem 1.2rem;
         font-size: 0.9rem;
-        min-width: 120px; /* Ensure touch target size */
+        min-width: 120px;
       }
       .logo {
         font-size: 1.2rem;
@@ -397,7 +405,7 @@
         height: 160px;
       }
       .series-section {
-        display: none; /* Hide series section on tablets for simplicity */
+        display: none;
       }
     }
 
@@ -410,7 +418,7 @@
         left: 0.5rem;
         right: 0.5rem;
         padding: 0.8rem;
-        background: rgba(0, 0, 0, 0.7); /* Semi-transparent background for readability */
+        background: rgba(0, 0, 0, 0.7);
       }
       .movie-title {
         font-size: 1.5rem;
@@ -441,7 +449,7 @@
     }
   </style>
 </head>
-  <!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DC1T9B6B9W"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -450,10 +458,8 @@
   gtag('config', 'G-DC1T9B6B9W');
 </script>
 <body>
-  <!-- KINAFLIX logo linking back to homepage -->
   <a href="index.html" class="logo">KINAFLIX</a>
 
-  <!-- Main player section displaying movie banner and details -->
   <div class="player-section">
     <div class="player-container" id="player-container">
       <img src="" alt="Movie Poster" id="player-image" class="player-image" />
@@ -465,19 +471,18 @@
           <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
           <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> Add to watchlist</button>
           <button class="action-btn download" id="download-btn"><i class="fas fa-download"></i> Download</button>
+          <button class="action-btn whatsapp" id="whatsapp-btn"><i class="fab fa-whatsapp"></i> MENYA UTUGEZWEHO</button>
           <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Share</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Series section for related movies in a series, hidden by default -->
   <div class="series-section" id="series-section" style="display: none;">
     <h2 class="series-title" id="series-title"></h2>
     <div class="series-movies" id="series-movies"></div>
   </div>
 
-  <!-- Content section with trailer and comments -->
   <div class="content-section">
     <div class="trailer-section" id="trailer-section">
       <h2 class="trailer-title">Trailer</h2>
@@ -494,7 +499,6 @@
   </div>
 
   <script type="module">
-    // Import Firebase SDK modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import {
       getFirestore,
@@ -514,7 +518,6 @@
     } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
 
-    // Firebase configuration for KINAFLIX project
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
@@ -525,16 +528,13 @@
       measurementId: "G-DC1T9B6B9W"
     };
 
-    // Initialize Firebase app and services
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Get movie ID from URL query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
 
-    // DOM elements for movie details and interactions
     const playerImage = document.getElementById('player-image');
     const movieTitle = document.getElementById('movie-title');
     const movieMeta = document.getElementById('movie-meta');
@@ -542,10 +542,10 @@
     const watchNowBtn = document.getElementById('watch-now-btn');
     const watchlistBtn = document.getElementById('watchlist-btn');
     const downloadBtn = document.getElementById('download-btn');
+    const whatsappBtn = document.getElementById('whatsapp-btn');
     const shareBtn = document.getElementById('share-btn');
     const commentInput = document.getElementById('comment-input');
     const submitCommentBtn = document.getElementById('submit-comment');
-    const commentsList = document.getElementById('comments-list');
     const seriesSection = document.getElementById('series-section');
     const seriesTitle = document.getElementById('series-title');
     const seriesMovies = document.getElementById('series-movies');
@@ -555,12 +555,10 @@
     let currentUser = null;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    // Create toast element
     const toast = document.createElement('div');
     toast.className = 'toast';
     document.body.appendChild(toast);
 
-    // Toast notification function
     function showToast(message, type = 'info') {
       toast.textContent = message;
       toast.className = 'toast';
@@ -568,18 +566,14 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // Initialize page when DOM is fully loaded
     document.addEventListener('DOMContentLoaded', () => {
-      // Load movie data and set up event listeners
       loadMovieData();
 
-      // Watch movie button: opens Google Drive link in preview mode
       const watchHandler = () => {
         if (currentMovie.googleDriveLink) {
           let playableLink = currentMovie.googleDriveLink.includes('/view')
             ? currentMovie.googleDriveLink.replace('/view', '/preview')
             : currentMovie.googleDriveLink;
-          // Use mobile-specific link format if on mobile
           if (isMobile) {
             const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
             if (fileIdMatch && fileIdMatch[1]) {
@@ -600,7 +594,6 @@
         });
       }
 
-      // Download button: initiates file download from Google Drive (logged-in users only)
       downloadBtn.addEventListener('click', () => {
         if (!currentUser) {
           showToast('Please log in to download this movie.', 'error');
@@ -625,24 +618,30 @@
         }
       });
 
-      // Share button: copies current page URL to clipboard
+      whatsappBtn.addEventListener('click', () => {
+        window.open('https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c', '_blank');
+      });
+      if (isMobile) {
+        whatsappBtn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          window.open('https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c', '_blank');
+        });
+      }
+
       shareBtn.addEventListener('click', () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard!', 'success'));
       });
 
-      // Submit comment button: adds new comment to Firestore
       submitCommentBtn.addEventListener('click', addComment);
 
-      // Adjust UI for mobile devices
       if (isMobile) {
         document.querySelectorAll('.action-btn').forEach(btn => {
-          btn.style.touchAction = 'manipulation'; // Prevent zoom on double-tap
+          btn.style.touchAction = 'manipulation';
         });
       }
     });
 
-    // Load movie data from Firestore based on movieId
     async function loadMovieData() {
       if (!movieId) {
         showToast('No movie ID provided.', 'error');
@@ -678,7 +677,6 @@
       }
     }
 
-    // Load series data for movies in the same series
     async function loadSeriesData(seriesId) {
       try {
         const seriesRef = doc(db, 'series', seriesId);
@@ -725,7 +723,6 @@
       }
     }
 
-    // Render movie details on the page
     function renderMovieDetails() {
       playerImage.src = currentMovie.coverImageUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80';
       movieTitle.textContent = currentMovie.title || 'N/A';
@@ -753,14 +750,12 @@
       }
     }
 
-    // Extract YouTube video ID from URL
     function extractYouTubeVideoId(url) {
       const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
       const match = url.match(regex);
       return match ? match[1] : null;
     }
 
-    // Check if movie is in user's watchlist and update button state
     async function checkWatchlistStatus() {
       const user = auth.currentUser;
       if (user) {
@@ -786,7 +781,6 @@
       }
     }
 
-    // Toggle movie in/out of user's watchlist
     async function toggleWatchlist() {
       if (!currentUser) {
         showToast('Please log in to manage your watchlist.', 'error');
@@ -812,7 +806,6 @@
       }
     }
 
-    // Load comments for the current movie from Firestore
     async function loadComments() {
       try {
         const commentsRef = collection(db, 'comments');
@@ -843,7 +836,6 @@
       }
     }
 
-    // Add a new comment to Firestore
     async function addComment() {
       const text = commentInput.value.trim();
       if (!text) {
