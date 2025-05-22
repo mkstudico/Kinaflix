@@ -499,7 +499,7 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import {
       getFirestore,
       doc,
@@ -515,14 +515,16 @@
       getDocs,
       serverTimestamp,
       orderBy
-    } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+    } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+    import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      apiKey: "AIyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
+      databaseURL: "https://kinaflix-default-rtdb.firebaseio.com",
       projectId: "kinaflix",
-      storageBucket: "kinaflix.appspot.com",
+      storageBucket: "kinaflix.firebasestorage.app",
       messagingSenderId: "318239806217",
       appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
       measurementId: "G-DC1T9B6B9W"
@@ -531,6 +533,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    const analytics = getAnalytics(app);
+
+    // Log page view
+    logEvent(analytics, 'page_view', { page_title: 'Watch Movie - KINAFLIX' });
 
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
@@ -579,7 +585,12 @@
 
       const watchHandler = () => {
         if (currentMovie) {
-          window.location.href = `watch.html?id=${movieId}`;
+          if (currentMovie.googleDriveLink) {
+            window.open(currentMovie.googleDriveLink, '_blank');
+            logEvent(analytics, 'watch_movie', { movie_id: movieId, title: currentMovie.title });
+          } else {
+            showToast('No streaming link available.', 'error');
+          }
         } else {
           showToast('Movie data not loaded.', 'error');
         }
@@ -609,6 +620,7 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            logEvent(analytics, 'download_movie', { movie_id: movieId, title: currentMovie.title });
           } else {
             showToast('Invalid Google Drive link format.', 'error');
           }
@@ -619,17 +631,22 @@
 
       whatsappBtn.addEventListener('click', () => {
         window.open('https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c', '_blank');
+        logEvent(analytics, 'open_whatsapp', { page: 'see.html' });
       });
       if (isMobile) {
         whatsappBtn.addEventListener('touchstart', (e) => {
           e.preventDefault();
           window.open('https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c', '_blank');
+          logEvent(analytics, 'open_whatsapp', { page: 'see.html' });
         });
       }
 
       shareBtn.addEventListener('click', () => {
         const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard!', 'success'));
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('Link copied to clipboard!', 'success');
+          logEvent(analytics, 'share_movie', { movie_id: movieId, url });
+        });
       });
 
       submitCommentBtn.addEventListener('click', addComment);
@@ -794,10 +811,12 @@
           await setDoc(watchlistRef, {
             movies: arrayRemove(movieId)
           }, { merge: true });
+          logEvent(analytics, 'remove_from_watchlist', { movie_id: movieId });
         } else {
           await setDoc(watchlistRef, {
             movies: arrayUnion(movieId)
           }, { merge: true });
+          logEvent(analytics, 'add_to_watchlist', { movie_id: movieId });
         }
       } catch (error) {
         console.error('Error updating watchlist:', error);
@@ -813,9 +832,7 @@
           where('movieId', '==', movieId),
           orderBy('timestamp', 'desc')
         );
-        console.log('Fetching comments for movieId:', movieId);
         onSnapshot(q, (snapshot) => {
-          console.log('Comments snapshot size:', snapshot.size);
           if (snapshot.empty) {
             commentsList.innerHTML = '<p>No comments yet.</p>';
             return;
@@ -823,7 +840,6 @@
           commentsList.innerHTML = '';
           snapshot.forEach(doc => {
             const comment = doc.data();
-            console.log('Comment:', comment);
             const commentElement = document.createElement('div');
             commentElement.className = 'comment';
             commentElement.innerHTML = `
@@ -868,6 +884,7 @@
         });
         commentInput.value = '';
         showToast('Comment added successfully!', 'success');
+        logEvent(analytics, 'add_comment', { movie_id: movieId });
       } catch (error) {
         console.error('Error adding comment:', error);
         showToast(`Error adding comment: ${error.message}`, 'error');
