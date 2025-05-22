@@ -274,7 +274,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-DC1T9B6B9W');
 </script>
 <body>
@@ -302,28 +301,28 @@
         <div class="form-group">
           <label for="genres">Genres (select multiple)</label>
           <select id="genres" name="genres" multiple>
-                     <option value="Action">Action</option>
-<option value="Adventure">Adventure</option>
-<option value="Animation">Animation</option>
-<option value="Biography">Biography</option>
-<option value="Comedy">Comedy</option>
-<option value="Crime">Crime</option>
-<option value="Documentary">Documentary</option>
-<option value="Drama">Drama</option>
-<option value="Family">Family</option>
-<option value="Fantasy">Fantasy</option>
-<option value="History">History</option>
-<option value="Horror">Horror</option>
-<option value="Musical">Musical</option>
-<option value="Mystery">Mystery</option>
-<option value="Romance">Romance</option>
-<option value="Sci-Fi">Sci-Fi</option>
-<option value="Sport">Sport</option>
-<option value="Thriller">Thriller</option>
-<option value="War">War</option>
-<option value="Western">Western</option>
-<option value="indian">Indian</option>
-          </select required>
+            <option value="Action">Action</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Animation">Animation</option>
+            <option value="Biography">Biography</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Crime">Crime</option>
+            <option value="Documentary">Documentary</option>
+            <option value="Drama">Drama</option>
+            <option value="Family">Family</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="History">History</option>
+            <option value="Horror">Horror</option>
+            <option value="Musical">Musical</option>
+            <option value="Mystery">Mystery</option>
+            <option value="Romance">Romance</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Sport">Sport</option>
+            <option value="Thriller">Thriller</option>
+            <option value="War">War</option>
+            <option value="Western">Western</option>
+            <option value="indian">Indian</option>
+          </select>
         </div>
         <div class="form-group">
           <label for="series">Series (optional)</label>
@@ -344,7 +343,7 @@
           <input type="number" id="rating" name="rating" min="0" max="10" step="0.1" required />
         </div>
         <div class="form-group">
-          <label for="posterImageUrl">Poster Image URL</label>
+          <label for="coverImageUrl">Poster Image URL</label>
           <input type="url" id="coverImageUrl" name="coverImageUrl" required />
         </div>
         <div class="form-group">
@@ -369,11 +368,11 @@
       <p>© 2025 KINAFLIX. All rights reserved.</p>
     </div>
     <a href="edit.html">
-  <button>MANAGE MOVIES</button>
-</a>
- <a href="https://analytics.google.com/analytics/web/#/p490006864/reports/intelligenthome?params=_u..nav%3Dmaui">
-  <button>SITE ANALYTICS</button>
-</a>
+      <button>MANAGE MOVIES</button>
+    </a>
+    <a href="https://analytics.google.com/analytics/web/#/p490006864/reports/intelligenthome?params=_u..nav%3Dmaui">
+      <button>SITE ANALYTICS</button>
+    </a>
   </footer>
 
   <script type="module">
@@ -435,6 +434,14 @@
 
       movieForm.addEventListener('submit', handleFormSubmit);
       addSeriesBtn.addEventListener('click', createSeries);
+
+      // Enforce uppercase input in real-time
+      document.getElementById('title').addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+      });
+      document.getElementById('umusobanuzi').addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+      });
     }
 
     function updateAuthUI(user) {
@@ -511,7 +518,7 @@
       e.preventDefault();
       showLoading();
       try {
-        const title = document.getElementById('title').value.trim();
+        const title = document.getElementById('title').value.trim().toUpperCase();
         const description = document.getElementById('description').value.trim();
         const genres = Array.from(document.getElementById('genres').selectedOptions).map(option => option.value);
         const seriesId = document.getElementById('series').value || null;
@@ -520,7 +527,7 @@
         const coverImageUrl = document.getElementById('coverImageUrl').value.trim();
         const googleDriveLink = document.getElementById('googleDriveLink').value.trim();
         const youtubeTrailerUrl = document.getElementById('youtubeTrailerUrl').value.trim();
-        const umusobanuzi = document.getElementById('umusobanuzi').value.trim();
+        const umusobanuzi = document.getElementById('umusobanuzi').value.trim().toUpperCase();
 
         await addDoc(collection(db, 'movies'), {
           title,
