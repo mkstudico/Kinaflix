@@ -546,6 +546,7 @@
     const shareBtn = document.getElementById('share-btn');
     const commentInput = document.getElementById('comment-input');
     const submitCommentBtn = document.getElementById('submit-comment');
+    const commentsList = document.getElementById('comments-list');
     const seriesSection = document.getElementById('series-section');
     const seriesTitle = document.getElementById('series-title');
     const seriesMovies = document.getElementById('series-movies');
@@ -566,23 +567,21 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    function formatEmail(email) {
+      if (email && email.includes('@gmail.com')) {
+        return email.replace('@gmail.com', '');
+      }
+      return email || 'Anonymous';
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       loadMovieData();
 
       const watchHandler = () => {
-        if (currentMovie.googleDriveLink) {
-          let playableLink = currentMovie.googleDriveLink.includes('/view')
-            ? currentMovie.googleDriveLink.replace('/view', '/preview')
-            : currentMovie.googleDriveLink;
-          if (isMobile) {
-            const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
-            if (fileIdMatch && fileIdMatch[1]) {
-              playableLink = `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
-            }
-          }
-          window.open(playableLink, '_blank');
+        if (currentMovie) {
+          window.location.href = `watch.html?id=${movieId}`;
         } else {
-          showToast('Google Drive link not available.', 'error');
+          showToast('Movie data not loaded.', 'error');
         }
       };
 
@@ -739,7 +738,7 @@
           trailerContainer.innerHTML = `
             <iframe src="https://www.youtube.com/embed/${videoId}" 
                     frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen></iframe>
           `;
         } else {
@@ -814,24 +813,33 @@
           where('movieId', '==', movieId),
           orderBy('timestamp', 'desc')
         );
+        console.log('Fetching comments for movieId:', movieId);
         onSnapshot(q, (snapshot) => {
+          console.log('Comments snapshot size:', snapshot.size);
+          if (snapshot.empty) {
+            commentsList.innerHTML = '<p>No comments yet.</p>';
+            return;
+          }
           commentsList.innerHTML = '';
           snapshot.forEach(doc => {
             const comment = doc.data();
+            console.log('Comment:', comment);
             const commentElement = document.createElement('div');
             commentElement.className = 'comment';
             commentElement.innerHTML = `
-              <span class="user">${comment.userEmail || 'Anonymous'}</span>
+              <span class="user">${formatEmail(comment.userEmail)}</span>
               <p class="text">${comment.text}</p>
             `;
             commentsList.appendChild(commentElement);
           });
         }, (error) => {
-          console.error('Error loading comments:', error);
+          console.error('Error in comments snapshot:', error);
+          showToast(`Error loading comments: ${error.message}`, 'error');
           commentsList.innerHTML = '<p>Error loading comments.</p>';
         });
       } catch (error) {
-        console.error('Error setting up comments listener:', error);
+        console.error('Error setting up comments query:', error);
+        showToast(`Error setting up comments: ${error.message}`, 'error');
         commentsList.innerHTML = '<p>Error loading comments.</p>';
       }
     }
