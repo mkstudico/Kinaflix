@@ -148,17 +148,20 @@
       height: 150px;
     }
 
-    .form-group .series-input-group {
+    .form-group .series-input-group,
+    .form-group .umusobanuzi-input-group {
       display: flex;
       gap: 0.5rem;
       align-items: flex-end;
     }
 
-    .form-group .series-input {
+    .form-group .series-input,
+    .form-group .umusobanuzi-input {
       flex: 1;
     }
 
-    .form-group .add-series-btn {
+    .form-group .add-series-btn,
+    .form-group .add-umusobanuzi-btn {
       background-color: var(--primary);
       color: white;
       border: none;
@@ -169,7 +172,8 @@
       transition: background 0.3s ease;
     }
 
-    .form-group .add-series-btn:hover {
+    .form-group .add-series-btn:hover,
+    .form-group .add-umusobanuzi-btn:hover {
       background-color: #f40612;
     }
 
@@ -356,7 +360,13 @@
         </div>
         <div class="form-group">
           <label for="umusobanuzi">Umusobanuzi</label>
-          <input type="text" id="umusobanuzi" name="umusobanuzi" required />
+          <select id="umusobanuzi" name="umusobanuzi" required>
+            <option value="">Select Umusobanuzi</option>
+          </select>
+          <div class="umus06112024obanuzi-input-group">
+            <input type="text" id="new-umusobanuzi" class="umusobanuzi-input" placeholder="Enter new umusobanuzi..." />
+            <button type="button" id="add-umusobanuzi-btn" class="add-umusobanuzi-btn">Add Umusobanuzi</button>
+          </div>
         </div>
         <button type="submit" class="submit-btn">Add Movie</button>
       </form>
@@ -400,6 +410,9 @@
     const seriesSelect = document.getElementById('series');
     const newSeriesInput = document.getElementById('new-series');
     const addSeriesBtn = document.getElementById('add-series-btn');
+    const umusobanuziSelect = document.getElementById('umusobanuzi');
+    const newUmusobanuziInput = document.getElementById('new-umusobanuzi');
+    const addUmusobanuziBtn = document.getElementById('add-umusobanuzi-btn');
     const toast = document.createElement('div');
     toast.className = 'toast';
     document.body.appendChild(toast);
@@ -408,6 +421,7 @@
       initAuth();
       initUI();
       loadSeries();
+      loadUmusobanuzi();
     });
 
     function initAuth() {
@@ -434,12 +448,10 @@
 
       movieForm.addEventListener('submit', handleFormSubmit);
       addSeriesBtn.addEventListener('click', createSeries);
+      addUmusobanuziBtn.addEventListener('click', createUmusobanuzi);
 
-      // Enforce uppercase input in real-time
+      // Enforce uppercase input in real-time for title
       document.getElementById('title').addEventListener('input', (e) => {
-        e.target.value = e.target.value.toUpperCase();
-      });
-      document.getElementById('umusobanuzi').addEventListener('input', (e) => {
         e.target.value = e.target.value.toUpperCase();
       });
     }
@@ -505,10 +517,57 @@
         });
         showToast('Series added successfully', 'success');
         newSeriesInput.value = '';
-        await loadSeries(); // Refresh the series dropdown
-        seriesSelect.value = docRef.id; // Select the newly added series
+        await loadSeries();
+        seriesSelect.value = docRef.id;
       } catch (error) {
         showToast('Error adding series: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function loadUmusobanuzi() {
+      try {
+        const q = query(collection(db, 'movies'));
+        const querySnapshot = await getDocs(q);
+        const umusobanuziValues = [...new Set(
+          querySnapshot.docs
+            .map(doc => doc.data().umusobanuzi?.toUpperCase() || '')
+            .filter(value => value)
+        )].sort();
+        umusobanuziSelect.innerHTML = '<option value="">Select Umusobanuzi</option>';
+        umusobanuziValues.forEach(value => {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = value;
+          umusobanuziSelect.appendChild(option);
+        });
+      } catch (error) {
+        showToast('Error loading umusobanuzi values: ' + error.message, 'error');
+      }
+    }
+
+    async function createUmusobanuzi() {
+      const umusobanuziName = newUmusobanuziInput.value.trim().toUpperCase();
+      if (!umusobanuziName) {
+        showToast('Please enter an umusobanuzi name', 'error');
+        return;
+      }
+      showLoading();
+      try {
+        await addDoc(collection(db, 'movies'), {
+          title: 'TEMPORARY_MOVIE_' + Date.now(),
+          umusobanuzi: umusobanuziName,
+          dateAdded: new Date(),
+          views: 0,
+          isTemporary: true
+        });
+        showToast('Umusobanuzi added successfully', 'success');
+        newUmusobanuziInput.value = '';
+        await loadUmusobanuzi();
+        umusobanuziSelect.value = umusobanuziName;
+      } catch (error) {
+        showToast('Error adding umusobanuzi: ' + error.message, 'error');
       } finally {
         hideLoading();
       }
@@ -527,7 +586,7 @@
         const coverImageUrl = document.getElementById('coverImageUrl').value.trim();
         const googleDriveLink = document.getElementById('googleDriveLink').value.trim();
         const youtubeTrailerUrl = document.getElementById('youtubeTrailerUrl').value.trim();
-        const umusobanuzi = document.getElementById('umusobanuzi').value.trim().toUpperCase();
+        const umusobanuzi = document.getElementById('umusobanuzi').value;
 
         await addDoc(collection(db, 'movies'), {
           title,
@@ -546,7 +605,8 @@
 
         showToast('Movie added successfully', 'success');
         movieForm.reset();
-        seriesSelect.value = ''; // Reset series dropdown
+        seriesSelect.value = '';
+        umusobanuziSelect.value = '';
       } catch (error) {
         showToast('Error adding movie: ' + error.message, 'error');
       } finally {
