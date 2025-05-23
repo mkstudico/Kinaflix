@@ -1,0 +1,37 @@
+{
+    "name": "KINAFLIX",
+    "short_name": "Kina",
+    "description": "A movie streaming website, where you can watch kinyarwanda explained movies by famous explainer's like ROCKY,B THE GREAT,SANKRA,...",
+    "theme_color": "#f20202",
+    "background_color": "#000000",
+    "display": "standalone",
+    "orientation": "any",
+    "scope": "/index.html",
+    "start_url": "/https://kinaflix-fawn.vercel.app/index.html",
+    "icons": [
+        {
+            "src": "icons/icon_192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/icon_512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/maskable_192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/maskable_512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
