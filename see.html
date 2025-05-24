@@ -494,7 +494,9 @@
         <textarea id="comment-input" placeholder="Write a comment..."></textarea>
         <button id="submit-comment">Submit</button>
       </div>
-      <div class="comments-list" id="comments-list"></div>
+      <div class="comments-list" id="comments-list">
+        <p>Loading comments...</p>
+      </div>
     </div>
   </div>
 
@@ -520,7 +522,7 @@
     import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
 
     const firebaseConfig = {
-      apiKey: "AIyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
       databaseURL: "https://kinaflix-default-rtdb.firebaseio.com",
       projectId: "kinaflix",
@@ -718,7 +720,7 @@
           movieCard.className = 'series-movie-card';
           movieCard.setAttribute('data-movie-id', movie.id);
           movieCard.innerHTML = `
-            <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
+            <img src="${movie.posterImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
                  alt="${movie.title}" class="series-movie-poster" />
             <div class="series-movie-title">${movie.title}</div>
           `;
@@ -740,7 +742,7 @@
     }
 
     function renderMovieDetails() {
-      playerImage.src = currentMovie.coverImageUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80';
+      playerImage.src = currentMovie.posterImageUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80';
       movieTitle.textContent = currentMovie.title || 'N/A';
       movieMeta.innerHTML = `
         ${currentMovie.genres?.[0] || 'N/A'} |
@@ -826,20 +828,35 @@
 
     async function loadComments() {
       try {
+        if (!movieId) {
+          console.error('No movieId provided for comments query');
+          commentsList.innerHTML = '<p>Error: Invalid movie ID.</p>';
+          showToast('Cannot load comments: Invalid movie ID.', 'error');
+          return;
+        }
+
         const commentsRef = collection(db, 'comments');
         const q = query(
           commentsRef,
           where('movieId', '==', movieId),
           orderBy('timestamp', 'desc')
         );
+
         onSnapshot(q, (snapshot) => {
+          console.log('Comments snapshot received:', snapshot.size, 'documents');
           if (snapshot.empty) {
-            commentsList.innerHTML = '<p>No comments yet.</p>';
+            commentsList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
             return;
           }
-          commentsList.innerHTML = '';
+
+          commentsList.innerHTML = ''; // Clear loading message
           snapshot.forEach(doc => {
             const comment = doc.data();
+            console.log('Comment data:', comment);
+            if (!comment.text || !comment.userEmail) {
+              console.warn('Invalid comment data:', comment);
+              return;
+            }
             const commentElement = document.createElement('div');
             commentElement.className = 'comment';
             commentElement.innerHTML = `
@@ -850,13 +867,19 @@
           });
         }, (error) => {
           console.error('Error in comments snapshot:', error);
-          showToast(`Error loading comments: ${error.message}`, 'error');
-          commentsList.innerHTML = '<p>Error loading comments.</p>';
+          let errorMessage = 'Error loading comments.';
+          if (error.code === 'permission-denied') {
+            errorMessage = 'Permission denied: Cannot access comments.';
+          } else if (error.code === 'unavailable') {
+            errorMessage = 'Network error: Please check your connection.';
+          }
+          commentsList.innerHTML = `<p>${errorMessage}</p>`;
+          showToast(errorMessage, 'error');
         });
       } catch (error) {
         console.error('Error setting up comments query:', error);
-        showToast(`Error setting up comments: ${error.message}`, 'error');
-        commentsList.innerHTML = '<p>Error loading comments.</p>';
+        commentsList.innerHTML = '<p>Error setting up comments.</p>';
+        showToast('Error setting up comments: ' + error.message, 'error');
       }
     }
 
@@ -869,12 +892,18 @@
 
       const user = auth.currentUser;
       if (!user) {
-        showToast('Please log in to add a comment.', 'error');
+        showToast('Please log in to comment.', 'error');
         setTimeout(() => window.location.href = 'login.html', 1000);
         return;
       }
 
+      if (!movieId) {
+        showToast('Invalid movie ID. Cannot add comment.', 'error');
+        return;
+      }
+
       try {
+        console.log('Adding comment:', { movieId, userId: user.uid, text });
         await addDoc(collection(db, 'comments'), {
           movieId: movieId,
           userId: user.uid,
@@ -887,7 +916,13 @@
         logEvent(analytics, 'add_comment', { movie_id: movieId });
       } catch (error) {
         console.error('Error adding comment:', error);
-        showToast(`Error adding comment: ${error.message}`, 'error');
+        let errorMessage = 'Error adding comment.';
+        if (error.code === 'permission-denied') {
+          errorMessage = 'Permission denied: Cannot add comment.';
+        } else if (error.code === 'unavailable') {
+          errorMessage = 'Network error: Please check your connection.';
+        }
+        showToast(errorMessage, 'error');
       }
     }
   </script>
