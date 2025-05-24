@@ -720,7 +720,7 @@
           movieCard.className = 'series-movie-card';
           movieCard.setAttribute('data-movie-id', movie.id);
           movieCard.innerHTML = `
-            <img src="${movie.posterImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
+            <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
                  alt="${movie.title}" class="series-movie-poster" />
             <div class="series-movie-title">${movie.title}</div>
           `;
