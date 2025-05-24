@@ -229,7 +229,7 @@ License
 This project is licensed under the MIT License. See the LICENSE file for details.
 Contact
 
-Project Maintainer: [Your Name] (your.email@example.com)
+Project Maintainer: MWIZERWA KAREKEZI Bertrand (mkstudio841@gmail.com)
 GitHub Issues: Report bugs or suggest features
 WhatsApp Group: Join for updates
 
