@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> REBA AGASOBANUYE | KINAFLIX </title>
+  <title>REBA AGASOBANUYE | KINAFLIX</title>
   <meta name="description" content="Reba filme zisobanuye zirenga 100, kubuntu na Kinaflix aho uri hose.">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
@@ -953,7 +953,7 @@
           <h3>Connect With Us</h3>
           <div class="social-links">
             <a href="https://www.youtube.com/@kinaflix"><i class="fab fa-youtube"></i></a>
-             <a href="https://www.instagram.com/kinaflix/"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.instagram.com/kinaflix/"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
       </div>
@@ -979,7 +979,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, getDocs, query, where, orderBy, limit, updateDoc, arrayUnion, arrayRemove, increment } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, query, where, orderBy, limit, updateDoc, arrayUnion, arrayRemove, increment, startAfter } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
@@ -1181,16 +1181,17 @@
     async function loadHomePage() {
       showLoading();
       try {
-        const [moviesData, genresData, featuredData] = await Promise.all([
+        const [moviesData, genresData, featuredData, newestData] = await Promise.all([
           getCachedData('movies', fetchMovies),
           getCachedData('genres', fetchGenres),
-          getCachedData('featured', fetchFeaturedMovies)
+          getCachedData('featured', fetchFeaturedMovies),
+          fetchNewestMovies() // Fetch fresh to ensure consistent display
         ]);
         movies = moviesData;
         genres = genresData;
         featuredMovies = featuredData;
         allYears = [...new Set(movies.map(movie => movie.releaseYear))].sort((a, b) => b - a);
-        renderHomePage();
+        renderHomePage(newestData);
         startSlideshow();
         hideLoading();
       } catch (error) {
@@ -1223,7 +1224,8 @@
           genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
           releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
           views: typeof doc.data().views === 'number' ? doc.data().views : 0,
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
+          timestamp: doc.data().dateAdded?.toDate() || new Date(),
+          seriesId: doc.data().seriesId || null
         }))
         .filter(movie => movie.title);
     }
@@ -1244,6 +1246,78 @@
         releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
         timestamp: doc.data().dateAdded?.toDate() || new Date()
       }));
+    }
+
+    async function fetchNewestMovies() {
+      let q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(16));
+      let querySnapshot = await getDocs(q);
+      let movies = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
+        releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
+        views: typeof doc.data().views === 'number' ? doc.data().views : 0,
+        timestamp: doc.data().dateAdded?.toDate() || new Date(),
+        seriesId: doc.data().seriesId || null
+      }));
+
+      // Group by series
+      const seriesGroups = new Map();
+      for (const movie of movies) {
+        const seriesKey = movie.seriesId || getTitlePrefix(movie.title);
+        if (!seriesGroups.has(seriesKey)) {
+          seriesGroups.set(seriesKey, []);
+        }
+        seriesGroups.get(seriesKey).push(movie);
+      }
+
+      // Randomly select one movie per series
+      const uniqueMovies = [];
+      for (const group of seriesGroups.values()) {
+        const randomMovie = group[Math.floor(Math.random() * group.length)];
+        uniqueMovies.push(randomMovie);
+        if (uniqueMovies.length >= 8) break;
+      }
+
+      // Fetch more if needed
+      while (uniqueMovies.length < 8 && querySnapshot.docs.length >= 16) {
+        q = query(
+          collection(db, 'movies'),
+          orderBy('dateAdded', 'desc'),
+          startAfter(querySnapshot.docs[querySnapshot.docs.length - 1]),
+          limit(16)
+        );
+        querySnapshot = await getDocs(q);
+        const moreMovies = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
+          releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
+          views: typeof doc.data().views === 'number' ? doc.data().views : 0,
+          timestamp: doc.data().dateAdded?.toDate() || new Date(),
+          seriesId: doc.data().seriesId || null
+        }));
+        for (const movie of moreMovies) {
+          const seriesKey = movie.seriesId || getTitlePrefix(movie.title);
+          if (!seriesGroups.has(seriesKey)) {
+            seriesGroups.set(seriesKey, []);
+          }
+          seriesGroups.get(seriesKey).push(movie);
+          if (!uniqueMovies.some(m => (m.seriesId || getTitlePrefix(m.title)) === seriesKey)) {
+            const randomMovie = seriesGroups.get(seriesKey)[Math.floor(Math.random() * seriesGroups.get(seriesKey).length)];
+            uniqueMovies.push(randomMovie);
+          }
+          if (uniqueMovies.length >= 8) break;
+        }
+      }
+
+      return uniqueMovies.slice(0, 8);
+    }
+
+    function getTitlePrefix(title) {
+      // Extract first 70% of title to identify series
+      const words = title.split(' ').slice(0, Math.ceil(title.split(' ').length * 0.7));
+      return words.join(' ').toLowerCase().replace(/[^a-z0-9]/g, '');
     }
 
     function startSlideshow() {
@@ -1275,7 +1349,7 @@
       });
     }
 
-    async function renderHomePage() {
+    async function renderHomePage(newestMovies) {
       let sortField = 'releaseYear';
       let sortOrder = 'desc';
       if (currentUser) {
@@ -1304,6 +1378,18 @@
           `).join('')}
         </section>
       ` : '';
+
+      // Newest Releases Section
+      if (newestMovies && newestMovies.length > 0) {
+        html += `
+          <section class="section">
+            <h2 class="section-title">Newest Releases <a href="#" class="view-all" data-sort="newest">See All</a></h2>
+            <div class="movies-grid">
+              ${newestMovies.map(movie => renderMovieCard(movie)).join('')}
+            </div>
+          </section>
+        `;
+      }
 
       if (movies.length > 0) {
         const latestMovies = sortMovies([...movies], 'releaseYear', 'desc').slice(0, 5);
@@ -1397,6 +1483,7 @@
         case 'rating': sorted.sort((a, b) => isAsc ? (a.rating || 0) - (b.rating || 0) : (b.rating || 0) - (a.rating || 0)); break;
         case 'releaseYear': sorted.sort((a, b) => isAsc ? (a.releaseYear || 0) - (b.releaseYear || 0) : (b.releaseYear || 0) - (a.releaseYear || 0)); break;
         case 'views': sorted.sort((a, b) => isAsc ? (a.views || 0) - (b.views || 0) : (b.views || 0) - (a.views || 0)); break;
+        case 'dateAdded': sorted.sort((a, b) => isAsc ? a.timestamp - b.timestamp : b.timestamp - a.timestamp); break;
         default: sorted.sort((a, b) => isAsc ? (a.releaseYear || 0) - (b.releaseYear || 0) : (b.releaseYear || 0) - (a.releaseYear || 0));
       }
       return sorted;
@@ -1607,29 +1694,54 @@
       showLoading();
       try {
         let q;
+        let sortField = 'releaseYear';
+        let allMovies = [];
         if (sort === 'popular') {
           q = query(collection(db, 'movies'), orderBy('views', 'desc'));
+          sortField = 'views';
+        } else if (sort === 'newest') {
+          q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'));
+          sortField = 'dateAdded';
         } else {
           q = query(collection(db, 'movies'), orderBy('releaseYear', 'desc'));
         }
-        const querySnapshot = await getDocs(q);
-        let allMovies = querySnapshot.docs.map(doc => ({ 
+        let querySnapshot = await getDocs(q);
+        allMovies = querySnapshot.docs.map(doc => ({ 
           id: doc.id, 
           ...doc.data(),
           genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
           releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
           views: typeof doc.data().views === 'number' ? doc.data().views : 0,
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
+          timestamp: doc.data().dateAdded?.toDate() || new Date(),
+          seriesId: doc.data().seriesId || null
         }));
+
+        // Deduplicate series for 'newest' sort with random selection
+        if (sort === 'newest') {
+          const seriesGroups = new Map();
+          for (const movie of allMovies) {
+            const seriesKey = movie.seriesId || getTitlePrefix(movie.title);
+            if (!seriesGroups.has(seriesKey)) {
+              seriesGroups.set(seriesKey, []);
+            }
+            seriesGroups.get(seriesKey).push(movie);
+          }
+          allMovies = [];
+          for (const group of seriesGroups.values()) {
+            const randomMovie = group[Math.floor(Math.random() * group.length)];
+            allMovies.push(randomMovie);
+          }
+        }
+
         if (currentUser) {
           const userRef = doc(db, 'users', currentUser.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const preferences = userSnap.data().displayPreferences || {};
-            allMovies = sortMovies(allMovies, preferences.sortField || (sort === 'popular' ? 'views' : 'releaseYear'), preferences.sortOrder || 'desc');
+            allMovies = sortMovies(allMovies, preferences.sortField || sortField, preferences.sortOrder || 'desc');
           }
         }
-        renderMovieList(allMovies, sort === 'popular' ? 'Popular Movies' : 'Latest Movies');
+        renderMovieList(allMovies, sort === 'popular' ? 'Popular Movies' : sort === 'newest' ? 'Newest Releases' : 'Latest Movies');
         hideLoading();
       } catch (error) {
         showToast('Error loading movies: ' + error.message, 'error');
@@ -1688,8 +1800,8 @@
             docSnap.exists() ? { 
               id: docSnap.id, 
               ...docSnap.data(),
-              genres: Array.isArray(docSnap.data().genres) ? doc.data().genres : [],
-              releaseYear: typeof docSnap.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
+              genres: Array.isArray(docSnap.data().genres) ? docSnap.data().genres : [],
+              releaseYear: typeof docSnap.data().releaseYear === 'number' ? docSnap.data().releaseYear : 0,
               timestamp: docSnap.data().dateAdded?.toDate() || new Date()
             } : null
           )
@@ -1734,8 +1846,8 @@
             docSnap.exists() ? { 
               id: docSnap.id, 
               ...docSnap.data(),
-              genres: Array.isArray(docSnap.data().genres) ? doc.data().genres : [],
-              releaseYear: typeof docSnap.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
+              genres: Array.isArray(docSnap.data().genres) ? docSnap.data().genres : [],
+              releaseYear: typeof docSnap.data().releaseYear === 'number' ? docSnap.data().releaseYear : 0,
               timestamp: docSnap.data().dateAdded?.toDate() || new Date()
             } : null
           )
