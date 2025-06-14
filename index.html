@@ -36,6 +36,7 @@
       --content-box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
       --whatsapp-green: #25D366;
       --whatsapp-dark-green: #128C7E;
+      --taskbar-height: 60px;
     }
 
     * {
@@ -742,77 +743,98 @@
 
     @media (max-width: 768px) {
       .sidebar {
-        transform: translateX(-100%);
-        width: 280px;
+        width: 100%;
+        height: var(--taskbar-height);
+        bottom: 0;
+        top: auto;
+        left: 0;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
         background: var(--dark);
-        justify-content: flex-start;
-        align-items: flex-start;
-        padding: 2rem 1.5rem;
+        z-index: 1000;
+        position: fixed;
       }
+
       body.light-mode .sidebar {
         background: var(--light);
       }
-      .sidebar.show {
-        transform: translateX(0);
+
+      .sidebar-content {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+        padding: 0.5rem 1rem;
+        border-radius: 0;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+        gap: 0.5rem;
       }
+
+      .nav-menu {
+        flex-direction: row;
+        gap: 1rem;
+        justify-content: center;
+        flex-grow: 1;
+      }
+
+      .nav-item {
+        font-size: 1.2rem;
+        padding: 0.5rem;
+      }
+
+      .nav-divider {
+        width: 1px;
+        height: 20px;
+        margin: 0 0.5rem;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .sidebar-footer {
+        margin-left: auto;
+      }
+
+      .theme-toggle {
+        font-size: 1.2rem;
+        padding: 0.5rem;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+      }
+
       .main-content {
         margin-left: 0;
+        padding-bottom: var(--taskbar-height);
       }
-      .sidebar-content {
-        width: 100%;
-        border-radius: 12px;
-        padding: 1.5rem;
-        align-items: flex-start;
+
+      .mobile-menu-btn {
+        display: none;
       }
-      .nav-menu {
-        width: 100%;
-        gap: 0.8rem;
-      }
-      .nav-item {
-        font-size: 1.5rem;
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 0;
-      }
-      .nav-divider {
-        width: 80%;
-        margin: 0.4rem 0;
-      }
-      .sidebar-footer {
-        width: 100%;
-      }
-      .theme-toggle {
-        font-size: 1.5rem;
-        padding: 0.5rem 0;
-      }
+
       .footer-content {
         grid-template-columns: repeat(2, 1fr);
       }
-      .mobile-menu-btn {
-        display: block;
-        background: none;
-        border: none;
-        color: var(--light);
-        font-size: 1.5rem;
-        cursor: pointer;
-        margin-right: auto;
-      }
-      body.light-mode .mobile-menu-btn {
-        color: var(--dark);
-      }
+
       .hero-slideshow {
         height: 60vh;
         padding: 0 1rem;
       }
+
       .hero-slide {
         padding: 0 1rem;
       }
+
       .hero-content h1 {
         font-size: 2.5rem;
       }
+
       .hero-content p {
         font-size: 1rem;
       }
+
       .watch-btn, .info-btn {
         padding: 0.6rem 1.5rem;
         font-size: 1rem;
@@ -874,6 +896,22 @@
       }
       .footer-content {
         grid-template-columns: 1fr;
+      }
+      .sidebar-content {
+        padding: 0.5rem;
+      }
+      .nav-item {
+        font-size: 1rem;
+      }
+      .theme-toggle {
+        font-size: 1rem;
+      }
+      .logo {
+        font-size: 1.2rem;
+      }
+      .nav-divider {
+        height: 16px;
+        margin: 0 0.3rem;
       }
     }
   </style>
@@ -1002,8 +1040,6 @@
     toast.className = 'toast';
     document.body.appendChild(toast);
     const authButtons = document.getElementById('auth-buttons');
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const sidebar = document.querySelector('.sidebar');
 
     let currentUser = null;
     let movies = [];
@@ -1076,16 +1112,6 @@
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             link.classList.add('active');
           }
-        }
-      });
-
-      mobileMenuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('show');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-          sidebar.classList.remove('show');
         }
       });
     }
@@ -1185,7 +1211,7 @@
           getCachedData('movies', fetchMovies),
           getCachedData('genres', fetchGenres),
           getCachedData('featured', fetchFeaturedMovies),
-          fetchNewestMovies() // Fetch fresh to ensure consistent display
+          fetchNewestMovies()
         ]);
         movies = moviesData;
         genres = genresData;
