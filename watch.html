@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play Movie - KINAFLIX</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #e50914;
+      --dark: #000000;
+      --light: #f5f5f5;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--dark);
+      color: var(--light);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .back-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #f40612 !important;
+    }
+
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    .video-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: var(--dark);
+      color: var(--primary);
+      text-align: center;
+      padding: 2rem;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="button back-button is-rounded">
+    <span class="icon">
+      <i class="fas fa-arrow-left"></i>
+    </span>
+    <span>BACK</span>
+  </a>
+
+  <div class="video-container" id="video-container">
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+    import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      authDomain: "kinaflix.firebaseapp.com",
+      databaseURL: "https://kinaflix-default-rtdb.firebaseio.com",
+      projectId: "kinaflix",
+      storageBucket: "kinaflix.firebasestorage.app",
+      messagingSenderId: "318239806217",
+      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+      measurementId: "G-DC1T9B6B9W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const analytics = getAnalytics(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieId = urlParams.get('movieId');
+    const streamingLink = urlParams.get('streamingLink');
+    const videoContainer = document.getElementById('video-container');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    async function loadMovie() {
+      if (!movieId || !streamingLink) {
+        showError("Invalid movie ID or streaming link");
+        return;
+      }
+
+      try {
+        // Decode streaming link
+        const decodedStreamingLink = decodeURIComponent(streamingLink);
+        
+        // Check for Google Drive link
+        const googleDriveMatch = decodedStreamingLink.match(/\/d\/(.+?)\//);
+        if (!googleDriveMatch || !googleDriveMatch[1]) {
+          showError("Only Google Drive links are supported");
+          return;
+        }
+
+        // Fetch movie data from Firestore
+        const movieRef = doc(db, 'movies', movieId);
+        const movieSnap = await getDoc(movieRef);
+
+        if (!movieSnap.exists()) {
+          throw new Error('Movie not found');
+        }
+
+        const movieData = movieSnap.data();
+        document.title = `${movieData.title || 'Movie'} - KINAFLIX`;
+
+        // Create Google Drive embed
+        const embedUrl = `https://drive.google.com/file/d/${googleDriveMatch[1]}/preview`;
+        videoContainer.innerHTML = `
+          <iframe src="${embedUrl}" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
+          <div class="loading-overlay" id="loading-overlay">
+            <div class="loading-spinner"></div>
+          </div>
+        `;
+
+        // Reattach loading overlay
+        const newLoadingOverlay = document.getElementById('loading-overlay');
+        const iframe = videoContainer.querySelector('iframe');
+
+        iframe.onload = () => {
+          newLoadingOverlay.style.display = 'none';
+          logEvent(analytics, 'play_movie', { 
+            movie_id: movieId, 
+            title: movieData.title 
+          });
+          
+          // Try to autoplay
+          try {
+            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+          } catch (e) {
+            console.log("Autoplay not supported");
+          }
+        };
+
+        iframe.onerror = () => {
+          showError("Failed to load video");
+        };
+
+      } catch (error) {
+        console.error('Error loading movie:', error);
+        showError(error.message);
+      }
+    }
+
+    function showError(message) {
+      videoContainer.innerHTML = `
+        <div class="error-message">
+          <h1 class="title is-3 has-text-danger">⚠️ Error</h1>
+          <p class="subtitle is-5">${message}</p>
+          <a href="index.html" class="button is-danger is-rounded mt-4">
+            <span class="icon">
+              <i class="fas fa-arrow-left"></i>
+            </span>
+            <span>Go Back</span>
+          </a>
+        </div>
+      `;
+      loadingOverlay.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMovie);
+  </script>
+</body>
+</html>
