@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html translate="no" lang="kn">
+<html translate="no">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -200,19 +200,19 @@
       border: 1px solid rgba(0, 255, 0, 0.4);
     }
 
-    .series-section {
+    .series-section, .popular-movies-section {
       padding: 1rem;
       background: var(--dark-gray);
       display: none; /* Hidden by default on mobile */
     }
 
-    .series-title {
+    .series-title, .popular-movies-title {
       font-size: 1.3rem;
       color: var(--primary);
       margin-bottom: 1rem;
     }
 
-    .series-movies {
+    .series-movies, .popular-movies-grid {
       display: flex;
       overflow-x: auto;
       gap: 0.5rem;
@@ -221,20 +221,20 @@
       scrollbar-color: var(--primary) var(--dark-gray);
     }
 
-    .series-movies::-webkit-scrollbar {
+    .series-movies::-webkit-scrollbar, .popular-movies-grid::-webkit-scrollbar {
       height: 6px;
     }
 
-    .series-movies::-webkit-scrollbar-track {
+    .series-movies::-webkit-scrollbar-track, .popular-movies-grid::-webkit-scrollbar-track {
       background: var(--dark-gray);
     }
 
-    .series-movies::-webkit-scrollbar-thumb {
+    .series-movies::-webkit-scrollbar-thumb, .popular-movies-grid::-webkit-scrollbar-thumb {
       background: var(--primary);
       border-radius: 4px;
     }
 
-    .series-movie-card {
+    .series-movie-card, .popular-movie-card {
       flex: 0 0 auto;
       width: 120px;
       background: rgba(255, 255, 255, 0.1);
@@ -244,17 +244,17 @@
       transition: transform 0.3s ease;
     }
 
-    .series-movie-card:hover {
+    .series-movie-card:hover, .popular-movie-card:hover {
       transform: translateY(-5px);
     }
 
-    .series-movie-poster {
+    .series-movie-poster, .popular-movie-poster {
       width: 100%;
       height: 160px;
       object-fit: cover;
     }
 
-    .series-movie-title {
+    .series-movie-title, .popular-movie-title {
       padding: 0.5rem;
       font-size: 0.8rem;
       text-align: center;
@@ -414,7 +414,7 @@
         font-size: 1rem;
       }
 
-      .series-section {
+      .series-section, .popular-movies-section {
         display: block;
       }
 
@@ -463,7 +463,7 @@
         <p class="movie-description" id="movie-description"></p>
         <div class="action-buttons" id="action-buttons">
           <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
-          <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> NZAYIREBA Ubutaha</button>
+          <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> NZAYIREBA UBUTAHA</button>
           <button class="action-btn download" id="download-btn"><i class="fas fa-download"></i> Download</button>
           <button class="action-btn whatsapp" id="whatsapp-btn"><i class="fab fa-whatsapp"></i> MENYA UTUGEZWEHO</button>
           <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Sangiza</button>
@@ -494,6 +494,11 @@
     </div>
   </div>
 
+  <div class="popular-movies-section" id="popular-movies-section">
+    <h2 class="popular-movies-title">Reba:</h2>
+    <div class="popular-movies-grid" id="popular-movies-grid"></div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import {
@@ -510,7 +515,8 @@
       where,
       getDocs,
       serverTimestamp,
-      orderBy
+      orderBy,
+      limit
     } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
     import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
@@ -553,6 +559,8 @@
     const seriesTitle = document.getElementById('series-title');
     const seriesMovies = document.getElementById('series-movies');
     const trailerContainer = document.getElementById('trailer-container');
+    const popularMoviesSection = document.getElementById('popular-movies-section');
+    const popularMoviesGrid = document.getElementById('popular-movies-grid');
 
     let currentMovie = null;
     let currentUser = null;
@@ -578,12 +586,12 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       loadMovieData();
+      loadPopularMovies();
 
       const watchHandler = () => {
         if (currentMovie) {
           const streamingLink = currentMovie.googleDriveLink || currentMovie.streamingLink;
           if (streamingLink) {
-            // Encode the streaming link for URL safety
             const encodedLink = encodeURIComponent(streamingLink);
             window.location.href = `watch.html?movieId=${movieId}&streamingLink=${encodedLink}`;
             logEvent(analytics, 'watch_movie', { movie_id: movieId, title: currentMovie.title });
@@ -686,9 +694,98 @@
         } else {
           seriesSection.style.display = 'none';
         }
+        await loadPopularMovies();
       } catch (error) {
         showToast(`Error loading movie: ${error.message}`, 'error');
         setTimeout(() => window.location.href = 'index.html', 1000);
+      }
+    }
+
+    async function loadPopularMovies() {
+      try {
+        let movies = [];
+        // Fetch popular movies (by views)
+        const popularQuery = query(
+          collection(db, 'movies'),
+          orderBy('views', 'desc'),
+          limit(50)
+        );
+        const popularSnap = await getDocs(popularQuery);
+        movies = movies.concat(popularSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })));
+
+        // Fetch movies by genres if currentMovie has genres
+        if (currentMovie?.genres?.length > 0) {
+          const genresQuery = query(
+            collection(db, 'movies'),
+            where('genres', 'array-contains-any', currentMovie.genres),
+            limit(50)
+          );
+          const genresSnap = await getDocs(genresQuery);
+          movies = movies.concat(genresSnap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })));
+        }
+
+        // Fetch random movies
+        const randomQuery = query(
+          collection(db, 'movies'),
+          limit(50)
+        );
+        const randomSnap = await getDocs(randomQuery);
+        movies = movies.concat(randomSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })));
+
+        // Remove duplicates and current movie
+        const movieMap = new Map();
+        movies.forEach(movie => {
+          if (movie.id !== movieId) {
+            movieMap.set(movie.id, movie);
+          }
+        });
+        movies = Array.from(movieMap.values());
+
+        // Shuffle and take 20
+        movies = movies.sort(() => Math.random() - 0.5).slice(0, 20);
+
+        popularMoviesGrid.innerHTML = '';
+        if (movies.length === 0) {
+          popularMoviesSection.style.display = 'none';
+          return;
+        }
+
+        movies.forEach(movie => {
+          const movieCard = document.createElement('div');
+          movieCard.className = 'popular-movie-card';
+          movieCard.setAttribute('data-movie-id', movie.id);
+          movieCard.innerHTML = `
+            <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
+                 alt="${movie.title}" class="popular-movie-poster" />
+            <div class="popular-movie-title">${movie.title}</div>
+          `;
+          popularMoviesGrid.appendChild(movieCard);
+          movieCard.addEventListener('click', () => {
+            window.location.href = `see.html?id=${movie.id}`;
+            logEvent(analytics, 'view_popular_movie', { movie_id: movie.id, title: movie.title });
+          });
+          if (isMobile) {
+            movieCard.addEventListener('touchstart', (e) => {
+              e.preventDefault();
+              window.location.href = `see.html?id=${movie.id}`;
+              logEvent(analytics, 'view_popular_movie', { movie_id: movie.id, title: movie.title });
+            });
+          }
+        });
+        popularMoviesSection.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading popular movies:', error);
+        popularMoviesSection.style.display = 'none';
+        showToast('Error loading recommended movies.', 'error');
       }
     }
 
@@ -717,7 +814,7 @@
           movieCard.className = 'series-movie-card';
           movieCard.setAttribute('data-movie-id', movie.id);
           movieCard.innerHTML = `
-            <img src="${movie.posterImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
+            <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
                  alt="${movie.title}" class="series-movie-poster" />
             <div class="series-movie-title">${movie.title}</div>
           `;
@@ -782,7 +879,7 @@
             watchlistBtn.innerHTML = '<i class="fas fa-check"></i> Remove from watchlist';
           } else {
             watchlistBtn.classList.remove('watchlist-added');
-            watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to watchlist';
+            watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> NZAYIREBA UBUTAHA';
           }
           watchlistBtn.onclick = toggleWatchlist;
         }, (error) => {
@@ -791,7 +888,7 @@
         });
       } else {
         watchlistBtn.classList.remove('watchlist-added');
-        watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> Add to watchlist (Log in to use)';
+        watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> NZAYIREBA UBUTAHA (Log in to use)';
         watchlistBtn.onclick = () => showToast('Please log in to add to watchlist.', 'error');
       }
     }
@@ -846,7 +943,7 @@
             return;
           }
 
-          commentsList.innerHTML = ''; // Clear loading message
+          commentsList.innerHTML = '';
           snapshot.forEach(doc => {
             const comment = doc.data();
             console.log('Comment data:', comment);
