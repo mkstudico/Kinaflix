@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Play Movie - KINAFLIX</title>
+  <title>Loading... | KINAFLIX</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     :root {
       --primary: #e50914;
+      --ad-primary: #4285f4;
       --dark: #000000;
       --light: #f5f5f5;
+      --gray-text: #888;
     }
 
     body {
@@ -20,6 +22,7 @@
       color: var(--light);
       height: 100vh;
       overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
     }
 
     .back-button {
@@ -31,10 +34,6 @@
       color: white;
       border: none;
       transition: all 0.3s ease;
-    }
-
-    .back-button:hover {
-      background-color: #f40612 !important;
     }
 
     .video-container {
@@ -74,37 +73,67 @@
       animation: spin 1s linear infinite;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .ad-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      height: 50px;
+      background: rgba(0, 0, 0, 0.8);
+      border-left: 3px solid var(--ad-primary);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      z-index: 200;
+      animation: slideIn 0.3s ease-out;
+      overflow: hidden;
+      cursor: pointer;
     }
 
-    .error-message {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: var(--dark);
-      color: var(--primary);
-      text-align: center;
-      padding: 2rem;
-      z-index: 100;
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    .ad-notification img {
+      height: 40px;
+      width: 40px;
+      object-fit: cover;
+      margin-right: 10px;
+      border-radius: 4px;
+    }
+
+    .ad-notification-content {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ad-notification-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 2px;
+    }
+
+    .ad-notification-description {
+      font-size: 10px;
+      color: var(--gray-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ad-notification-close {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      margin-left: 5px;
     }
   </style>
 </head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DC1T9B6B9W"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DC1T9B6B9W');
-</script>
 <body>
   <a href="index.html" class="button back-button is-rounded">
     <span class="icon">
@@ -120,114 +149,176 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
-    import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
+    // Configuration
+    const AD_DISPLAY_DURATION = 7000; // 7 seconds
+    const INITIAL_AD_DELAY = 60000;   // 1 minute for first ad
+    const AD_INTERVAL = 420000;       // 7 minutes for subsequent ads
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
-      authDomain: "kinaflix.firebaseapp.com",
-      databaseURL: "https://kinaflix-default-rtdb.firebaseio.com",
-      projectId: "kinaflix",
-      storageBucket: "kinaflix.firebasestorage.app",
-      messagingSenderId: "318239806217",
-      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
-      measurementId: "G-DC1T9B6B9W"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const analytics = getAnalytics(app);
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const movieId = urlParams.get('movieId');
-    const streamingLink = urlParams.get('streamingLink');
-    const videoContainer = document.getElementById('video-container');
-    const loadingOverlay = document.getElementById('loading-overlay');
-
-    async function loadMovie() {
-      if (!movieId || !streamingLink) {
-        showError("Invalid movie ID or streaming link");
-        return;
-      }
-
+    // Core player functionality
+    const initPlayer = async () => {
       try {
-        // Decode streaming link
-        const decodedStreamingLink = decodeURIComponent(streamingLink);
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('movieId');
+        const streamingLink = urlParams.get('streamingLink');
         
-        // Check for Google Drive link
-        const googleDriveMatch = decodedStreamingLink.match(/\/d\/(.+?)\//);
-        if (!googleDriveMatch || !googleDriveMatch[1]) {
-          showError("Only Google Drive links are supported");
-          return;
+        if (!movieId || !streamingLink) {
+          throw new Error("Invalid movie ID or streaming link");
         }
 
-        // Fetch movie data from Firestore
-        const movieRef = doc(db, 'movies', movieId);
-        const movieSnap = await getDoc(movieRef);
-
-        if (!movieSnap.exists()) {
-          throw new Error('Movie not found');
-        }
-
-        const movieData = movieSnap.data();
-        document.title = `${movieData.title || 'Movie'} - KINAFLIX`;
-
-        // Create Google Drive embed
-        const embedUrl = `https://drive.google.com/file/d/${googleDriveMatch[1]}/preview`;
+        // Show loading immediately
+        document.getElementById('loading-overlay').style.display = 'flex';
+        
+        // Initialize video player
+        const decodedLink = decodeURIComponent(streamingLink);
+        const googleDriveMatch = decodedLink.match(/\/d\/(.+?)\//);
+        if (!googleDriveMatch) throw new Error("Only Google Drive links are supported");
+        
+        // Load movie data to set page title
+        const movieData = await loadMovieData(movieId);
+        document.title = `${movieData.title} | KINAFLIX`;
+        
+        const videoContainer = document.getElementById('video-container');
         videoContainer.innerHTML = `
-          <iframe src="${embedUrl}" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
-          <div class="loading-overlay" id="loading-overlay">
-            <div class="loading-spinner"></div>
-          </div>
+          <iframe src="https://drive.google.com/file/d/${googleDriveMatch[1]}/preview" 
+                  frameborder="0" 
+                  allow="autoplay; fullscreen; encrypted-media" 
+                  allowfullscreen>
+          </iframe>
         `;
-
-        // Reattach loading overlay
-        const newLoadingOverlay = document.getElementById('loading-overlay');
-        const iframe = videoContainer.querySelector('iframe');
-
-        iframe.onload = () => {
-          newLoadingOverlay.style.display = 'none';
-          logEvent(analytics, 'play_movie', { 
-            movie_id: movieId, 
-            title: movieData.title 
-          });
-          
-          // Try to autoplay
-          try {
-            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-          } catch (e) {
-            console.log("Autoplay not supported");
-          }
+        
+        // Initialize ad system after video starts loading
+        initAdSystem();
+        
+        // Hide loading when video loads
+        videoContainer.querySelector('iframe').onload = () => {
+          document.getElementById('loading-overlay').style.display = 'none';
         };
-
-        iframe.onerror = () => {
-          showError("Failed to load video");
-        };
-
+        
       } catch (error) {
-        console.error('Error loading movie:', error);
         showError(error.message);
       }
-    }
+    };
 
-    function showError(message) {
-      videoContainer.innerHTML = `
-        <div class="error-message">
-          <h1 class="title is-3 has-text-danger">⚠️ Error</h1>
-          <p class="subtitle is-5">${message}</p>
-          <a href="index.html" class="button is-danger is-rounded mt-4">
-            <span class="icon">
-              <i class="fas fa-arrow-left"></i>
-            </span>
+    // Load movie data from Firestore
+    const loadMovieData = async (movieId) => {
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js');
+      const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js');
+      
+      const app = initializeApp({
+        apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+        authDomain: "kinaflix.firebaseapp.com",
+        projectId: "kinaflix",
+        storageBucket: "kinaflix.appspot.com",
+        messagingSenderId: "318239806217",
+        appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
+      });
+      
+      const db = getFirestore(app);
+      const docSnap = await getDoc(doc(db, 'movies', movieId));
+      
+      if (!docSnap.exists()) {
+        throw new Error('Movie not found');
+      }
+      
+      return docSnap.data();
+    };
+
+    // Ad management system
+    const initAdSystem = async () => {
+      try {
+        // Load Firebase dynamically
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js');
+        const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js');
+        
+        const app = initializeApp({
+          apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+          authDomain: "kinaflix.firebaseapp.com",
+          projectId: "kinaflix",
+          storageBucket: "kinaflix.appspot.com",
+          messagingSenderId: "318239806217",
+          appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
+        });
+        
+        const db = getFirestore(app);
+        const adsSnapshot = await getDocs(collection(db, 'ads'));
+        const ads = adsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(ad => !ad.category || ad.category === 'Movie');
+        
+        if (ads.length > 0) {
+          // Show random ad after 1 minute
+          setTimeout(() => showRandomAd(ads), INITIAL_AD_DELAY);
+          
+          // Then show random ads every 7 minutes
+          setInterval(() => showRandomAd(ads), AD_INTERVAL);
+        }
+      } catch (error) {
+        console.error('Ad system error:', error);
+      }
+    };
+
+    const showRandomAd = (ads) => {
+      const ad = ads[Math.floor(Math.random() * ads.length)];
+      const adElement = document.createElement('div');
+      adElement.className = 'ad-notification';
+      adElement.innerHTML = `
+        <img src="${ad.imageUrl}" alt="${ad.name}" loading="lazy">
+        <div class="ad-notification-content">
+          <div class="ad-notification-title">${ad.name}</div>
+          <div class="ad-notification-description">${ad.description}</div>
+        </div>
+        <button class="ad-notification-close"><i class="fas fa-times"></i></button>
+      `;
+      
+      // Make entire ad clickable
+      adElement.addEventListener('click', (e) => {
+        if (!e.target.closest('.ad-notification-close')) {
+          window.open(ad.link, '_blank');
+        }
+      });
+      
+      document.body.appendChild(adElement);
+      
+      // Auto-remove after display duration
+      setTimeout(() => {
+        adElement.remove();
+      }, AD_DISPLAY_DURATION);
+      
+      // Close button functionality
+      adElement.querySelector('.ad-notification-close').addEventListener('click', (e) => {
+        e.stopPropagation();
+        adElement.remove();
+      });
+    };
+
+    const showError = (message) => {
+      const container = document.getElementById('video-container');
+      container.innerHTML = `
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#000;color:#e50914;text-align:center;padding:2rem;z-index:100;">
+          <h1 style="font-size:1.5rem;margin-bottom:1rem;">⚠️ Error</h1>
+          <p style="margin-bottom:1.5rem;">${message}</p>
+          <a href="index.html" style="background:#e50914;color:white;padding:0.5rem 1rem;border-radius:4px;text-decoration:none;">
+            <span style="margin-right:0.5rem;"><i class="fas fa-arrow-left"></i></span>
             <span>Go Back</span>
           </a>
         </div>
       `;
-      loadingOverlay.style.display = 'none';
-    }
+      document.getElementById('loading-overlay').style.display = 'none';
+      document.title = `Error | KINAFLIX`;
+      
+      // Load Font Awesome for error page if needed
+      if (!document.querySelector('.fa-arrow-left')) {
+        const faScript = document.createElement('script');
+        faScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js';
+        document.head.appendChild(faScript);
+      }
+    };
 
-    document.addEventListener('DOMContentLoaded', loadMovie);
+    // Start the player
+    if (document.readyState === 'complete') {
+      initPlayer();
+    } else {
+      document.addEventListener('DOMContentLoaded', initPlayer);
+    }
   </script>
 </body>
 </html>
