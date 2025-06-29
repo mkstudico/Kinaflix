@@ -612,11 +612,6 @@
       }
 
       downloadBtn.addEventListener('click', () => {
-        if (!currentUser) {
-          showToast('Please log in to download this movie.', 'error');
-          setTimeout(() => window.location.href = 'login.html', 1000);
-          return;
-        }
         if (currentMovie.googleDriveLink) {
           const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
           if (fileIdMatch && fileIdMatch[1]) {
