@@ -154,8 +154,8 @@
     const AD_DISPLAY_DURATION = 7000; // 7 seconds
     const INITIAL_AD_DELAY = 60000;   // 1 minute for first ad
     const AD_INTERVAL = 420000;       // 7 minutes for subsequent ads
-    const RUMBLE_CHANNEL_ID = 'u4m9tqz'; // Rumble channel ID (adjust if incorrect)
-    const RUMBLE_PUB_ID = '4m9tqz';     // Rumble publisher ID for monetization
+    const RUMBLE_CHANNEL_ID = '@YourUsername'; // Replace with your actual Rumble username (e.g., from c-7740707)
+    const RUMBLE_PUB_ID = '4m9tqz';     // Confirmed as your publisher ID
 
     // Core player functionality
     const initPlayer = async () => {
@@ -227,6 +227,8 @@
               }
               console.warn('Rumble script load timed out. URL:', rumbleScriptUrl);
               showError('Failed to load Rumble video. Check video ID or account settings.');
+              // Fallback to IFRAME
+              videoContainer.innerHTML = `<iframe src="https://rumble.com/embed/${videoId}/?pub=${RUMBLE_PUB_ID}" frameborder="0" allowfullscreen></iframe>`;
             }, 20000);
 
             rumbleScript.onload = () => {
@@ -239,12 +241,14 @@
               } else {
                 console.error('Rumble object not defined after script load');
                 showError('Rumble player initialization failed.');
+                videoContainer.innerHTML = `<iframe src="https://rumble.com/embed/${videoId}/?pub=${RUMBLE_PUB_ID}" frameborder="0" allowfullscreen></iframe>`;
               }
             };
             rumbleScript.onerror = () => {
               clearTimeout(loadTimeout);
               console.error('Rumble script failed to load:', rumbleScriptUrl);
               showError('Failed to load Rumble script. Check network or ID configuration.');
+              videoContainer.innerHTML = `<iframe src="https://rumble.com/embed/${videoId}/?pub=${RUMBLE_PUB_ID}" frameborder="0" allowfullscreen></iframe>`;
             };
           } else {
             window.Rumble("play", { video: videoId, div: divId });
