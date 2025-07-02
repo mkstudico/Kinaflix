@@ -1,8 +1,8 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
- <meta name="google-adsense-account" content="ca-pub-1889908156684044">
+  <meta name="google-adsense-account" content="ca-pub-1889908156684044">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>REBA AGASOBANUYE | KINAFLIX</title>
   <meta name="description" content="Reba filme zisobanuye zirenga 100, kubuntu na Kinaflix aho uri hose.">
@@ -172,7 +172,7 @@
       background: var(--dark);
       padding: 1rem 2rem;
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-start;
       align-items: center;
       position: sticky;
       top: 0;
@@ -185,6 +185,34 @@
     body.light-mode header {
       background: var(--light);
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-image-box {
+      width: 50px;
+      height: 50px;
+      background: #fff;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-right: 1rem;
+      cursor: pointer;
+    }
+
+    .header-image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .header-text {
+      color: var(--light);
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    body.light-mode .header-text {
+      color: var(--dark);
     }
 
     /* WhatsApp Button */
@@ -217,6 +245,7 @@
       display: flex;
       gap: 1rem;
       align-items: center;
+      margin-left: auto;
     }
 
     .auth-btn {
@@ -436,6 +465,31 @@
     }
 
     .section-title a:hover {
+      color: var(--primary-dark);
+    }
+
+    /* Genre Bar Styles */
+    .genre-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scroll-behavior: smooth;
+    }
+
+    .genre-bar a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 1rem;
+      white-space: nowrap;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .genre-bar a:hover {
+      background: rgba(229, 9, 20, 0.2);
       color: var(--primary-dark);
     }
 
@@ -796,25 +850,6 @@
       background: #f44336;
     }
 
-    /* Genre Section */
-    .genre-section {
-      margin-top: 3rem;
-    }
-
-    .genre-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--primary);
-    }
-
-    .genre-title {
-      font-size: 1.5rem;
-      color: var(--primary);
-    }
-
     /* Responsive Styles */
     @media (max-width: 1024px) {
       .section, footer {
@@ -953,6 +988,15 @@
         font-size: 0.7rem;
         padding: 3px 6px;
       }
+
+      .header-image-box {
+        width: 40px;
+        height: 40px;
+      }
+
+      .header-text {
+        font-size: 1rem;
+      }
     }
 
     @media (max-width: 576px) {
@@ -1027,6 +1071,15 @@
         height: 16px;
         margin: 0 0.3rem;
       }
+
+      .genre-bar {
+        gap: 0.5rem;
+      }
+
+      .genre-bar a {
+        font-size: 0.9rem;
+        padding: 0.3rem 0.7rem;
+      }
     }
   </style>
 </head>
@@ -1048,8 +1101,6 @@
         <hr class="nav-divider">
         <a href="#" class="nav-item" data-page="new-releases"><i class="fas fa-film"></i></a>
         <hr class="nav-divider">
-        <a href="genre.html" class="nav-item"><i class="fas fa-tags"></i></a>
-        <hr class="nav-divider">
         <a href="#" class="nav-item" data-page="searching"><i class="fas fa-search"></i></a>
         <hr class="nav-divider">
         <a href="#" class="nav-item" data-page="profile"><i class="fas fa-user"></i></a>
@@ -1063,7 +1114,10 @@
 
   <div class="main-content">
     <header>
-      <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+      <div class="header-image-box">
+        <img src="https://i.ibb.co/9H91j0gB/camao.png" alt="Header Image" onclick="window.location.href='https://example.com'">
+      </div>
+      <div class="header-text" onclick="window.location.href='https://right-coyote.static.domains/'"><i>Click to see</i><br>CAMAVINGA</div>
       <a href="https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c" target="_blank" class="whatsapp-btn">
         <i class="fab fa-whatsapp"></i> JOIN US
       </a>
@@ -1092,7 +1146,7 @@
         <div class="footer-column">
           <h3>Legal</h3>
           <ul>
-            <li><a href="pass.html">Admin</a></li>
+            <li><a href="policy.html">Policy</a></li>
           </ul>
         </div>
         <div class="footer-column">
@@ -1131,7 +1185,7 @@
       }
     }).render('#donate-button');
   </script>
-  <script defer type="module">
+<script defer type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
@@ -1170,19 +1224,46 @@
     let allYears = [];
     let slideInterval = null;
     let themeToggleTimeout = null;
-    let watchlistNotificationsQueue = [];
+    let lastAddedMovieId = null;
 
-    // Cache for Firestore data
     const cache = {
       movies: null,
       genres: null,
       featured: null,
-      expiry: 5 * 60 * 1000 // 5 minutes
+      expiry: 5 * 60 * 1000
     };
+
+    // No Internet Overlay
+    const noInternetOverlay = document.createElement('div');
+    noInternetOverlay.id = 'no-internet-overlay';
+    noInternetOverlay.style.cssText = `
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+    `;
+    noInternetOverlay.innerHTML = `
+      <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+      <h2 style="color: white;">Connection Error</h2>
+      <p style="color: white;">Remember to support btem@fficial</p>
+    `;
+    document.body.appendChild(noInternetOverlay);
 
     document.addEventListener('DOMContentLoaded', () => {
       initAuth();
       initUI();
+      checkInternetConnection();
+      setInterval(checkInternetConnection, 5000);
       loadHomePage();
       loadWatchHistoryFromCookies();
       setupIntersectionObserver();
@@ -1194,7 +1275,6 @@
           currentUser = user;
           updateAuthUI(user);
           await loadUserData(user.uid);
-          // Show watchlist notifications if any
           if (watchlist.length > 0) {
             showWatchlistNotifications();
           }
@@ -1221,13 +1301,14 @@
         });
       }
 
-      // Event delegation for nav and footer links
       document.addEventListener('click', (e) => {
-        const link = e.target.closest('.nav-item, .footer-link');
+        const link = e.target.closest('.nav-item, .footer-link, .genre-bar a');
         if (link) {
-          // Skip custom navigation for genre.html link
-          if (link.getAttribute('href') === 'genre.html') {
-            return; // Allow default navigation to genre.html
+          if (link.classList.contains('genre-bar')) {
+            const genre = link.textContent.trim();
+            localStorage.setItem('selectedGenre', genre); // Store genre in local storage
+            window.location.href = 'genre.html';
+            return;
           }
           e.preventDefault();
           const page = link.getAttribute('data-page');
@@ -1240,15 +1321,11 @@
       });
     }
 
-    // Function to show watchlist notifications
     async function showWatchlistNotifications() {
       if (!currentUser || watchlist.length === 0) return;
       
-      // Clear any existing notifications
       watchlistNotifications.innerHTML = '';
-      watchlistNotificationsQueue = [];
-      
-      // Get movie details for each in watchlist
+      const uniqueMovies = new Map();
       const notificationPromises = watchlist.map(movieId => 
         getDoc(doc(db, 'movies', movieId)).then(docSnap => 
           docSnap.exists() ? { 
@@ -1260,29 +1337,12 @@
       );
       
       const notificationMovies = (await Promise.all(notificationPromises)).filter(Boolean);
+      notificationMovies.forEach(movie => uniqueMovies.set(movie.id, movie));
       
-      // Add to queue
-      watchlistNotificationsQueue = [...notificationMovies];
-      
-      // Show notifications with delay
-      showNextNotification();
-    }
-    
-    function showNextNotification() {
-      if (watchlistNotificationsQueue.length === 0) return;
-      
-      const movie = watchlistNotificationsQueue.shift();
-      const notification = createWatchlistNotification(movie);
-      watchlistNotifications.appendChild(notification);
-      
-      // Show with animation
-      setTimeout(() => {
-        notification.classList.add('show');
-      }, 50);
-      
-      // Schedule next notification
-      if (watchlistNotificationsQueue.length > 0) {
-        setTimeout(showNextNotification, 3000);
+      for (const movie of uniqueMovies.values()) {
+        const notification = createWatchlistNotification(movie);
+        watchlistNotifications.appendChild(notification);
+        setTimeout(() => notification.classList.add('show'), 50);
       }
     }
     
@@ -1307,7 +1367,6 @@
         </div>
       `;
       
-      // Add event listeners
       notification.querySelector('.close').addEventListener('click', () => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
@@ -1321,12 +1380,13 @@
           showToast('Removed from watchlist', 'success');
           notification.classList.remove('show');
           setTimeout(() => notification.remove(), 300);
+          watchlistNotifications.innerHTML = '';
+          if (watchlist.length > 0) showWatchlistNotifications();
         } catch (error) {
           showToast('Error removing from watchlist: ' + error.message, 'error');
         }
       });
       
-      // Auto-remove after some time
       setTimeout(() => {
         if (notification.parentNode) {
           notification.classList.remove('show');
@@ -1508,7 +1568,6 @@
         seriesId: doc.data().seriesId || null
       }));
 
-      // Group by series
       const seriesGroups = new Map();
       for (const movie of movies) {
         const seriesKey = movie.seriesId || getTitlePrefix(movie.title);
@@ -1518,16 +1577,19 @@
         seriesGroups.get(seriesKey).push(movie);
       }
 
-      // Randomly select one movie per series
       const uniqueMovies = [];
       for (const group of seriesGroups.values()) {
-        const randomMovie = group[Math.floor(Math.random() * group.length)];
-        uniqueMovies.push(randomMovie);
-        if (uniqueMovies.length >= 8) break;
+        const selectedMovies = [];
+        for (let i = 0; i < Math.min(3, group.length); i++) {
+          const randomIndex = Math.floor(Math.random() * group.length);
+          selectedMovies.push(group[randomIndex]);
+          group.splice(randomIndex, 1);
+        }
+        uniqueMovies.push(...selectedMovies);
+        if (uniqueMovies.length >= 10) break;
       }
 
-      // Fetch more if needed
-      while (uniqueMovies.length < 8 && querySnapshot.docs.length >= 16) {
+      while (uniqueMovies.length < 10 && querySnapshot.docs.length >= 16) {
         q = query(
           collection(db, 'movies'),
           orderBy('dateAdded', 'desc'),
@@ -1551,18 +1613,22 @@
           }
           seriesGroups.get(seriesKey).push(movie);
           if (!uniqueMovies.some(m => (m.seriesId || getTitlePrefix(m.title)) === seriesKey)) {
-            const randomMovie = seriesGroups.get(seriesKey)[Math.floor(Math.random() * seriesGroups.get(seriesKey).length)];
-            uniqueMovies.push(randomMovie);
+            const selectedMovies = [];
+            for (let i = 0; i < Math.min(3, seriesGroups.get(seriesKey).length); i++) {
+              const randomIndex = Math.floor(Math.random() * seriesGroups.get(seriesKey).length);
+              selectedMovies.push(seriesGroups.get(seriesKey)[randomIndex]);
+              seriesGroups.get(seriesKey).splice(randomIndex, 1);
+            }
+            uniqueMovies.push(...selectedMovies);
           }
-          if (uniqueMovies.length >= 8) break;
+          if (uniqueMovies.length >= 10) break;
         }
       }
 
-      return uniqueMovies.slice(0, 8);
+      return uniqueMovies.slice(0, 10);
     }
 
     function getTitlePrefix(title) {
-      // Extract first 70% of title to identify series
       const words = title.split(' ').slice(0, Math.ceil(title.split(' ').length * 0.7));
       return words.join(' ').toLowerCase().replace(/[^a-z0-9]/g, '');
     }
@@ -1626,39 +1692,25 @@
         </section>
       ` : '';
 
-      // Newest Releases Section
       if (newestMovies && newestMovies.length > 0) {
         html += `
           <section class="section">
             <h2 class="section-title">Newest Releases <a href="#" class="view-all" data-sort="newest">See All</a></h2>
             <div class="movies-grid">
-              ${newestMovies.map(movie => renderMovieCard(movie)).join('')}
-            </div>
-          </section>
-        `;
-      }
-
-      if (movies.length > 0) {
-        const latestMovies = sortMovies([...movies], 'releaseYear', 'desc').slice(0, 5);
-        html += `
-          <section class="section">
-            <h2 class="section-title">Latest Uploads <a href="#" class="view-all" data-sort="latest">See All</a></h2>
-            <div class="movies-grid">
-              ${latestMovies.map(movie => renderMovieCard(movie)).join('')}
+              ${newestMovies.map(movie => renderMovieCard(movie)).slice(0, 10).join('')}
             </div>
           </section>
         `;
       }
 
       if (watchHistory.length > 0) {
-        const favoriteGenre = getFavoriteGenre();
-        const forYouMovies = movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes(favoriteGenre)).slice(0, 5);
+        const forYouMovies = await loadForYouMovies();
         if (forYouMovies.length > 0) {
           html += `
             <section class="section">
               <h2 class="section-title">For You <small>(Based on your preferences)</small></h2>
               <div class="movies-grid">
-                ${sortMovies(forYouMovies, sortField, sortOrder).map(movie => renderMovieCard(movie)).join('')}
+                ${forYouMovies.map(movie => renderMovieCard(movie)).slice(0, 12).join('')}
               </div>
             </section>
           `;
@@ -1666,7 +1718,7 @@
       }
 
       if (movies.length > 0) {
-        const popularMovies = sortMovies([...movies], 'views', 'desc').slice(0, 5);
+        const popularMovies = sortMovies([...movies], 'views', 'desc').slice(0, 10);
         html += `
           <section class="section">
             <h2 class="section-title">Popular Movies <a href="#" class="view-all" data-sort="popular">See All</a></h2>
@@ -1677,25 +1729,13 @@
         `;
       }
 
-      if (genres.length > 0) {
-        genres.forEach(genre => {
-          let genreMovies = movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes(genre));
-          genreMovies = sortMovies(genreMovies, sortField, sortOrder).slice(0, 5);
-          if (genreMovies.length > 0) {
-            html += `
-              <section class="section genre-section">
-                <div class="genre-header">
-                  <h2 class="genre-title">${genre} Movies</h2>
-                  <a href="#" class="view-all" data-genre="${genre}">See All</a>
-                </div>
-                <div class="movies-grid">
-                  ${genreMovies.map(movie => renderMovieCard(movie)).join('')}
-                </div>
-              </section>
-            `;
-          }
-        });
-      }
+      html += `
+        <div class="genre-bar">
+          ${['<b>Action</b>', '<b>Adventure</b>', '<b>Animation</b>', '<b>Comedy</b>', '<b>Crime</b>', '<b>Drama</b>', '<b>Horror</b>', '<b>Romance</b>', '<b>Adult</b>', '<b>War</b>', '<b>Thriller</b>', '<b>Indian</b>', '<b>Sci-Fi</b>', '<b>Sport</b>'].map(genre => `
+            <a href="#" class="genre-bar" data-genre="${genre.replace(/<b>|<\/b>/g, '')}">${genre}</a>
+          `).join('')}
+        </div>
+      `;
 
       if (movies.length > 0) {
         const allMovies = sortMovies([...movies], 'releaseYear', 'desc');
@@ -1720,6 +1760,32 @@
           else if (sort) loadAllMovies(sort);
         });
       });
+    }
+
+    async function loadForYouMovies() {
+      if (!currentUser || watchHistory.length === 0) {
+        return sortMovies([...movies], 'views', 'desc').slice(0, 12);
+      }
+
+      const watchedIds = new Set(watchHistory);
+      const favoriteGenre = getFavoriteGenre();
+      let candidateMovies = movies.filter(movie => 
+        !watchedIds.has(movie.id) && 
+        Array.isArray(movie.genres) && 
+        movie.genres.includes(favoriteGenre)
+      );
+
+      if (candidateMovies.length < 12) {
+        const additionalMovies = movies.filter(movie => 
+          !watchedIds.has(movie.id) && 
+          Array.isArray(movie.genres) && 
+          movie.genres.some(g => g !== favoriteGenre)
+        );
+        candidateMovies = [...candidateMovies, ...additionalMovies];
+      }
+
+      candidateMovies = sortMovies(candidateMovies, 'views', 'desc');
+      return candidateMovies.slice(0, 12);
     }
 
     function sortMovies(movies, field, order) {
@@ -1774,28 +1840,7 @@
     async function loadForYou() {
       showLoading();
       try {
-        if (watchHistory.length === 0) {
-          await loadAllMovies('popular');
-          return;
-        }
-        const favoriteGenre = getFavoriteGenre();
-        const q = query(collection(db, 'movies'), where('genres', 'array-contains', favoriteGenre), orderBy('releaseYear', 'desc'), limit(20));
-        const querySnapshot = await getDocs(q);
-        let forYouMovies = querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data(),
-          genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
-          releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
-        }));
-        if (currentUser) {
-          const userRef = doc(db, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            forYouMovies = sortMovies(forYouMovies, preferences.sortField || 'releaseYear', preferences.sortOrder || 'desc');
-          }
-        }
+        const forYouMovies = await loadForYouMovies();
         renderMovieList(forYouMovies, 'For You (Recommended)');
         hideLoading();
       } catch (error) {
@@ -1869,8 +1914,8 @@
               target.classList.add('in-watchlist');
               target.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
               
-              // Show notification for newly added movie
-              if (currentUser) {
+              if (movieId !== lastAddedMovieId) {
+                lastAddedMovieId = movieId;
                 const movieDoc = await getDoc(doc(db, 'movies', movieId));
                 if (movieDoc.exists()) {
                   const movie = { 
@@ -1881,9 +1926,12 @@
                   const notification = createWatchlistNotification(movie);
                   watchlistNotifications.appendChild(notification);
                   setTimeout(() => notification.classList.add('show'), 50);
+                  setTimeout(() => lastAddedMovieId = null, 2000);
                 }
               }
             }
+            watchlistNotifications.innerHTML = '';
+            if (watchlist.length > 0) showWatchlistNotifications();
           } catch (error) {
             showToast('Error updating watchlist: ' + error.message, 'error');
           }
@@ -1978,7 +2026,6 @@
           seriesId: doc.data().seriesId || null
         }));
 
-        // Deduplicate series for 'newest' sort with random selection
         if (sort === 'newest') {
           const seriesGroups = new Map();
           for (const movie of allMovies) {
@@ -1990,8 +2037,13 @@
           }
           allMovies = [];
           for (const group of seriesGroups.values()) {
-            const randomMovie = group[Math.floor(Math.random() * group.length)];
-            allMovies.push(randomMovie);
+            const selectedMovies = [];
+            for (let i = 0; i < Math.min(3, group.length); i++) {
+              const randomIndex = Math.floor(Math.random() * group.length);
+              selectedMovies.push(group[randomIndex]);
+              group.splice(randomIndex, 1);
+            }
+            allMovies.push(...selectedMovies);
           }
         }
 
@@ -2131,40 +2183,6 @@
       }
     }
 
-    function saveWatchHistoryToCookies(history) {
-      document.cookie = `watchHistory=${JSON.stringify(history)}; path=/; max-age=${30 * 24 * 60 * 60}`;
-    }
-
-    function loadWatchHistoryFromCookies() {
-      const cookies = document.cookie.split('; ');
-      const historyCookie = cookies.find(c => c.startsWith('watchHistory='));
-      if (historyCookie) {
-        try {
-          watchHistory = JSON.parse(historyCookie.split('=')[1]) || [];
-        } catch (e) {
-          watchHistory = [];
-        }
-      }
-    }
-
-    function setupIntersectionObserver() {
-      const sections = document.querySelectorAll('.section');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = 1;
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, { threshold: 0.1 });
-      sections.forEach(section => {
-        section.style.opacity = 0;
-        section.style.transform = 'translateY(20px)';
-        section.style.transition = 'opacity 0.3s, transform 0.3s';
-        observer.observe(section);
-      });
-    }
-
     function showLoading() {
       loadingSpinner.classList.add('active');
     }
@@ -2172,6 +2190,51 @@
     function hideLoading() {
       loadingSpinner.classList.remove('active');
     }
+
+    function loadWatchHistoryFromCookies() {
+      const historyCookie = document.cookie.split('; ').find(row => row.startsWith('watchHistory='));
+      if (historyCookie) {
+        watchHistory = JSON.parse(decodeURIComponent(historyCookie.split('=')[1])) || [];
+      }
+    }
+
+    function saveWatchHistoryToCookies(history) {
+      const expires = new Date();
+      expires.setFullYear(expires.getFullYear() + 1);
+      document.cookie = `watchHistory=${encodeURIComponent(JSON.stringify(history))}; expires=${expires.toUTCString()}; path=/`;
+    }
+
+    function setupIntersectionObserver() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const movieCard = entry.target;
+            const img = movieCard.querySelector('.movie-poster');
+            img.src = img.getAttribute('data-src') || img.src;
+            observer.unobserve(movieCard);
+          }
+        });
+      }, { rootMargin: '50px' });
+
+      document.querySelectorAll('.movie-card').forEach(card => {
+        const img = card.querySelector('.movie-poster');
+        if (img && !img.src.includes('via.placeholder.com')) {
+          img.setAttribute('data-src', img.src);
+          img.src = 'https://via.placeholder.com/300x450?text=Loading...';
+          observer.observe(card);
+        }
+      });
+    }
+
+    function checkInternetConnection() {
+      if (navigator.onLine) {
+        noInternetOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      } else {
+        noInternetOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+    }
   </script>
-</body>
-</html>
+  </body>
+  </html>
