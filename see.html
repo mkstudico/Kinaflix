@@ -26,6 +26,37 @@
       background-color: var(--dark);
       color: var(--light);
       line-height: 1.5;
+      overflow: hidden; /* Prevent scrolling during preload */
+    }
+
+    /* Pre-loader Styles */
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+
+    #loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .back-button {
@@ -70,12 +101,20 @@
       height: 60vh;
       background: #000;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
     }
 
     .player-container {
       position: relative;
+      flex: 1;
       width: 100%;
       height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .player-image {
@@ -98,16 +137,19 @@
     }
 
     .movie-info {
-      position: absolute;
-      top: 50%;
-      left: 1rem;
-      right: 1rem;
-      transform: translateY(-50%);
+      position: relative;
+      top: auto;
+      left: auto;
+      right: auto;
+      transform: none;
       color: white;
       z-index: 2;
       padding: 1rem;
       border-radius: 8px;
       background: rgba(0, 0, 0, 0.7);
+      flex: 0 0 auto;
+      width: 100%;
+      max-width: 100%;
     }
 
     .movie-title {
@@ -203,7 +245,7 @@
     .series-section, .popular-movies-section {
       padding: 1rem;
       background: var(--dark-gray);
-      display: none; /* Hidden by default on mobile */
+      display: none;
     }
 
     .series-title, .popular-movies-title {
@@ -219,6 +261,7 @@
       padding-bottom: 1rem;
       scrollbar-width: thin;
       scrollbar-color: var(--primary) var(--dark-gray);
+      position: relative;
     }
 
     .series-movies::-webkit-scrollbar, .popular-movies-grid::-webkit-scrollbar {
@@ -259,6 +302,80 @@
       font-size: 0.8rem;
       text-align: center;
       color: var(--light);
+    }
+
+    .scroll-slider {
+      width: 100%;
+      margin-bottom: 1rem;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      background: linear-gradient(to right, var(--primary), var(--primary));
+      outline: none;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .scroll-slider:hover {
+      opacity: 1;
+    }
+
+    .scroll-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      cursor: pointer;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .scroll-slider::-webkit-slider-thumb::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .scroll-slider::-webkit-slider-thumb:hover::after,
+    .scroll-slider::-webkit-slider-thumb:active::after {
+      opacity: 1;
+    }
+
+    .scroll-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      cursor: pointer;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .scroll-slider::-moz-range-thumb::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .scroll-slider::-moz-range-thumb:hover::after,
+    .scroll-slider::-moz-range-thumb:active::after {
+      opacity: 1;
     }
 
     .content-section {
@@ -389,15 +506,36 @@
       background: #2196F3;
     }
 
+    footer {
+      text-align: center;
+      padding: 1rem 0;
+      color: var(--light);
+      font-size: 0.9rem;
+      background: transparent;
+    }
+
     @media (min-width: 768px) {
       .player-section {
         height: 80vh;
       }
 
+      .player-container {
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .player-image {
+        flex: 1;
+        height: auto;
+        min-height: 100%;
+      }
+
       .movie-info {
         max-width: 50%;
+        position: absolute;
+        top: 50%;
         left: 2rem;
-        right: auto;
+        transform: translateY(-50%);
         background: transparent;
       }
 
@@ -447,6 +585,10 @@
   gtag('config', 'G-DC1T9B6B9W');
 </script>
 <body>
+  <div id="preloader">
+    <div id="loader"></div>
+  </div>
+
   <a href="index.html" class="back-button">
     <i class="fas fa-arrow-left"></i>
     <span>BACK</span>
@@ -474,6 +616,7 @@
 
   <div class="series-section" id="series-section">
     <h2 class="series-title" id="series-title"></h2>
+    <input type="range" class="scroll-slider" id="series-slider" min="0" max="100" value="0">
     <div class="series-movies" id="series-movies"></div>
   </div>
 
@@ -496,8 +639,13 @@
 
   <div class="popular-movies-section" id="popular-movies-section">
     <h2 class="popular-movies-title">Reba:</h2>
+    <input type="range" class="scroll-slider" id="popular-slider" min="0" max="100" value="0">
     <div class="popular-movies-grid" id="popular-movies-grid"></div>
   </div>
+
+  <footer>
+    © 2025 | Kinaflix | Made by btem@fficial
+  </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
@@ -537,7 +685,6 @@
     const auth = getAuth(app);
     const analytics = getAnalytics(app);
 
-    // Log page view
     logEvent(analytics, 'page_view', { page_title: 'Watch Movie - KINAFLIX' });
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -561,6 +708,9 @@
     const trailerContainer = document.getElementById('trailer-container');
     const popularMoviesSection = document.getElementById('popular-movies-section');
     const popularMoviesGrid = document.getElementById('popular-movies-grid');
+    const seriesSlider = document.getElementById('series-slider');
+    const popularSlider = document.getElementById('popular-slider');
+    const preloader = document.getElementById('preloader');
 
     let currentMovie = null;
     let currentUser = null;
@@ -584,6 +734,25 @@
       return email || 'Anonymous';
     }
 
+    function updateScrollPosition(slider, scrollContainer) {
+      if (slider && scrollContainer) {
+        const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+        const scrollPosition = (slider.value / 100) * maxScroll;
+        scrollContainer.scrollLeft = scrollPosition;
+      }
+    }
+
+    // Hide preloader after 3 seconds or when content is loaded
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (preloader) preloader.style.opacity = '0';
+        setTimeout(() => {
+          if (preloader) preloader.style.display = 'none';
+          document.body.style.overflow = 'auto'; // Restore scrolling
+        }, 500); // Match transition duration
+      }, 3000); // Minimum 3 seconds
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       loadMovieData();
       loadPopularMovies();
@@ -603,60 +772,79 @@
         }
       };
 
-      watchNowBtn.addEventListener('click', watchHandler);
-      if (isMobile) {
-        watchNowBtn.addEventListener('touchstart', (e) => {
-          e.preventDefault();
-          watchHandler();
+      if (watchNowBtn) {
+        watchNowBtn.addEventListener('click', watchHandler);
+        if (isMobile) {
+          watchNowBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            watchHandler();
+          });
+        }
+      }
+
+      if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+          if (currentMovie && currentMovie.googleDriveLink) {
+            const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
+            if (fileIdMatch && fileIdMatch[1]) {
+              const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+              const link = document.createElement('a');
+              link.href = downloadUrl;
+              link.download = `${currentMovie.title || 'movie'}.mp4`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              logEvent(analytics, 'download_movie', { movie_id: movieId, title: currentMovie.title });
+            } else {
+              showToast('Invalid Google Drive link format.', 'error');
+            }
+          } else {
+            showToast('Download link not available.', 'error');
+          }
         });
       }
 
-      downloadBtn.addEventListener('click', () => {
-        if (currentMovie.googleDriveLink) {
-          const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
-          if (fileIdMatch && fileIdMatch[1]) {
-            const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `${currentMovie.title || 'movie'}.mp4`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            logEvent(analytics, 'download_movie', { movie_id: movieId, title: currentMovie.title });
-          } else {
-            showToast('Invalid Google Drive link format.', 'error');
-          }
-        } else {
-          showToast('Download link not available.', 'error');
-        }
-      });
-
-      whatsappBtn.addEventListener('click', () => {
-        window.open('https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c', '_blank');
-        logEvent(analytics, 'open_whatsapp', { page: 'see.html' });
-      });
-      if (isMobile) {
-        whatsappBtn.addEventListener('touchstart', (e) => {
-          e.preventDefault();
+      if (whatsappBtn) {
+        whatsappBtn.addEventListener('click', () => {
           window.open('https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c', '_blank');
           logEvent(analytics, 'open_whatsapp', { page: 'see.html' });
         });
+        if (isMobile) {
+          whatsappBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            window.open('https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c', '_blank');
+            logEvent(analytics, 'open_whatsapp', { page: 'see.html' });
+          });
+        }
       }
 
-      shareBtn.addEventListener('click', () => {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => {
-          showToast('Link copied to clipboard!', 'success');
-          logEvent(analytics, 'share_movie', { movie_id: movieId, url });
+      if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+          const url = window.location.href;
+          navigator.clipboard.writeText(url).then(() => {
+            showToast('Link copied to clipboard!', 'success');
+            logEvent(analytics, 'share_movie', { movie_id: movieId, url });
+          }).catch(err => {
+            showToast('Failed to copy link.', 'error');
+          });
         });
-      });
+      }
 
-      submitCommentBtn.addEventListener('click', addComment);
+      if (submitCommentBtn) {
+        submitCommentBtn.addEventListener('click', addComment);
+      }
 
       if (isMobile) {
         document.querySelectorAll('.action-btn').forEach(btn => {
-          btn.style.touchAction = 'manipulation';
+          if (btn) btn.style.touchAction = 'manipulation';
         });
+      }
+
+      if (seriesSlider && seriesMovies) {
+        seriesSlider.addEventListener('input', () => updateScrollPosition(seriesSlider, seriesMovies));
+      }
+      if (popularSlider && popularMoviesGrid) {
+        popularSlider.addEventListener('input', () => updateScrollPosition(popularSlider, popularMoviesGrid));
       }
     });
 
@@ -687,7 +875,7 @@
         if (currentMovie.seriesId) {
           await loadSeriesData(currentMovie.seriesId);
         } else {
-          seriesSection.style.display = 'none';
+          if (seriesSection) seriesSection.style.display = 'none';
         }
         await loadPopularMovies();
       } catch (error) {
@@ -699,7 +887,6 @@
     async function loadPopularMovies() {
       try {
         let movies = [];
-        // Fetch popular movies (by views)
         const popularQuery = query(
           collection(db, 'movies'),
           orderBy('views', 'desc'),
@@ -711,7 +898,6 @@
           ...doc.data()
         })));
 
-        // Fetch movies by genres if currentMovie has genres
         if (currentMovie?.genres?.length > 0) {
           const genresQuery = query(
             collection(db, 'movies'),
@@ -725,7 +911,6 @@
           })));
         }
 
-        // Fetch random movies
         const randomQuery = query(
           collection(db, 'movies'),
           limit(50)
@@ -736,7 +921,6 @@
           ...doc.data()
         })));
 
-        // Remove duplicates and current movie
         const movieMap = new Map();
         movies.forEach(movie => {
           if (movie.id !== movieId) {
@@ -745,41 +929,42 @@
         });
         movies = Array.from(movieMap.values());
 
-        // Shuffle and take 20
         movies = movies.sort(() => Math.random() - 0.5).slice(0, 20);
 
-        popularMoviesGrid.innerHTML = '';
-        if (movies.length === 0) {
-          popularMoviesSection.style.display = 'none';
-          return;
-        }
+        if (popularMoviesGrid) {
+          popularMoviesGrid.innerHTML = '';
+          if (movies.length === 0) {
+            if (popularMoviesSection) popularMoviesSection.style.display = 'none';
+            return;
+          }
 
-        movies.forEach(movie => {
-          const movieCard = document.createElement('div');
-          movieCard.className = 'popular-movie-card';
-          movieCard.setAttribute('data-movie-id', movie.id);
-          movieCard.innerHTML = `
-            <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
-                 alt="${movie.title}" class="popular-movie-poster" />
-            <div class="popular-movie-title">${movie.title}</div>
-          `;
-          popularMoviesGrid.appendChild(movieCard);
-          movieCard.addEventListener('click', () => {
-            window.location.href = `see.html?id=${movie.id}`;
-            logEvent(analytics, 'view_popular_movie', { movie_id: movie.id, title: movie.title });
-          });
-          if (isMobile) {
-            movieCard.addEventListener('touchstart', (e) => {
-              e.preventDefault();
+          movies.forEach(movie => {
+            const movieCard = document.createElement('div');
+            movieCard.className = 'popular-movie-card';
+            movieCard.setAttribute('data-movie-id', movie.id);
+            movieCard.innerHTML = `
+              <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
+                   alt="${movie.title}" class="popular-movie-poster" />
+              <div class="popular-movie-title">${movie.title}</div>
+            `;
+            popularMoviesGrid.appendChild(movieCard);
+            movieCard.addEventListener('click', () => {
               window.location.href = `see.html?id=${movie.id}`;
               logEvent(analytics, 'view_popular_movie', { movie_id: movie.id, title: movie.title });
             });
-          }
-        });
-        popularMoviesSection.style.display = 'block';
+            if (isMobile) {
+              movieCard.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                window.location.href = `see.html?id=${movie.id}`;
+                logEvent(analytics, 'view_popular_movie', { movie_id: movie.id, title: movie.title });
+              });
+            }
+          });
+          if (popularMoviesSection) popularMoviesSection.style.display = 'block';
+        }
       } catch (error) {
         console.error('Error loading popular movies:', error);
-        popularMoviesSection.style.display = 'none';
+        if (popularMoviesSection) popularMoviesSection.style.display = 'none';
         showToast('Error loading recommended movies.', 'error');
       }
     }
@@ -789,10 +974,10 @@
         const seriesRef = doc(db, 'series', seriesId);
         const seriesSnap = await getDoc(seriesRef);
         if (seriesSnap.exists()) {
-          seriesTitle.textContent = `Series: ${seriesSnap.data().name}`;
-          seriesSection.style.display = 'block';
+          if (seriesTitle) seriesTitle.textContent = `Series: ${seriesSnap.data().name}`;
+          if (seriesSection) seriesSection.style.display = 'block';
         } else {
-          seriesSection.style.display = 'none';
+          if (seriesSection) seriesSection.style.display = 'none';
           return;
         }
 
@@ -802,45 +987,47 @@
           orderBy('title')
         );
         const seriesMoviesSnap = await getDocs(seriesMoviesQuery);
-        seriesMovies.innerHTML = '';
-        seriesMoviesSnap.forEach(doc => {
-          const movie = { id: doc.id, ...doc.data() };
-          const movieCard = document.createElement('div');
-          movieCard.className = 'series-movie-card';
-          movieCard.setAttribute('data-movie-id', movie.id);
-          movieCard.innerHTML = `
-            <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
-                 alt="${movie.title}" class="series-movie-poster" />
-            <div class="series-movie-title">${movie.title}</div>
-          `;
-          seriesMovies.appendChild(movieCard);
-          movieCard.addEventListener('click', () => {
-            window.location.href = `see.html?id=${movie.id}`;
-          });
-          if (isMobile) {
-            movieCard.addEventListener('touchstart', (e) => {
-              e.preventDefault();
+        if (seriesMovies) {
+          seriesMovies.innerHTML = '';
+          seriesMoviesSnap.forEach(doc => {
+            const movie = { id: doc.id, ...doc.data() };
+            const movieCard = document.createElement('div');
+            movieCard.className = 'series-movie-card';
+            movieCard.setAttribute('data-movie-id', movie.id);
+            movieCard.innerHTML = `
+              <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
+                   alt="${movie.title}" class="series-movie-poster" />
+              <div class="series-movie-title">${movie.title}</div>
+            `;
+            seriesMovies.appendChild(movieCard);
+            movieCard.addEventListener('click', () => {
               window.location.href = `see.html?id=${movie.id}`;
             });
-          }
-        });
+            if (isMobile) {
+              movieCard.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                window.location.href = `see.html?id=${movie.id}`;
+              });
+            }
+          });
+        }
       } catch (error) {
         console.error('Error loading series data:', error);
-        seriesSection.style.display = 'none';
+        if (seriesSection) seriesSection.style.display = 'none';
       }
     }
 
     function renderMovieDetails() {
-      playerImage.src = currentMovie.coverImageUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80';
-      movieTitle.textContent = currentMovie.title || 'N/A';
-      movieMeta.innerHTML = `
+      if (playerImage) playerImage.src = currentMovie.coverImageUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80';
+      if (movieTitle) movieTitle.textContent = currentMovie.title || 'N/A';
+      if (movieMeta) movieMeta.innerHTML = `
         ${currentMovie.genres?.[0] || 'N/A'} |
         ${currentMovie.country || 'N/A'} |
         ${currentMovie.releaseYear || 'N/A'}
       `;
-      movieDescription.textContent = currentMovie.description || 'No description available.';
+      if (movieDescription) movieDescription.textContent = currentMovie.description || 'No description available.';
       
-      if (currentMovie.youtubeTrailerUrl) {
+      if (trailerContainer && currentMovie.youtubeTrailerUrl) {
         const videoId = extractYouTubeVideoId(currentMovie.youtubeTrailerUrl);
         if (videoId) {
           trailerContainer.innerHTML = `
@@ -852,7 +1039,7 @@
         } else {
           trailerContainer.innerHTML = '<p>Invalid YouTube trailer URL.</p>';
         }
-      } else {
+      } else if (trailerContainer) {
         trailerContainer.innerHTML = '<p>No trailer available.</p>';
       }
     }
@@ -869,19 +1056,21 @@
         currentUser = user;
         const watchlistRef = doc(db, 'watchlists', currentUser.uid);
         onSnapshot(watchlistRef, (docSnap) => {
-          if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
-            watchlistBtn.classList.add('watchlist-added');
-            watchlistBtn.innerHTML = '<i class="fas fa-check"></i> Remove from watchlist';
-          } else {
-            watchlistBtn.classList.remove('watchlist-added');
-            watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> NZAYIREBA UBUTAHA';
+          if (watchlistBtn) {
+            if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
+              watchlistBtn.classList.add('watchlist-added');
+              watchlistBtn.innerHTML = '<i class="fas fa-check"></i> Remove from watchlist';
+            } else {
+              watchlistBtn.classList.remove('watchlist-added');
+              watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> NZAYIREBA UBUTAHA';
+            }
+            watchlistBtn.onclick = toggleWatchlist;
           }
-          watchlistBtn.onclick = toggleWatchlist;
         }, (error) => {
           console.error('Error checking watchlist:', error);
           showToast('Error checking watchlist.', 'error');
         });
-      } else {
+      } else if (watchlistBtn) {
         watchlistBtn.classList.remove('watchlist-added');
         watchlistBtn.innerHTML = '<i class="fas fa-plus"></i> NZAYIREBA UBUTAHA (Log in to use)';
         watchlistBtn.onclick = () => showToast('Please log in to add to watchlist.', 'error');
@@ -919,7 +1108,7 @@
       try {
         if (!movieId) {
           console.error('No movieId provided for comments query');
-          commentsList.innerHTML = '<p>Error: Invalid movie ID.</p>';
+          if (commentsList) commentsList.innerHTML = '<p>Error: Invalid movie ID.</p>';
           showToast('Cannot load comments: Invalid movie ID.', 'error');
           return;
         }
@@ -933,27 +1122,29 @@
 
         onSnapshot(q, (snapshot) => {
           console.log('Comments snapshot received:', snapshot.size, 'documents');
-          if (snapshot.empty) {
-            commentsList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
-            return;
-          }
-
-          commentsList.innerHTML = '';
-          snapshot.forEach(doc => {
-            const comment = doc.data();
-            console.log('Comment data:', comment);
-            if (!comment.text || !comment.userEmail) {
-              console.warn('Invalid comment data:', comment);
+          if (commentsList) {
+            if (snapshot.empty) {
+              commentsList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
               return;
             }
-            const commentElement = document.createElement('div');
-            commentElement.className = 'comment';
-            commentElement.innerHTML = `
-              <span class="user">${formatEmail(comment.userEmail)}</span>
-              <p class="text">${comment.text}</p>
-            `;
-            commentsList.appendChild(commentElement);
-          });
+
+            commentsList.innerHTML = '';
+            snapshot.forEach(doc => {
+              const comment = doc.data();
+              console.log('Comment data:', comment);
+              if (!comment.text || !comment.userEmail) {
+                console.warn('Invalid comment data:', comment);
+                return;
+              }
+              const commentElement = document.createElement('div');
+              commentElement.className = 'comment';
+              commentElement.innerHTML = `
+                <span class="user">${formatEmail(comment.userEmail)}</span>
+                <p class="text">${comment.text}</p>
+              `;
+              commentsList.appendChild(commentElement);
+            });
+          }
         }, (error) => {
           console.error('Error in comments snapshot:', error);
           let errorMessage = 'Error loading comments.';
@@ -962,18 +1153,18 @@
           } else if (error.code === 'unavailable') {
             errorMessage = 'Network error: Please check your connection.';
           }
-          commentsList.innerHTML = `<p>${errorMessage}</p>`;
+          if (commentsList) commentsList.innerHTML = `<p>${errorMessage}</p>`;
           showToast(errorMessage, 'error');
         });
       } catch (error) {
         console.error('Error setting up comments query:', error);
-        commentsList.innerHTML = '<p>Error setting up comments.</p>';
+        if (commentsList) commentsList.innerHTML = '<p>Error setting up comments.</p>';
         showToast('Error setting up comments: ' + error.message, 'error');
       }
     }
 
     async function addComment() {
-      const text = commentInput.value.trim();
+      const text = commentInput ? commentInput.value.trim() : '';
       if (!text) {
         showToast('Please enter a comment.', 'error');
         return;
@@ -1000,7 +1191,7 @@
           text: text,
           timestamp: serverTimestamp()
         });
-        commentInput.value = '';
+        if (commentInput) commentInput.value = '';
         showToast('Comment added successfully!', 'success');
         logEvent(analytics, 'add_comment', { movie_id: movieId });
       } catch (error) {
