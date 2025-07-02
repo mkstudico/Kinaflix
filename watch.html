@@ -226,6 +226,7 @@
                 loadingOverlay.style.display = 'none';
               }
               console.warn('Rumble script load timed out. URL:', rumbleScriptUrl);
+              showError('Failed to load Rumble video. Check video ID or account settings.');
             }, 20000);
 
             rumbleScript.onload = () => {
@@ -237,14 +238,13 @@
                 }
               } else {
                 console.error('Rumble object not defined after script load');
+                showError('Rumble player initialization failed.');
               }
             };
             rumbleScript.onerror = () => {
               clearTimeout(loadTimeout);
               console.error('Rumble script failed to load:', rumbleScriptUrl);
-              if (loadingOverlay) {
-                loadingOverlay.style.display = 'none';
-              }
+              showError('Failed to load Rumble script. Check network or ID configuration.');
             };
           } else {
             window.Rumble("play", { video: videoId, div: divId });
