@@ -45,7 +45,8 @@
       background: #000;
     }
 
-    .video-container iframe {
+    .video-container iframe,
+    .video-container div[id^="rumble_"] {
       width: 100%;
       height: 100%;
       border: none;
@@ -153,16 +154,17 @@
     const AD_DISPLAY_DURATION = 7000; // 7 seconds
     const INITIAL_AD_DELAY = 60000;   // 1 minute for first ad
     const AD_INTERVAL = 420000;       // 7 minutes for subsequent ads
+    const RUMBLE_CHANNEL_ID = 'u4m9tqz'; // Rumble channel ID (adjust if incorrect)
+    const RUMBLE_PUB_ID = '4m9tqz';     // Rumble publisher ID for monetization
 
     // Core player functionality
     const initPlayer = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('movieId');
-        const streamingLink = urlParams.get('streamingLink');
         
-        if (!movieId || !streamingLink) {
-          throw new Error("Invalid movie ID or streaming link");
+        if (!movieId) {
+          throw new Error("Invalid movie ID");
         }
 
         // Update back button href with movieId
@@ -172,33 +174,101 @@
         }
 
         // Show loading immediately
-        document.getElementById('loading-overlay').style.display = 'flex';
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+          loadingOverlay.style.display = 'flex';
+        }
         
-        // Initialize video player
-        const decodedLink = decodeURIComponent(streamingLink);
-        const googleDriveMatch = decodedLink.match(/\/d\/(.+?)\//);
-        if (!googleDriveMatch) throw new Error("Only Google Drive links are supported");
-        
-        // Load movie data to set page title
+        // Load movie data to get googleDriveLink
         const movieData = await loadMovieData(movieId);
+        const streamingLink = movieData.googleDriveLink || urlParams.get('streamingLink');
+        if (!streamingLink) {
+          throw new Error("No streaming link available for this movie");
+        }
+
+        // Initialize video player based on link type
+        const videoContainer = document.getElementById('video-container');
+        if (!videoContainer) {
+          throw new Error("Video container not found");
+        }
+        
+        if (streamingLink.includes('drive.google.com')) {
+          const googleDriveMatch = streamingLink.match(/\/d\/(.+?)\//);
+          if (!googleDriveMatch) throw new Error("Invalid Google Drive link format");
+          videoContainer.innerHTML = `
+            <iframe src="https://drive.google.com/file/d/${googleDriveMatch[1]}/preview" 
+                    frameborder="0" 
+                    allow="autoplay; fullscreen; encrypted-media" 
+                    allowfullscreen>
+            </iframe>
+          `;
+        } else if (streamingLink.includes('rumble.com')) {
+          const rumbleMatch = streamingLink.match(/v([a-zA-Z0-9]+)/);
+          if (!rumbleMatch) throw new Error("Invalid Rumble link format");
+          const videoId = rumbleMatch[0]; // Full video ID (e.g., v6vmxmr)
+          const divId = `rumble_${videoId}`;
+          videoContainer.innerHTML = `<div id="${divId}"></div>`;
+
+          // Log the URL for debugging
+          const rumbleScriptUrl = `https://rumble.com/embedJS/${RUMBLE_CHANNEL_ID}.${videoId}/?pub=${RUMBLE_PUB_ID}&url=${encodeURIComponent(location.href)}&args=${encodeURIComponent(JSON.stringify([]))}`;
+          console.log('Loading Rumble script:', rumbleScriptUrl);
+
+          // Load Rumble script dynamically if not already loaded
+          if (!window.Rumble) {
+            const rumbleScript = document.createElement('script');
+            rumbleScript.async = true;
+            rumbleScript.src = rumbleScriptUrl;
+            document.body.appendChild(rumbleScript);
+
+            // Fallback timeout for script load
+            const loadTimeout = setTimeout(() => {
+              if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+              }
+              console.warn('Rumble script load timed out. URL:', rumbleScriptUrl);
+            }, 20000);
+
+            rumbleScript.onload = () => {
+              clearTimeout(loadTimeout);
+              if (window.Rumble) {
+                window.Rumble("play", { video: videoId, div: divId });
+                if (loadingOverlay) {
+                  loadingOverlay.style.display = 'none';
+                }
+              } else {
+                console.error('Rumble object not defined after script load');
+              }
+            };
+            rumbleScript.onerror = () => {
+              clearTimeout(loadTimeout);
+              console.error('Rumble script failed to load:', rumbleScriptUrl);
+              if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+              }
+            };
+          } else {
+            window.Rumble("play", { video: videoId, div: divId });
+            if (loadingOverlay) {
+              loadingOverlay.style.display = 'none';
+            }
+          }
+        } else {
+          throw new Error("Unsupported streaming link type");
+        }
+
+        // Load movie data to set page title
         document.title = `${movieData.title} | KINAFLIX`;
         
-        const videoContainer = document.getElementById('video-container');
-        videoContainer.innerHTML = `
-          <iframe src="https://drive.google.com/file/d/${googleDriveMatch[1]}/preview" 
-                  frameborder="0" 
-                  allow="autoplay; fullscreen; encrypted-media" 
-                  allowfullscreen>
-          </iframe>
-        `;
+        // Hide loading when Google Drive video loads
+        const iframe = videoContainer.querySelector('iframe');
+        if (iframe && loadingOverlay) {
+          iframe.onload = () => {
+            loadingOverlay.style.display = 'none';
+          };
+        }
         
         // Initialize ad system after video starts loading
         initAdSystem();
-        
-        // Hide loading when video loads
-        videoContainer.querySelector('iframe').onload = () => {
-          document.getElementById('loading-overlay').style.display = 'none';
-        };
         
       } catch (error) {
         showError(error.message);
@@ -301,7 +371,10 @@
           </a>
         </div>
       `;
-      document.getElementById('loading-overlay').style.display = 'none';
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+      }
       document.title = `Error | KINAFLIX`;
       
       if (!document.querySelector('.fa-arrow-left')) {
