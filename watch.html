@@ -135,7 +135,7 @@
   </style>
 </head>
 <body>
-  <a href="index.html" class="button back-button is-rounded">
+  <a href="#" class="button back-button is-rounded" id="back-button">
     <span class="icon">
       <i class="fas fa-arrow-left"></i>
     </span>
@@ -163,6 +163,12 @@
         
         if (!movieId || !streamingLink) {
           throw new Error("Invalid movie ID or streaming link");
+        }
+
+        // Update back button href with movieId
+        const backButton = document.getElementById('back-button');
+        if (backButton) {
+          backButton.href = `see.html?id=${movieId}`;
         }
 
         // Show loading immediately
@@ -226,7 +232,6 @@
     // Ad management system
     const initAdSystem = async () => {
       try {
-        // Load Firebase dynamically
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js');
         const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js');
         
@@ -245,10 +250,7 @@
           .filter(ad => !ad.category || ad.category === 'Movie');
         
         if (ads.length > 0) {
-          // Show random ad after 1 minute
           setTimeout(() => showRandomAd(ads), INITIAL_AD_DELAY);
-          
-          // Then show random ads every 7 minutes
           setInterval(() => showRandomAd(ads), AD_INTERVAL);
         }
       } catch (error) {
@@ -269,7 +271,6 @@
         <button class="ad-notification-close"><i class="fas fa-times"></i></button>
       `;
       
-      // Make entire ad clickable
       adElement.addEventListener('click', (e) => {
         if (!e.target.closest('.ad-notification-close')) {
           window.open(ad.link, '_blank');
@@ -278,12 +279,10 @@
       
       document.body.appendChild(adElement);
       
-      // Auto-remove after display duration
       setTimeout(() => {
         adElement.remove();
       }, AD_DISPLAY_DURATION);
       
-      // Close button functionality
       adElement.querySelector('.ad-notification-close').addEventListener('click', (e) => {
         e.stopPropagation();
         adElement.remove();
@@ -305,7 +304,6 @@
       document.getElementById('loading-overlay').style.display = 'none';
       document.title = `Error | KINAFLIX`;
       
-      // Load Font Awesome for error page if needed
       if (!document.querySelector('.fa-arrow-left')) {
         const faScript = document.createElement('script');
         faScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js';
@@ -313,7 +311,6 @@
       }
     };
 
-    // Start the player
     if (document.readyState === 'complete') {
       initPlayer();
     } else {
