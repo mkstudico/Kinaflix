@@ -154,7 +154,7 @@
     const AD_DISPLAY_DURATION = 7000; // 7 seconds
     const INITIAL_AD_DELAY = 60000;   // 1 minute for first ad
     const AD_INTERVAL = 420000;       // 7 minutes for subsequent ads
-    const RUMBLE_CHANNEL_ID = 'u4m9tqz'; // Using the channel ID from your embed code
+    const RUMBLE_CHANNEL_ID = 'u4m9tqz'; // Using the channel ID from your working example
 
     // Core player functionality
     const initPlayer = async () => {
@@ -208,14 +208,28 @@
           const divId = `rumble_${videoId}`;
           videoContainer.innerHTML = `<div id="${divId}"></div>`;
 
-          // Dynamically load Rumble embed script
+          // Load Rumble embed script
           !function(r,u,m,b,l,e){
-            r._Rumble=b,r[b]||(r[b]=function(){(r[b]._=r[b]._||[]).push(arguments);if(r[b]._.length==1){l=u.createElement(m),e=u.getElementsByTagName(m)[0],l.async=1,l.src="https://rumble.com/embedJS/"+RUMBLE_CHANNEL_ID+(arguments[1].video?'.'+arguments[1].video:'')+"/?url="+encodeURIComponent(location.href)+"&args="+encodeURIComponent(JSON.stringify([].slice.apply(arguments))),e.parentNode.insertBefore(l,e)}})}(window, document, "script", "Rumble");
+            r._Rumble = b;
+            r[b] || (r[b] = function(){
+              (r[b]._ = r[b]._ || []).push(arguments);
+              if (r[b]._.length == 1) {
+                l = u.createElement(m),
+                e = u.getElementsByTagName(m)[0],
+                l.async = 1,
+                l.src = "https://rumble.com/embedJS/" + RUMBLE_CHANNEL_ID + 
+                        (arguments[1].video ? '.' + arguments[1].video : '') +
+                        "/?url=" + encodeURIComponent(location.href) +
+                        "&args=" + encodeURIComponent(JSON.stringify([].slice.apply(arguments))),
+                e.parentNode.insertBefore(l, e)
+              }
+            })
+          }(window, document, "script", "Rumble");
 
           // Initialize Rumble player
           Rumble("play", { video: videoId, div: divId });
 
-          // Hide loading when video loads (basic check; Rumble doesn't provide onload)
+          // Hide loading after a timeout (Rumble doesn't provide onload)
           setTimeout(() => {
             if (loadingOverlay) {
               loadingOverlay.style.display = 'none';
