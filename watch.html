@@ -154,8 +154,7 @@
     const AD_DISPLAY_DURATION = 7000; // 7 seconds
     const INITIAL_AD_DELAY = 60000;   // 1 minute for first ad
     const AD_INTERVAL = 420000;       // 7 minutes for subsequent ads
-    const RUMBLE_CHANNEL_ID = '@YourUsername'; // Replace with your actual Rumble username (e.g., from c-7740707)
-    const RUMBLE_PUB_ID = '4m9tqz';     // Confirmed as your publisher ID
+    const RUMBLE_CHANNEL_ID = 'u4m9tqz'; // Using the channel ID from your embed code
 
     // Core player functionality
     const initPlayer = async () => {
@@ -179,7 +178,7 @@
           loadingOverlay.style.display = 'flex';
         }
         
-        // Load movie data to get googleDriveLink
+        // Load movie data to get streaming link
         const movieData = await loadMovieData(movieId);
         const streamingLink = movieData.googleDriveLink || urlParams.get('streamingLink');
         if (!streamingLink) {
@@ -205,57 +204,23 @@
         } else if (streamingLink.includes('rumble.com')) {
           const rumbleMatch = streamingLink.match(/v([a-zA-Z0-9]+)/);
           if (!rumbleMatch) throw new Error("Invalid Rumble link format");
-          const videoId = rumbleMatch[0]; // Full video ID (e.g., v6vmxmr)
+          const videoId = rumbleMatch[0]; // e.g., v6tg1dx
           const divId = `rumble_${videoId}`;
           videoContainer.innerHTML = `<div id="${divId}"></div>`;
 
-          // Log the URL for debugging
-          const rumbleScriptUrl = `https://rumble.com/embedJS/${RUMBLE_CHANNEL_ID}.${videoId}/?pub=${RUMBLE_PUB_ID}&url=${encodeURIComponent(location.href)}&args=${encodeURIComponent(JSON.stringify([]))}`;
-          console.log('Loading Rumble script:', rumbleScriptUrl);
+          // Dynamically load Rumble embed script
+          !function(r,u,m,b,l,e){
+            r._Rumble=b,r[b]||(r[b]=function(){(r[b]._=r[b]._||[]).push(arguments);if(r[b]._.length==1){l=u.createElement(m),e=u.getElementsByTagName(m)[0],l.async=1,l.src="https://rumble.com/embedJS/"+RUMBLE_CHANNEL_ID+(arguments[1].video?'.'+arguments[1].video:'')+"/?url="+encodeURIComponent(location.href)+"&args="+encodeURIComponent(JSON.stringify([].slice.apply(arguments))),e.parentNode.insertBefore(l,e)}})}(window, document, "script", "Rumble");
 
-          // Load Rumble script dynamically if not already loaded
-          if (!window.Rumble) {
-            const rumbleScript = document.createElement('script');
-            rumbleScript.async = true;
-            rumbleScript.src = rumbleScriptUrl;
-            document.body.appendChild(rumbleScript);
+          // Initialize Rumble player
+          Rumble("play", { video: videoId, div: divId });
 
-            // Fallback timeout for script load
-            const loadTimeout = setTimeout(() => {
-              if (loadingOverlay) {
-                loadingOverlay.style.display = 'none';
-              }
-              console.warn('Rumble script load timed out. URL:', rumbleScriptUrl);
-              showError('Failed to load Rumble video. Check video ID or account settings.');
-              // Fallback to IFRAME
-              videoContainer.innerHTML = `<iframe src="https://rumble.com/embed/${videoId}/?pub=${RUMBLE_PUB_ID}" frameborder="0" allowfullscreen></iframe>`;
-            }, 20000);
-
-            rumbleScript.onload = () => {
-              clearTimeout(loadTimeout);
-              if (window.Rumble) {
-                window.Rumble("play", { video: videoId, div: divId });
-                if (loadingOverlay) {
-                  loadingOverlay.style.display = 'none';
-                }
-              } else {
-                console.error('Rumble object not defined after script load');
-                showError('Rumble player initialization failed.');
-                videoContainer.innerHTML = `<iframe src="https://rumble.com/embed/${videoId}/?pub=${RUMBLE_PUB_ID}" frameborder="0" allowfullscreen></iframe>`;
-              }
-            };
-            rumbleScript.onerror = () => {
-              clearTimeout(loadTimeout);
-              console.error('Rumble script failed to load:', rumbleScriptUrl);
-              showError('Failed to load Rumble script. Check network or ID configuration.');
-              videoContainer.innerHTML = `<iframe src="https://rumble.com/embed/${videoId}/?pub=${RUMBLE_PUB_ID}" frameborder="0" allowfullscreen></iframe>`;
-            };
-          } else {
-            window.Rumble("play", { video: videoId, div: divId });
+          // Hide loading when video loads (basic check; Rumble doesn't provide onload)
+          setTimeout(() => {
             if (loadingOverlay) {
               loadingOverlay.style.display = 'none';
             }
-          }
+          }, 5000); // Adjust timeout as needed
         } else {
           throw new Error("Unsupported streaming link type");
         }
