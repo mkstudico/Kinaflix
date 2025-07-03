@@ -60,14 +60,12 @@
 
     .back-button {
       position: absolute;
-      top: 1rem;
-      left: 1rem;
+      top: 0.5rem;
+      left: 0.5rem;
       z-index: 100;
-      background-color: var(--primary);
-      color: white;
+      color: var(--primary);
       border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
+      padding: 0.3rem 0.8rem;
       font-weight: bold;
       display: flex;
       align-items: center;
@@ -76,13 +74,13 @@
     }
 
     .back-button:hover {
-      background-color: #f40612;
+      color: #f40612;
     }
 
     .logo {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
+      top: 0.5rem;
+      right: 0.5rem;
       font-size: 1.5rem;
       font-weight: bold;
       color: var(--primary);
@@ -120,7 +118,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: brightness(40%);
+      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.7);
       transition: filter 0.3s ease;
     }
 
@@ -186,18 +184,20 @@
       background: rgba(255, 255, 255, 0.1);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
+      padding: 0.5rem;
+      border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: center;
       transition: all 0.3s ease;
       font-weight: 500;
       font-size: 0.9rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       touch-action: manipulation;
+      width: 40px;
+      height: 40px;
     }
 
     .action-btn:hover {
@@ -493,6 +493,11 @@
       opacity: 1;
     }
 
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
     .toast.success {
       background: #4CAF50;
     }
@@ -567,6 +572,15 @@
       color: #f40612;
     }
 
+    .more-text {
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .more-text:hover {
+      color: #f40612;
+    }
+
     @media (max-width: 767px) {
       body {
         overflow: auto;
@@ -590,8 +604,8 @@
       .back-button, .logo {
         top: 0.5rem;
         z-index: 3;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(5px);
+        background: transparent;
+        backdrop-filter: none;
         padding: 0.3rem 0.8rem;
       }
 
@@ -618,8 +632,20 @@
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        text-overflow: ellipsis;
+        text-overflow: none;
         cursor: pointer;
+        position: relative;
+      }
+
+      .movie-description::after {
+        content: 'more';
+        color: var(--primary);
+        position: relative;
+        cursor: pointer;
+      }
+
+      .movie-description:hover::after {
+        color: #f40612;
       }
 
       .action-buttons {
@@ -629,15 +655,18 @@
       }
 
       .action-btn {
-        padding: 0.5rem;
+        padding: 0;
         font-size: 0;
         width: 40px;
         height: 40px;
         justify-content: center;
+        align-items: center;
       }
 
       .action-btn i {
         font-size: 1.2rem;
+        line-height: 40px;
+        text-align: center;
       }
 
       .series-section, .popular-movies-section {
@@ -753,6 +782,7 @@
   </div>
 
   <div class="series-section" id="series-section">
+    < pointers for the series section, unchanged as per instructions -->
     <h2 class="series-title" id="series-title"></h2>
     <input type="range" class="scroll-slider" id="series-slider" min="0" max="100" value="0">
     <div class="series-movies" id="series-movies"></div>
