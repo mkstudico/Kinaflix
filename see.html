@@ -26,10 +26,9 @@
       background-color: var(--dark);
       color: var(--light);
       line-height: 1.5;
-      overflow: hidden; /* Prevent scrolling during preload */
+      overflow: hidden;
     }
 
-    /* Pre-loader Styles */
     #preloader {
       position: fixed;
       top: 0;
@@ -60,7 +59,7 @@
     }
 
     .back-button {
-      position: fixed;
+      position: absolute;
       top: 1rem;
       left: 1rem;
       z-index: 100;
@@ -514,6 +513,146 @@
       background: transparent;
     }
 
+    .description-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 1rem;
+      border-radius: 8px;
+      z-index: 1000;
+      max-width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+      color: var(--light);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .description-popup.show {
+      display: block;
+    }
+
+    .comments-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 1rem;
+      border-radius: 8px;
+      z-index: 1000;
+      max-width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+      color: var(--light);
+    }
+
+    .comments-popup.show {
+      display: block;
+    }
+
+    .show-all-comments {
+      color: var(--primary);
+      cursor: pointer;
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .show-all-comments:hover {
+      color: #f40612;
+    }
+
+    @media (max-width: 767px) {
+      body {
+        overflow: auto;
+      }
+
+      .player-section {
+        height: auto;
+        min-height: 50vh;
+      }
+
+      .player-container {
+        flex-direction: column;
+        position: relative;
+      }
+
+      .player-image {
+        height: 40vh;
+        min-height: 200px;
+      }
+
+      .back-button, .logo {
+        top: 0.5rem;
+        z-index: 3;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        padding: 0.3rem 0.8rem;
+      }
+
+      .movie-info {
+        position: static;
+        background: transparent;
+        text-align: left;
+        padding: 0.5rem 1rem;
+      }
+
+      .movie-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .movie-meta {
+        font-size: 0.8rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .movie-description {
+        font-size: 0.85rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+      }
+
+      .action-buttons {
+        justify-content: center;
+        gap: 0.3rem;
+        margin: 0.5rem 0;
+      }
+
+      .action-btn {
+        padding: 0.5rem;
+        font-size: 0;
+        width: 40px;
+        height: 40px;
+        justify-content: center;
+      }
+
+      .action-btn i {
+        font-size: 1.2rem;
+      }
+
+      .series-section, .popular-movies-section {
+        display: block;
+      }
+
+      .comments-list {
+        max-height: none;
+      }
+
+      .comment:nth-child(n+6) {
+        display: none;
+      }
+    }
+
     @media (min-width: 768px) {
       .player-section {
         height: 80vh;
@@ -576,7 +715,6 @@
     }
   </style>
 </head>
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DC1T9B6B9W"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -634,6 +772,7 @@
       <div class="comments-list" id="comments-list">
         <p>Loading comments...</p>
       </div>
+      <div class="show-all-comments" id="show-all-comments">Show all comments</div>
     </div>
   </div>
 
@@ -646,6 +785,9 @@
   <footer>
     © 2025 | Kinaflix | Made by btem@fficial
   </footer>
+
+  <div id="description-popup" class="description-popup"></div>
+  <div id="comments-popup" class="comments-popup"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
@@ -711,6 +853,9 @@
     const seriesSlider = document.getElementById('series-slider');
     const popularSlider = document.getElementById('popular-slider');
     const preloader = document.getElementById('preloader');
+    const descriptionPopup = document.getElementById('description-popup');
+    const commentsPopup = document.getElementById('comments-popup');
+    const showAllComments = document.getElementById('show-all-comments');
 
     let currentMovie = null;
     let currentUser = null;
@@ -742,15 +887,14 @@
       }
     }
 
-    // Hide preloader after 3 seconds or when content is loaded
     window.addEventListener('load', () => {
       setTimeout(() => {
         if (preloader) preloader.style.opacity = '0';
         setTimeout(() => {
           if (preloader) preloader.style.display = 'none';
-          document.body.style.overflow = 'auto'; // Restore scrolling
-        }, 500); // Match transition duration
-      }, 3000); // Minimum 3 seconds
+          document.body.style.overflow = 'auto';
+        }, 500);
+      }, 3000);
     });
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -788,7 +932,7 @@
             const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
             if (fileIdMatch && fileIdMatch[1]) {
               const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-              window.open(downloadUrl, '_blank'); // Open in new tab for immediate download
+              window.open(downloadUrl, '_blank');
               logEvent(analytics, 'download_movie', { movie_id: movieId, title: currentMovie.title });
             } else {
               showToast('Invalid Google Drive link format.', 'error');
@@ -827,6 +971,39 @@
 
       if (submitCommentBtn) {
         submitCommentBtn.addEventListener('click', addComment);
+      }
+
+      if (movieDescription && isMobile) {
+        movieDescription.addEventListener('click', () => {
+          if (currentMovie && currentMovie.description) {
+            descriptionPopup.textContent = currentMovie.description;
+            descriptionPopup.classList.add('show');
+            document.body.style.overflow = 'hidden';
+          }
+        });
+      }
+
+      if (descriptionPopup) {
+        descriptionPopup.addEventListener('click', () => {
+          descriptionPopup.classList.remove('show');
+          document.body.style.overflow = 'auto';
+        });
+      }
+
+      if (showAllComments && isMobile) {
+        showAllComments.addEventListener('click', () => {
+          const comments = commentsList.innerHTML;
+          commentsPopup.innerHTML = comments;
+          commentsPopup.classList.add('show');
+          document.body.style.overflow = 'hidden';
+        });
+      }
+
+      if (commentsPopup) {
+        commentsPopup.addEventListener('click', () => {
+          commentsPopup.classList.remove('show');
+          document.body.style.overflow = 'auto';
+        });
       }
 
       if (isMobile) {
