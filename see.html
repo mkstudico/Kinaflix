@@ -788,12 +788,7 @@
             const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
             if (fileIdMatch && fileIdMatch[1]) {
               const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-              const link = document.createElement('a');
-              link.href = downloadUrl;
-              link.download = `${currentMovie.title || 'movie'}.mp4`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
+              window.open(downloadUrl, '_blank'); // Open in new tab for immediate download
               logEvent(analytics, 'download_movie', { movie_id: movieId, title: currentMovie.title });
             } else {
               showToast('Invalid Google Drive link format.', 'error');
