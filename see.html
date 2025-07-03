@@ -210,7 +210,7 @@
       line-height: 40px;
       text-align: center;
       width: 100%;
-      margin-left: 4px;
+      margin-left: 6px;
     }
 
     .action-btn:hover {
@@ -274,6 +274,7 @@
       scrollbar-width: thin;
       scrollbar-color: var(--primary) var(--dark-gray);
       position: relative;
+      touch-action: pan-x;
     }
 
     .series-movies::-webkit-scrollbar, .popular-movies-grid::-webkit-scrollbar {
@@ -643,6 +644,7 @@
         text-overflow: none;
         cursor: pointer;
         position: relative;
+        max-height: 3.6em;
       }
 
       .movie-description::after {
@@ -650,6 +652,16 @@
         color: var(--primary);
         position: relative;
         cursor: pointer;
+      }
+
+      .movie-description::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 5em;
+        height: 1.2em;
+        background: linear-gradient(to left, var(--dark), transparent);
       }
 
       .movie-description:hover::after {
@@ -676,7 +688,7 @@
         line-height: 40px;
         text-align: center;
         width: 100%;
-        margin-left: 4px;
+        margin-left: 6px;
       }
 
       .series-section, .popular-movies-section {
@@ -731,7 +743,7 @@
       }
 
       .action-btn i {
-        margin-left: 4px;
+        margin-left: 6px;
       }
 
       .series-section, .popular-movies-section {
