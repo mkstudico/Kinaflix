@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Loading... | KINAFLIX</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     :root {
@@ -33,7 +32,17 @@
       background-color: var(--primary);
       color: white;
       border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #f40612;
     }
 
     .video-container {
@@ -60,9 +69,11 @@
       bottom: 0;
       background: rgba(0, 0, 0, 0.8);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 10;
+      gap: 1rem;
     }
 
     .loading-spinner {
@@ -72,6 +83,11 @@
       width: 40px;
       height: 40px;
       animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 1rem;
     }
 
     .ad-notification {
@@ -89,6 +105,12 @@
       animation: slideIn 0.3s ease-out;
       overflow: hidden;
       cursor: pointer;
+      border-radius: 4px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     @keyframes slideIn {
@@ -133,19 +155,61 @@
       cursor: pointer;
       margin-left: 5px;
     }
+
+    .error-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      color: #e50914;
+      text-align: center;
+      padding: 2rem;
+      z-index: 100;
+    }
+
+    .error-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      margin-bottom: 1.5rem;
+      max-width: 80%;
+    }
+
+    .error-button {
+      background: #e50914;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .error-button:hover {
+      background: #f40612;
+    }
   </style>
 </head>
 <body>
-  <a href="#" class="button back-button is-rounded" id="back-button">
-    <span class="icon">
-      <i class="fas fa-arrow-left"></i>
-    </span>
+  <a href="#" class="back-button" id="back-button">
+    <i class="fas fa-arrow-left"></i>
     <span>BACK</span>
   </a>
 
   <div class="video-container" id="video-container">
     <div class="loading-overlay" id="loading-overlay">
       <div class="loading-spinner"></div>
+      <div class="loading-text">Loading player...</div>
     </div>
   </div>
 
@@ -154,7 +218,8 @@
     const AD_DISPLAY_DURATION = 7000; // 7 seconds
     const INITIAL_AD_DELAY = 60000;   // 1 minute for first ad
     const AD_INTERVAL = 420000;       // 7 minutes for subsequent ads
-    const RUMBLE_CHANNEL_ID = 'u4m9tqz'; // Using the channel ID from your working example
+    const RUMBLE_CHANNEL_ID = 'u4m9tqz'; // Your Rumble channel ID for monetization
+    const RUMBLE_PUB_ID = '4m9tqz'; // Your Rumble publisher ID for monetization
 
     // Core player functionality
     const initPlayer = async () => {
@@ -201,14 +266,32 @@
                     allowfullscreen>
             </iframe>
           `;
+          
+          // Hide loading when Google Drive video loads
+          const iframe = videoContainer.querySelector('iframe');
+          if (iframe && loadingOverlay) {
+            iframe.onload = () => {
+              loadingOverlay.style.display = 'none';
+            };
+          }
         } else if (streamingLink.includes('rumble.com')) {
-          const rumbleMatch = streamingLink.match(/v([a-zA-Z0-9]+)/);
-          if (!rumbleMatch) throw new Error("Invalid Rumble link format");
-          const videoId = rumbleMatch[0]; // e.g., v6tg1dx
-          const divId = `rumble_${videoId}`;
+          // Extract Rumble video ID (supports multiple URL formats)
+          let videoId;
+          const rumbleMatch1 = streamingLink.match(/v([a-zA-Z0-9]+)/);
+          const rumbleMatch2 = streamingLink.match(/rumble\.com\/([a-zA-Z0-9]+)/);
+          
+          if (rumbleMatch1) {
+            videoId = rumbleMatch1[0]; // e.g., v6tg1dx
+          } else if (rumbleMatch2) {
+            videoId = 'v' + rumbleMatch2[1]; // Convert to v-prefix format
+          } else {
+            throw new Error("Invalid Rumble link format");
+          }
+
+          const divId = `rumble_${videoId.replace('v', '')}`;
           videoContainer.innerHTML = `<div id="${divId}"></div>`;
 
-          // Load Rumble embed script
+          // Load Rumble embed script with monetization parameters
           !function(r,u,m,b,l,e){
             r._Rumble = b;
             r[b] || (r[b] = function(){
@@ -219,36 +302,48 @@
                 l.async = 1,
                 l.src = "https://rumble.com/embedJS/" + RUMBLE_CHANNEL_ID + 
                         (arguments[1].video ? '.' + arguments[1].video : '') +
-                        "/?url=" + encodeURIComponent(location.href) +
+                        "/?pub=" + RUMBLE_PUB_ID + 
+                        "&url=" + encodeURIComponent(location.href) +
                         "&args=" + encodeURIComponent(JSON.stringify([].slice.apply(arguments))),
                 e.parentNode.insertBefore(l, e)
               }
             })
           }(window, document, "script", "Rumble");
 
-          // Initialize Rumble player
-          Rumble("play", { video: videoId, div: divId });
+          // Initialize Rumble player with monetization
+          Rumble("play", {
+            video: videoId.replace('v', ''),
+            div: divId,
+            params: {
+              pub: RUMBLE_PUB_ID,
+              autoplay: 2 // Autoplay with sound off
+            }
+          });
 
-          // Hide loading after a timeout (Rumble doesn't provide onload)
+          // Check for Rumble player initialization
+          const checkPlayerReady = setInterval(() => {
+            const rumblePlayer = document.querySelector(`#${divId} iframe`);
+            if (rumblePlayer) {
+              clearInterval(checkPlayerReady);
+              if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+              }
+            }
+          }, 500);
+          
+          // Fallback timeout in case player doesn't load
           setTimeout(() => {
+            clearInterval(checkPlayerReady);
             if (loadingOverlay) {
               loadingOverlay.style.display = 'none';
             }
-          }, 5000); // Adjust timeout as needed
+          }, 10000);
         } else {
           throw new Error("Unsupported streaming link type");
         }
 
         // Load movie data to set page title
         document.title = `${movieData.title} | KINAFLIX`;
-        
-        // Hide loading when Google Drive video loads
-        const iframe = videoContainer.querySelector('iframe');
-        if (iframe && loadingOverlay) {
-          iframe.onload = () => {
-            loadingOverlay.style.display = 'none';
-          };
-        }
         
         // Initialize ad system after video starts loading
         initAdSystem();
@@ -345,11 +440,11 @@
     const showError = (message) => {
       const container = document.getElementById('video-container');
       container.innerHTML = `
-        <div style="position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#000;color:#e50914;text-align:center;padding:2rem;z-index:100;">
-          <h1 style="font-size:1.5rem;margin-bottom:1rem;">⚠️ Error</h1>
-          <p style="margin-bottom:1.5rem;">${message}</p>
-          <a href="index.html" style="background:#e50914;color:white;padding:0.5rem 1rem;border-radius:4px;text-decoration:none;">
-            <span style="margin-right:0.5rem;"><i class="fas fa-arrow-left"></i></span>
+        <div class="error-container">
+          <h1 class="error-title">⚠️ Error</h1>
+          <p class="error-message">${message}</p>
+          <a href="index.html" class="error-button">
+            <i class="fas fa-arrow-left"></i>
             <span>Go Back</span>
           </a>
         </div>
@@ -359,12 +454,6 @@
         loadingOverlay.style.display = 'none';
       }
       document.title = `Error | KINAFLIX`;
-      
-      if (!document.querySelector('.fa-arrow-left')) {
-        const faScript = document.createElement('script');
-        faScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js';
-        document.head.appendChild(faScript);
-      }
     };
 
     if (document.readyState === 'complete') {
