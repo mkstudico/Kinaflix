@@ -1,11 +1,256 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading... | KINAFLIX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #e50914;
+      --ad-primary: #4285f4;
+      --dark: #000000;
+      --light: #f5f5f5;
+      --gray-text: #888;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--dark);
+      color: var(--light);
+      height: 100vh;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .back-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #f40612;
+    }
+
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    .video-container iframe,
+    .video-container div[id^="rumble_"] {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      gap: 1rem;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      color: #e50914;
+      text-align: center;
+      padding: 2rem;
+      z-index: 100;
+    }
+
+    .error-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      margin-bottom: 1.5rem;
+      max-width: 80%;
+    }
+
+    .error-button {
+      background: #e50914;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .error-button:hover {
+      background: #f40612;
+    }
+
+    .debug-console {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 1000;
+      max-height: 30vh;
+      overflow-y: auto;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <a href="#" class="back-button" id="back-button">
+    <i class="fas fa-arrow-left"></i>
+    <span>BACK</span>
+  </a>
+
+  <div class="video-container" id="video-container">
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading player...</div>
+    </div>
+  </div>
+
+  <div class="debug-console" id="debug-console"></div>
+
+  <script type="module">
     // Configuration
     const RUMBLE_PUB_ID = '4m9tqz'; // Your monetized publisher ID
     const DEBUG_MODE = true; // Set to false in production
 
-    // Debug logging (same as before)
-    // Error handling (same as before)
-    // Load movie data from Firestore (same as before)
+    // Debug logging
+    function debugLog(message) {
+      if (DEBUG_MODE) {
+        console.log(message);
+        const debugConsole = document.getElementById('debug-console');
+        if (debugConsole) {
+          debugConsole.style.display = 'block';
+          debugConsole.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+          debugConsole.scrollTop = debugConsole.scrollHeight;
+        }
+      }
+    }
+
+    // Error handling
+    function showError(message, error = null) {
+      if (error) {
+        debugLog(`Error: ${message} - ${error.message || error}`);
+        console.error(message, error);
+      } else {
+        debugLog(`Error: ${message}`);
+        console.error(message);
+      }
+
+      const container = document.getElementById('video-container');
+      const loadingOverlay = document.getElementById('loading-overlay');
+      
+      if (container) {
+        container.innerHTML = `
+          <div class="error-container">
+            <h1 class="error-title">⚠️ Error</h1>
+            <p class="error-message">${message}</p>
+            <a href="index.html" class="error-button">
+              <i class="fas fa-arrow-left"></i>
+              <span>Go Back</span>
+            </a>
+          </div>
+        `;
+      }
+      
+      if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+      }
+      
+      document.title = `Error | KINAFLIX`;
+    }
+
+    // Load movie data from Firestore
+    const loadMovieData = async (movieId) => {
+      try {
+        debugLog(`Loading movie data for ID: ${movieId}`);
+        
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js');
+        const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js');
+        
+        const app = initializeApp({
+          apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+          authDomain: "kinaflix.firebaseapp.com",
+          projectId: "kinaflix",
+          storageBucket: "kinaflix.appspot.com",
+          messagingSenderId: "318239806217",
+          appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
+        });
+        
+        const db = getFirestore(app);
+        const docSnap = await getDoc(doc(db, 'movies', movieId));
+        
+        if (!docSnap.exists()) {
+          throw new Error('Movie not found');
+        }
+        
+        debugLog(`Successfully loaded movie data`);
+        return docSnap.data();
+      } catch (error) {
+        throw new Error(`Failed to load movie data: ${error.message}`);
+      }
+    };
 
     // Improved Rumble video ID extractor
     function extractRumbleVideoId(url) {
@@ -36,7 +281,74 @@
       }
     }
 
-    // Initialize Rumble player (same as before)
+    // Initialize Rumble player
+    const initRumblePlayer = (videoId, containerId) => {
+      return new Promise((resolve, reject) => {
+        try {
+          debugLog(`Initializing Rumble player for video: ${videoId}`);
+          
+          // Create container if it doesn't exist
+          let container = document.getElementById(containerId);
+          if (!container) {
+            container = document.createElement('div');
+            container.id = containerId;
+            document.getElementById('video-container').appendChild(container);
+          }
+
+          // Initialize Rumble if not already loaded
+          window.Rumble = window.Rumble || function() {
+            (window.Rumble._ = window.Rumble._ || []).push(arguments);
+          };
+
+          // Load Rumble embed script
+          const script = document.createElement('script');
+          script.src = `https://rumble.com/embedJS/u${RUMBLE_PUB_ID}.${videoId}/?pub=${RUMBLE_PUB_ID}`;
+          script.async = true;
+          
+          script.onload = () => {
+            debugLog(`Rumble script loaded successfully`);
+            try {
+              // Initialize player
+              Rumble("play", {
+                video: videoId,
+                div: containerId,
+                rel: 0 // Don't show related videos
+              });
+              
+              debugLog(`Rumble player initialized`);
+              
+              // Check for player initialization
+              const checkInterval = setInterval(() => {
+                const playerFrame = document.querySelector(`#${containerId} iframe`);
+                if (playerFrame) {
+                  clearInterval(checkInterval);
+                  debugLog(`Rumble player frame detected`);
+                  resolve(playerFrame);
+                }
+              }, 500);
+              
+              // Timeout fallback
+              setTimeout(() => {
+                clearInterval(checkInterval);
+                reject(new Error('Rumble player failed to initialize within timeout period'));
+              }, 10000);
+              
+            } catch (error) {
+              reject(new Error(`Rumble initialization error: ${error.message}`));
+            }
+          };
+          
+          script.onerror = () => {
+            reject(new Error('Failed to load Rumble embed script'));
+          };
+          
+          document.body.appendChild(script);
+          
+        } catch (error) {
+          reject(error);
+        }
+      });
+    };
 
     // Core player functionality
     const initPlayer = async () => {
@@ -103,4 +415,6 @@
     } else {
       document.addEventListener('DOMContentLoaded', initPlayer);
     }
-</script>
+  </script>
+</body>
+</html>
