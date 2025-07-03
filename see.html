@@ -184,6 +184,7 @@
       padding: 0.5rem;
       background: rgba(0, 0, 0, 0.7);
       z-index: 2;
+      transition: all 0.3s ease;
     }
 
     .action-btn {
@@ -290,7 +291,7 @@
       transition: transform 0.3s ease;
     }
 
-    .series-movie-card:hover, .popular-movie-info:hover {
+    .series-movie-card:hover, .popular-movie-card:hover {
       transform: translateY(-5px);
     }
 
@@ -391,6 +392,7 @@
 
     .trailer-section {
       width: 100%;
+      position: relative;
     }
 
     .trailer-title {
@@ -720,6 +722,8 @@
     const seriesSlider = document.getElementById('series-slider');
     const popularSlider = document.getElementById('popular-slider');
     const preloader = document.getElementById('preloader');
+    const actionButtons = document.getElementById('action-buttons');
+    const trailerSection = document.getElementById('trailer-section');
 
     let currentMovie = null;
     let currentUser = null;
@@ -761,6 +765,25 @@
         }, 500); // Match transition duration
       }, 3000); // Minimum 3 seconds
     });
+
+    function adjustButtonPosition() {
+      if (!isMobile || !actionButtons || !trailerSection) return;
+
+      const buttonsRect = actionButtons.getBoundingClientRect();
+      const trailerRect = trailerSection.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
+      // Check if buttons are below the viewport or overlaid by trailer
+      if (buttonsRect.bottom > viewportHeight || buttonsRect.top > trailerRect.top) {
+        if (!actionButtons.parentElement.classList.contains('trailer-section')) {
+          trailerSection.insertBefore(actionButtons, trailerSection.firstChild);
+          actionButtons.style.marginBottom = '1rem';
+        }
+      } else if (actionButtons.parentElement.classList.contains('trailer-section')) {
+        document.getElementById('movie-info').appendChild(actionButtons);
+        actionButtons.style.marginBottom = '0';
+      }
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       loadMovieData();
@@ -842,6 +865,9 @@
         document.querySelectorAll('.action-btn').forEach(btn => {
           if (btn) btn.style.touchAction = 'manipulation';
         });
+        window.addEventListener('resize', adjustButtonPosition);
+        window.addEventListener('load', adjustButtonPosition);
+        setInterval(adjustButtonPosition, 500); // Check periodically for content changes
       }
 
       if (seriesSlider && seriesMovies) {
@@ -1046,6 +1072,7 @@
       } else if (trailerContainer) {
         trailerContainer.innerHTML = '<p>No trailer available.</p>';
       }
+      adjustButtonPosition();
     }
 
     function extractYouTubeVideoId(url) {
