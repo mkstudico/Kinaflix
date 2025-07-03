@@ -26,7 +26,7 @@
       background-color: var(--dark);
       color: var(--light);
       line-height: 1.5;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
     #preloader {
@@ -80,7 +80,7 @@
     }
 
     .logo {
-      position: absolute;
+      position: fixed;
       top: 1rem;
       right: 1rem;
       font-size: 1.5rem;
@@ -97,7 +97,7 @@
     .player-section {
       position: relative;
       width: 100%;
-      height: 80vh;
+      height: 60vh;
       background: #000;
       overflow: hidden;
       display: flex;
@@ -112,18 +112,20 @@
       width: 100%;
       height: 100%;
       display: flex;
-      flex-direction: row;
-      align-items: center;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .player-image {
-      flex: 1;
       width: 100%;
-      height: auto;
-      min-height: 100%;
+      height: 100%;
       object-fit: cover;
       filter: brightness(40%);
-      transition: filter 0.3s ease;
+      transition: filter 0.3s ease, transform 0.3s ease;
+    }
+
+    .player-image:hover {
+      transform: scale(1.02);
     }
 
     .player-container::after {
@@ -138,21 +140,24 @@
     }
 
     .movie-info {
-      max-width: 50%;
-      position: absolute;
-      top: 50%;
-      left: 2rem;
-      transform: translateY(-50%);
+      position: relative;
+      top: auto;
+      left: auto;
+      right: auto;
+      transform: none;
       color: white;
       z-index: 2;
       padding: 1rem;
       border-radius: 8px;
-      background: transparent;
+      background: rgba(0, 0, 0, 0.7);
+      flex: 0 0 auto;
+      width: 100%;
+      max-width: 100%;
     }
 
     .movie-title {
       font-family: 'Montserrat', sans-serif;
-      font-size: 3rem;
+      font-size: 1.8rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
       text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
@@ -169,7 +174,7 @@
     }
 
     .movie-description {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       line-height: 1.5;
       margin-bottom: 1rem;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
@@ -185,7 +190,7 @@
       background: rgba(255, 255, 255, 0.1);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 0.6rem 1.2rem;
+      padding: 0.5rem 1rem;
       border-radius: 25px;
       cursor: pointer;
       display: flex;
@@ -193,7 +198,7 @@
       gap: 0.5rem;
       transition: all 0.3s ease;
       font-weight: 500;
-      font-size: 1rem;
+      font-size: 0.9rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       touch-action: manipulation;
@@ -243,7 +248,7 @@
     .series-section, .popular-movies-section {
       padding: 1rem;
       background: var(--dark-gray);
-      display: block;
+      display: none;
     }
 
     .series-title, .popular-movies-title {
@@ -260,6 +265,7 @@
       scrollbar-width: thin;
       scrollbar-color: var(--primary) var(--dark-gray);
       position: relative;
+      touch-action: pan-x;
     }
 
     .series-movies::-webkit-scrollbar, .popular-movies-grid::-webkit-scrollbar {
@@ -378,14 +384,14 @@
 
     .content-section {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       padding: 1rem;
       gap: 1rem;
       background: var(--dark-gray);
     }
 
-    .trailer-section, .comments-section {
-      width: 50%;
+    .trailer-section {
+      width: 100%;
     }
 
     .trailer-title {
@@ -408,6 +414,10 @@
       width: 100%;
       height: 100%;
       border: none;
+    }
+
+    .comments-section {
+      width: 100%;
     }
 
     .comments-title {
@@ -562,6 +572,15 @@
       color: #f40612;
     }
 
+    .more-text {
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .more-text:hover {
+      color: #f40612;
+    }
+
     @media (max-width: 767px) {
       body {
         overflow: auto;
@@ -580,7 +599,6 @@
       .player-image {
         height: 40vh;
         min-height: 200px;
-        filter: none;
       }
 
       .back-button, .logo {
@@ -642,7 +660,7 @@
       }
 
       .action-buttons {
-        justify-content: flex-end;
+        justify-content: center;
         gap: 0.3rem;
         margin: 0.5rem 0;
       }
@@ -654,7 +672,6 @@
         height: 40px;
         justify-content: center;
         align-items: center;
-        border-radius: 50%;
       }
 
       .action-btn i {
