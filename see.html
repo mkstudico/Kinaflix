@@ -26,7 +26,7 @@
       background-color: var(--dark);
       color: var(--light);
       line-height: 1.5;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     #preloader {
@@ -59,15 +59,13 @@
     }
 
     .back-button {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
       z-index: 100;
-      background-color: var(--primary);
-      color: white;
+      color: var(--primary);
       border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
+      padding: 0.3rem 0.8rem;
       font-weight: bold;
       display: flex;
       align-items: center;
@@ -76,13 +74,13 @@
     }
 
     .back-button:hover {
-      background-color: #f40612;
+      color: #f40612;
     }
 
     .logo {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
       font-size: 1.5rem;
       font-weight: bold;
       color: var(--primary);
@@ -120,7 +118,8 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: brightness(40%);
+      object-position: center;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.95), 0 20px 40px rgba(0, 0, 0, 0.8);
       transition: filter 0.3s ease, transform 0.3s ease;
     }
 
@@ -190,18 +189,28 @@
       background: rgba(255, 255, 255, 0.1);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
+      padding: 0;
+      border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: center;
       transition: all 0.3s ease;
       font-weight: 500;
-      font-size: 0.9rem;
+      font-size: 0;
       text-transform: uppercase;
       letter-spacing: 1px;
       touch-action: manipulation;
+      width: 40px;
+      height: 40px;
+    }
+
+    .action-btn i {
+      font-size: 1.2rem;
+      line-height: 40px;
+      text-align: center;
+      width: 100%;
+      margin-left: 12px;
     }
 
     .action-btn:hover {
@@ -709,6 +718,8 @@
         flex: 1;
         height: auto;
         min-height: 100%;
+        filter: brightness(40%);
+        box-shadow: none;
       }
 
       .movie-info {
@@ -728,13 +739,40 @@
         font-size: 1.1rem;
       }
 
+      .action-buttons {
+        gap: 0.5rem;
+      }
+
       .action-btn {
         padding: 0.6rem 1.2rem;
         font-size: 1rem;
+        border-radius: 25px;
+        width: auto;
+        height: auto;
+        justify-content: center;
+        align-items: center;
       }
 
       .action-btn i {
+        font-size: 1rem;
+        line-height: normal;
         margin-left: 6px;
+        width: auto;
+      }
+
+      .back-button {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        background-color: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+      }
+
+      .back-button:hover {
+        background-color: #f40612;
+        color: white;
       }
 
       .series-section, .popular-movies-section {
