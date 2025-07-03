@@ -16,8 +16,6 @@
       --dark-gray: #222;
       --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       --content-box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-      --whatsapp-green: #25D366;
-      --whatsapp-dark-green: #128C7E;
       --spacing-base: 1rem;
       --spacing-sm: 0.5rem;
     }
@@ -29,6 +27,10 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       background: var(--dark);
@@ -36,8 +38,9 @@
       min-height: 100vh;
       line-height: 1.5;
       touch-action: manipulation;
-      overflow: hidden; /* Hide default scrollbars */
+      overflow-x: hidden;
       margin: 0;
+      -webkit-font-smoothing: antialiased;
     }
 
     body.light-mode {
@@ -51,6 +54,7 @@
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      overflow-x: hidden;
     }
 
     header {
@@ -96,30 +100,6 @@
     .back-btn:hover {
       color: var(--primary);
       transform: scale(1.1);
-    }
-
-    .whatsapp-btn {
-      background-color: var(--whatsapp-green);
-      color: white;
-      border: none;
-      padding: var(--spacing-sm) var(--spacing-base);
-      border-radius: 4px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      text-decoration: none;
-      font-size: 0.9rem;
-    }
-
-    .whatsapp-btn:hover {
-      background-color: var(--whatsapp-dark-green);
-    }
-
-    .donate-btn-container {
-      display: inline-block;
     }
 
     .theme-toggle-header {
@@ -237,7 +217,8 @@
     .section {
       padding: var(--spacing-base) var(--spacing-sm);
       background: var(--dark);
-      min-height: 100vh; /* Ensure sections take full height for scrolling */
+      min-height: 100vh;
+      scroll-snap-align: start;
     }
 
     body.light-mode .section {
@@ -256,19 +237,20 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: var(--spacing-sm);
-      overflow: hidden;
       padding: var(--spacing-sm);
+      will-change: transform;
     }
 
     .movie-card {
       background: var(--dark-gray);
       border-radius: 6px;
       overflow: hidden;
-      transition: transform 0.3s, box-shadow 0.3s;
+      transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
       position: relative;
       cursor: pointer;
       min-width: 120px;
       min-height: 200px;
+      will-change: transform;
     }
 
     body.light-mode .movie-card {
@@ -329,7 +311,7 @@
       justify-content: center;
       align-items: center;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s ease-out;
       padding: var(--spacing-sm);
       text-align: center;
     }
@@ -371,7 +353,7 @@
       display: flex;
       align-items: center;
       gap: var(--spacing-sm);
-      transition: background 0.3s;
+      transition: background 0.3s ease-out;
       font-size: 0.7rem;
     }
 
@@ -436,11 +418,42 @@
       color: var(--gray);
       font-size: 1.2rem;
       margin: 0 var(--spacing-sm);
-      transition: color 0.3s;
+      transition: color 0.3s ease-out;
     }
 
     .social-icons a:hover {
       color: var(--primary);
+    }
+
+    /* Smooth scrolling container */
+    .scroll-container {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      flex-grow: 1;
+    }
+
+    /* Custom scrollbar for WebKit browsers */
+    .scroll-container::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .scroll-container::-webkit-scrollbar-track {
+      background: var(--dark-gray);
+    }
+
+    .scroll-container::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    body.light-mode .scroll-container::-webkit-scrollbar-track {
+      background: #e0e0e0;
+    }
+
+    body.light-mode .scroll-container::-webkit-scrollbar-thumb {
+      background: var(--primary-dark);
     }
 
     @media (max-width: 768px) {
@@ -528,10 +541,6 @@
         padding: 0.1rem 0.1rem;
         font-size: 0.5rem;
       }
-      .whatsapp-btn {
-        padding: var(--spacing-sm) var(--spacing-sm);
-        font-size: 0.8rem;
-      }
       .show-toggle-header {
         padding: var(--spacing-sm) var(--spacing-sm);
         font-size: 0.6rem;
@@ -547,12 +556,6 @@
     <header>
       <div class="header-left">
         <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> BACK</a>
-        <a href="https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c" target="_blank" class="whatsapp-btn">
-          <i class="fab fa-whatsapp"></i> JOIN US
-        </a>
-        <div class="donate-btn-container">
-          <div id="donate-button"></div>
-        </div>
       </div>
       <div class="header-right">
         <button class="show-toggle-header" id="show-toggle-header">Show</button>
@@ -582,30 +585,19 @@
       </div>
     </header>
     
-    <main id="main-content">
-      <div class="spinner active" id="loading-spinner"></div>
-    </main>
+    <div class="scroll-container" id="scroll-container">
+      <main id="main-content">
+        <div class="spinner active" id="loading-spinner"></div>
+      </main>
 
-    <div class="copyright-text">© 2025 KINAFLIX by btem@fficial</div>
-    <div class="social-icons">
-      <a href="https://www.youtube.com/@kinaflix" target="_blank"><i class="fab fa-youtube"></i></a>
-      <a href="https://www.instagram.com/kinaflix_official" target="_blank"><i class="fab fa-instagram"></i></a>
+      <div class="copyright-text">© 2025 KINAFLIX by btem@fficial</div>
+      <div class="social-icons">
+        <a href="https://www.youtube.com/@kinaflix" target="_blank"><i class="fab fa-youtube"></i></a>
+        <a href="https://www.instagram.com/kinaflix_official" target="_blank"><i class="fab fa-instagram"></i></a>
+      </div>
     </div>
   </div>
 
-  <!-- PayPal Donation Button Script -->
-  <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
-  <script>
-    PayPal.Donation.Button({
-      env: 'production',
-      hosted_button_id: 'KPKNJ4Y5V7TBC',
-      image: {
-        src: 'https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif',
-        alt: 'Donate with PayPal button',
-        title: 'PayPal - The safer, easier way to pay online!',
-      }
-    }).render('#donate-button');
-  </script>
   <script defer type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
@@ -628,10 +620,8 @@
     const db = getFirestore(app);
 
     const mainContent = document.getElementById('main-content');
+    const scrollContainer = document.getElementById('scroll-container');
     const loadingSpinner = document.getElementById('loading-spinner');
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    document.body.appendChild(toast);
     const showToggleHeader = document.getElementById('show-toggle-header');
     const dropdownHeader = document.getElementById('dropdown-header');
     const genreDropdown = document.getElementById('genre-dropdown');
@@ -736,13 +726,6 @@
         });
         if (navigator.cookieEnabled) localStorage.setItem('theme', 'dark');
       }
-    }
-
-    function showToast(message, type = 'info') {
-      toast.textContent = message;
-      toast.className = 'toast';
-      toast.classList.add(type, 'show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     async function loadGenreOrUmusobanuziPage() {
@@ -881,7 +864,7 @@
         attachMovieCardEvents();
         hideLoading();
       } catch (error) {
-        showToast('Error loading page: ' + error.message, 'error');
+        console.error('Error loading page:', error);
         hideLoading();
       }
     }
@@ -997,7 +980,6 @@
           e.stopPropagation();
           const movieId = target.getAttribute('data-movie-id');
           if (!currentUser) {
-            showToast('Please login to use watchlist', 'error');
             window.location.href = 'login.html';
             return;
           }
@@ -1006,18 +988,16 @@
             if (watchlist.includes(movieId)) {
               await updateDoc(userRef, { watchlist: arrayRemove(movieId) });
               watchlist = watchlist.filter(id => id !== movieId);
-              showToast('Removed from watchlist', 'success');
               target.classList.remove('in-watchlist');
               target.innerHTML = `<i class="fas fa-plus"></i> Add to Watchlist`;
             } else {
               await updateDoc(userRef, { watchlist: arrayUnion(movieId) });
               watchlist.push(movieId);
-              showToast('Added to watchlist', 'success');
               target.classList.add('in-watchlist');
               target.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
             }
           } catch (error) {
-            showToast('Error updating watchlist: ' + error.message, 'error');
+            console.error('Error updating watchlist:', error);
           }
         } else {
           const movieId = target.getAttribute('data-movie-id') || target.closest('.movie-card')?.getAttribute('data-movie-id');
@@ -1040,7 +1020,6 @@
         const movieId = target.getAttribute('data-movie-id') || target.closest('.movie-card')?.getAttribute('data-movie-id');
         if (target.classList.contains('watchlist-btn')) {
           if (!currentUser) {
-            showToast('Please login to use watchlist', 'error');
             window.location.href = 'login.html';
             return;
           }
@@ -1084,9 +1063,6 @@
       let isLoading = false;
       let lastScrollTop = 0;
       let lastScrollLeft = 0;
-
-      mainContent.style.position = 'relative';
-      mainContent.style.overflow = 'hidden';
 
       const loadMore = async () => {
         if (isLoading) return;
@@ -1226,13 +1202,13 @@
         hideLoading();
       };
 
-      mainContent.addEventListener('scroll', () => {
-        const scrollTop = mainContent.scrollTop;
-        const scrollLeft = mainContent.scrollLeft;
-        const clientHeight = mainContent.clientHeight;
-        const clientWidth = mainContent.clientWidth;
-        const scrollHeight = mainContent.scrollHeight;
-        const scrollWidth = mainContent.scrollWidth;
+      scrollContainer.addEventListener('scroll', () => {
+        const scrollTop = scrollContainer.scrollTop;
+        const scrollLeft = scrollContainer.scrollLeft;
+        const clientHeight = scrollContainer.clientHeight;
+        const clientWidth = scrollContainer.clientWidth;
+        const scrollHeight = scrollContainer.scrollHeight;
+        const scrollWidth = scrollContainer.scrollWidth;
 
         if ((scrollTop + clientHeight >= scrollHeight - 100 || scrollLeft + clientWidth >= scrollWidth - 100) &&
             (scrollTop !== lastScrollTop || scrollLeft !== lastScrollLeft)) {
@@ -1242,8 +1218,6 @@
         lastScrollLeft = scrollLeft;
       });
 
-      // Enable touch scrolling
-      mainContent.style.touchAction = 'pan-x pan-y';
       loadMore();
     }
   </script>
