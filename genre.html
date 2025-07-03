@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KINAFLIX – Browse by Umusobanuzi</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KINAFLIX – Browse by Genre or Umusobanuzi</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
   <style>
     :root {
@@ -19,12 +18,15 @@
       --content-box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
       --whatsapp-green: #25D366;
       --whatsapp-dark-green: #128C7E;
+      --spacing-base: 1rem;
+      --spacing-sm: 0.5rem;
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -32,6 +34,10 @@
       background: var(--dark);
       color: var(--light);
       min-height: 100vh;
+      line-height: 1.5;
+      touch-action: manipulation;
+      overflow: hidden; /* Hide default scrollbars */
+      margin: 0;
     }
 
     body.light-mode {
@@ -39,25 +45,26 @@
       color: var(--dark);
     }
 
-    /* Main Content Styles */
     .main-content {
-      flex: 1;
-      margin-left: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
     }
 
-    /* Header Styles */
     header {
       background: var(--dark);
-      padding: 1rem 2rem;
+      padding: var(--spacing-base) var(--spacing-sm);
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: var(--shadow);
       transition: background 0.3s;
-      gap: 1rem;
+      flex-shrink: 0;
     }
 
     body.light-mode header {
@@ -65,124 +72,54 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
-    .home-btn {
-      color: var(--light);
-      text-decoration: none;
-      font-size: 1.5rem;
-      transition: color 0.2s, transform 0.2s;
-      margin-right: auto;
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      flex-wrap: wrap;
     }
 
-    body.light-mode .home-btn {
+    .back-btn {
+      color: var(--light);
+      text-decoration: none;
+      font-size: 1.2rem;
+      transition: color 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    body.light-mode .back-btn {
       color: var(--dark);
     }
 
-    .home-btn:hover {
+    .back-btn:hover {
       color: var(--primary);
       transform: scale(1.1);
     }
 
-    /* WhatsApp Button */
     .whatsapp-btn {
       background-color: var(--whatsapp-green);
       color: white;
       border: none;
-      padding: 0.5rem 1rem;
+      padding: var(--spacing-sm) var(--spacing-base);
       border-radius: 4px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: var(--spacing-sm);
       text-decoration: none;
+      font-size: 0.9rem;
     }
 
     .whatsapp-btn:hover {
       background-color: var(--whatsapp-dark-green);
     }
 
-    /* PayPal Donation Button Container */
     .donate-btn-container {
       display: inline-block;
-    }
-
-    /* Auth Buttons */
-    .auth-buttons {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .auth-btn {
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .login-btn {
-      background: transparent;
-      border: 1px solid var(--light);
-      color: var(--light);
-    }
-
-    body.light-mode .login-btn {
-      border: 1px solid var(--dark);
-      color: var(--dark);
-    }
-
-    .login-btn:hover {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .register-btn {
-      background: var(--primary);
-      border: 1px solid var(--primary);
-      color: white;
-    }
-
-    .register-btn:hover {
-      background: var(--primary-dark);
-    }
-
-    .profile-btn {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--light);
-      border: none;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    body.light-mode .profile-btn {
-      background: rgba(0, 0, 0, 0.1);
-      color: var(--dark);
-    }
-
-    .profile-btn:hover {
-      background: var(--primary);
-      color: white;
-    }
-
-    .logout-btn {
-      background: transparent;
-      border: 1px solid var(--light);
-      color: var(--light);
-    }
-
-    body.light-mode .logout-btn {
-      border: 1px solid var(--dark);
-      color: var(--dark);
-    }
-
-    .logout-btn:hover {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
     }
 
     .theme-toggle-header {
@@ -192,6 +129,7 @@
       cursor: pointer;
       font-size: 1.2rem;
       transition: color 0.3s;
+      padding: var(--spacing-sm);
     }
 
     body.light-mode .theme-toggle-header {
@@ -202,24 +140,104 @@
       color: var(--primary);
     }
 
-    .mobile-menu-btn {
-      display: none;
-      background: none;
+    .show-toggle-header {
+      background: var(--primary);
+      color: white;
       border: none;
-      color: var(--light);
-      font-size: 1.5rem;
+      padding: var(--spacing-sm) var(--spacing-base);
+      border-radius: 3px;
       cursor: pointer;
-      margin-right: auto;
+      margin: 0 var(--spacing-sm);
+      transition: background 0.3s;
+      font-size: 0.8rem;
+      visibility: visible;
+      position: relative;
     }
 
-    body.light-mode .mobile-menu-btn {
+    .show-toggle-header:hover {
+      background: var(--primary-dark);
+    }
+
+    .dropdown-header {
+      display: none;
+      position: absolute;
+      background: var(--dark-gray);
+      border-radius: 3px;
+      box-shadow: var(--shadow);
+      z-index: 100;
+      min-width: 120px;
+      right: 0;
+      top: 100%;
+      margin-top: var(--spacing-sm);
+    }
+
+    body.light-mode .dropdown-header {
+      background: #e0e0e0;
+    }
+
+    .dropdown-header.show {
+      display: block;
+    }
+
+    .dropdown-header a {
+      color: var(--light);
+      padding: var(--spacing-sm) var(--spacing-base);
+      text-decoration: none;
+      display: block;
+      font-size: 0.8rem;
+    }
+
+    body.light-mode .dropdown-header a {
       color: var(--dark);
     }
 
-    /* Section Styles */
+    .dropdown-header a:hover {
+      background: var(--primary-light);
+      color: white;
+    }
+
+    .genre-dropdown {
+      display: none;
+      position: absolute;
+      background: var(--dark-gray);
+      border-radius: 3px;
+      box-shadow: var(--shadow);
+      z-index: 100;
+      min-width: 150px;
+      right: 0;
+      top: 100%;
+      margin-top: var(--spacing-sm);
+    }
+
+    body.light-mode .genre-dropdown {
+      background: #e0e0e0;
+    }
+
+    .genre-dropdown.show {
+      display: block;
+    }
+
+    .genre-dropdown a {
+      color: var(--light);
+      padding: var(--spacing-sm) var(--spacing-base);
+      text-decoration: none;
+      display: block;
+      font-size: 0.8rem;
+    }
+
+    body.light-mode .genre-dropdown a {
+      color: var(--dark);
+    }
+
+    .genre-dropdown a:hover {
+      background: var(--primary-light);
+      color: white;
+    }
+
     .section {
-      padding: 2rem 5rem;
+      padding: var(--spacing-base) var(--spacing-sm);
       background: var(--dark);
+      min-height: 100vh; /* Ensure sections take full height for scrolling */
     }
 
     body.light-mode .section {
@@ -227,32 +245,30 @@
     }
 
     .section-title {
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      margin-bottom: var(--spacing-sm);
       color: var(--primary);
-      padding-bottom: 0.5rem;
+      padding-bottom: var(--spacing-sm);
       border-bottom: 1px solid var(--primary);
     }
 
-    /* Umusobanuzi Section */
-    .umusobanuzi-section {
-      margin-bottom: 3rem;
-    }
-
-    /* Movies Grid */
     .movies-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1.2rem;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: var(--spacing-sm);
+      overflow: hidden;
+      padding: var(--spacing-sm);
     }
 
     .movie-card {
       background: var(--dark-gray);
-      border-radius: 8px;
+      border-radius: 6px;
       overflow: hidden;
       transition: transform 0.3s, box-shadow 0.3s;
       position: relative;
       cursor: pointer;
+      min-width: 120px;
+      min-height: 200px;
     }
 
     body.light-mode .movie-card {
@@ -260,25 +276,25 @@
     }
 
     .movie-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      transform: translateY(-8px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     }
 
     .movie-poster {
       width: 100%;
-      height: 240px;
+      height: 150px;
       object-fit: cover;
       display: block;
       transition: opacity 0.3s;
     }
 
     .movie-info {
-      padding: 0.8rem;
+      padding: var(--spacing-sm);
     }
 
     .movie-title {
-      font-size: 0.9rem;
-      margin-bottom: 0.4rem;
+      font-size: 0.8rem;
+      margin-bottom: var(--spacing-sm);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -288,7 +304,7 @@
       display: flex;
       justify-content: space-between;
       color: var(--gray);
-      font-size: 0.8rem;
+      font-size: 0.7rem;
     }
 
     .movie-rating {
@@ -296,9 +312,9 @@
     }
 
     .time-indicator {
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       color: var(--gray);
-      margin-top: 0.3rem;
+      margin-top: var(--spacing-sm);
     }
 
     .movie-overlay {
@@ -314,7 +330,7 @@
       align-items: center;
       opacity: 0;
       transition: opacity 0.3s;
-      padding: 0.8rem;
+      padding: var(--spacing-sm);
       text-align: center;
     }
 
@@ -323,40 +339,40 @@
     }
 
     .overlay-title {
-      font-size: 1rem;
-      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+      margin-bottom: var(--spacing-sm);
       color: white;
     }
 
     .overlay-genres {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 0.8rem;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-sm);
       justify-content: center;
     }
 
     .genre-tag {
       background: var(--primary);
       color: white;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.7rem;
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      font-size: 0.6rem;
     }
 
     .overlay-btn {
       background: var(--primary);
       color: white;
       border: none;
-      padding: 0.4rem 0.8rem;
-      border-radius: 4px;
+      padding: var(--spacing-sm) var(--spacing-base);
+      border-radius: 3px;
       cursor: pointer;
-      margin-top: 0.4rem;
+      margin-top: var(--spacing-sm);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: var(--spacing-sm);
       transition: background 0.3s;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
     }
 
     .overlay-btn:hover {
@@ -373,23 +389,22 @@
 
     .umusobanuzi {
       position: absolute;
-      top: 8px;
-      left: 8px;
+      top: 4px;
+      left: 4px;
       background: rgba(0, 0, 0, 0.7);
       color: white;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      font-size: 0.7rem;
+      padding: 0.1rem 0.2rem;
+      border-radius: 3px;
+      font-size: 0.6rem;
       z-index: 10;
     }
 
-    /* Loading Spinner */
     .spinner {
       display: none;
-      width: 40px;
-      height: 40px;
-      margin: 2rem auto;
-      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 24px;
+      height: 24px;
+      margin: var(--spacing-base) auto;
+      border: 3px solid rgba(0, 0, 0, 0.1);
       border-radius: 50%;
       border-top-color: var(--primary);
       animation: spin 1s ease-in-out infinite;
@@ -403,190 +418,166 @@
       display: block;
     }
 
-    /* Footer Styles */
-    footer {
-      background: var(--dark-gray);
-      padding: 3rem 5rem 1rem;
-      color: var(--gray);
-    }
-
-    body.light-mode footer {
-      background: #e0e0e0;
-    }
-
-    .footer-content {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .footer-column h3 {
-      color: var(--light);
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-    }
-
-    body.light-mode .footer-column h3 {
-      color: var(--dark);
-    }
-
-    .footer-column ul {
-      list-style: none;
-    }
-
-    .footer-column li {
-      margin-bottom: 0.5rem;
-    }
-
-    .footer-column a {
-      color: var(--gray);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .footer-column a:hover {
-      color: var(--primary);
-    }
-
-    .social-links {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .social-links a {
-      color: var(--gray);
-      font-size: 1.5rem;
-      transition: color 0.3s;
-    }
-
-    .social-links a:hover {
-      color: var(--primary);
-    }
-
-    .footer-bottom {
+    .copyright-text {
       text-align: center;
-      padding-top: 1rem;
-      border-top: 1px solid var(--dark);
+      padding: var(--spacing-base) 0;
+      color: var(--gray);
+      font-size: 0.9rem;
+      flex-shrink: 0;
     }
 
-    body.light-mode .footer-bottom {
-      border-top: 1px solid #ccc;
+    .social-icons {
+      text-align: center;
+      padding: var(--spacing-sm) 0;
+      flex-shrink: 0;
     }
 
-    /* Toast Notifications */
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--dark);
-      color: white;
-      padding: 1rem;
-      border-radius: 4px;
-      box-shadow: var(--shadow);
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s;
-      z-index: 1000;
+    .social-icons a {
+      color: var(--gray);
+      font-size: 1.2rem;
+      margin: 0 var(--spacing-sm);
+      transition: color 0.3s;
     }
 
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .toast.success {
-      background: #4CAF50;
-    }
-
-    .toast.error {
-      background: #f44336;
-    }
-
-    /* Responsive Styles */
-    @media (max-width: 1024px) {
-      .section, footer {
-        padding: 2rem;
-      }
+    .social-icons a:hover {
+      color: var(--primary);
     }
 
     @media (max-width: 768px) {
-      .main-content {
-        margin-left: 0;
+      .movies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
       }
-      .footer-content {
-        grid-template-columns: repeat(2, 1fr);
+      .movie-poster {
+        height: 130px;
       }
-      .mobile-menu-btn {
-        display: none; /* No sidebar, so no menu button */
+      .movie-title {
+        font-size: 0.75rem;
+      }
+      .movie-meta {
+        font-size: 0.65rem;
+      }
+      .time-indicator {
+        font-size: 0.55rem;
+      }
+      .overlay-title {
+        font-size: 0.8rem;
+      }
+      .genre-tag {
+        font-size: 0.55rem;
+        padding: 0.1rem 0.2rem;
+      }
+      .overlay-btn {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        font-size: 0.65rem;
+      }
+      .umusobanuzi {
+        top: 3px;
+        left: 3px;
+        padding: 0.1rem 0.2rem;
+        font-size: 0.55rem;
+      }
+      header {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-left, .header-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .show-toggle-header {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        font-size: 0.7rem;
+      }
+      .section {
+        padding: var(--spacing-sm);
       }
     }
 
     @media (max-width: 576px) {
-      .section, footer {
-        padding: 1rem;
-      }
       .movies-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: var(--spacing-sm);
       }
       .movie-poster {
-        height: 200px;
+        height: 120px;
       }
       .movie-title {
-        font-size: 0.85rem;
+        font-size: 0.7rem;
       }
       .movie-meta {
-        font-size: 0.75rem;
+        font-size: 0.6rem;
       }
       .time-indicator {
-        font-size: 0.65rem;
+        font-size: 0.5rem;
       }
       .overlay-title {
-        font-size: 0.9rem;
-      }
-      .genre-tag {
-        font-size: 0.65rem;
-        padding: 0.15rem 0.4rem;
-      }
-      .overlay-btn {
-        padding: 0.3rem 0.7rem;
         font-size: 0.75rem;
       }
-      .umusobanuzi {
-        top: 6px;
-        left: 6px;
-        padding: 0.15rem 0.3rem;
-        font-size: 0.65rem;
+      .genre-tag {
+        font-size: 0.5rem;
+        padding: 0.1rem 0.2rem;
       }
-      .footer-content {
-        grid-template-columns: 1fr;
+      .overlay-btn {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        font-size: 0.6rem;
+      }
+      .umusobanuzi {
+        top: 2px;
+        left: 2px;
+        padding: 0.1rem 0.1rem;
+        font-size: 0.5rem;
+      }
+      .whatsapp-btn {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        font-size: 0.8rem;
+      }
+      .show-toggle-header {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        font-size: 0.6rem;
+      }
+      .section-title {
+        font-size: 1.1rem;
       }
     }
   </style>
 </head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DC1T9B6B9W"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-DC1T9B6B9W');
-</script>
 <body>
   <div class="main-content">
     <header>
-      <a href="index.html" class="home-btn"><i class="fas fa-home"></i></a>
-      <a href="https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c" target="_blank" class="whatsapp-btn">
-        <i class="fab fa-whatsapp"></i> JOIN US
-      </a>
-      <div class="donate-btn-container">
-        <div id="donate-button"></div>
+      <div class="header-left">
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> BACK</a>
+        <a href="https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c" target="_blank" class="whatsapp-btn">
+          <i class="fab fa-whatsapp"></i> JOIN US
+        </a>
+        <div class="donate-btn-container">
+          <div id="donate-button"></div>
+        </div>
       </div>
-      <div class="auth-buttons" id="auth-buttons">
-        <button class="auth-btn login-btn">Login</button>
-        <button class="auth-btn register-btn">Register</button>
+      <div class="header-right">
+        <button class="show-toggle-header" id="show-toggle-header">Show</button>
+        <div class="dropdown-header" id="dropdown-header">
+          <a href="#" data-type="abasobanuzi">Abasobanuzi only</a>
+          <a href="#" data-type="genres">Genres only</a>
+          <a href="#" data-type="all">All</a>
+          <a href="#" id="choose-genre">Choose</a>
+        </div>
+        <div class="genre-dropdown" id="genre-dropdown">
+          <a href="#" data-genre="Action">Action</a>
+          <a href="#" data-genre="Adventure">Adventure</a>
+          <a href="#" data-genre="Animation">Animation</a>
+          <a href="#" data-genre="Comedy">Comedy</a>
+          <a href="#" data-genre="Crime">Crime</a>
+          <a href="#" data-genre="Drama">Drama</a>
+          <a href="#" data-genre="Horror">Horror</a>
+          <a href="#" data-genre="Romance">Romance</a>
+          <a href="#" data-genre="Adult">Adult</a>
+          <a href="#" data-genre="War">War</a>
+          <a href="#" data-genre="Thriller">Thriller</a>
+          <a href="#" data-genre="Indian">Indian</a>
+          <a href="#" data-genre="Sci-Fi">Sci-Fi</a>
+          <a href="#" data-genre="Sport">Sport</a>
+        </div>
         <button class="theme-toggle-header"><i class="fas fa-moon"></i></button>
       </div>
     </header>
@@ -595,38 +586,11 @@
       <div class="spinner active" id="loading-spinner"></div>
     </main>
 
-    <footer>
-      <div class="footer-content">
-        <div class="footer-column">
-          <h3>Navigation</h3>
-          <ul>
-            <li><a href="index.html" class="footer-link">Home</a></li>
-            <li><a href="#" class="footer-link" data-page="for-you">For You</a></li>
-          </ul>
-        </div>
-        <div class="footer-column">
-          <h3>Legal</h3>
-          <ul>
-            <li><a href="pass.html">Admin</a></li>
-          </ul>
-        </div>
-        <div class="footer-column">
-          <h3>Account</h3>
-          <ul>
-            <li><a href="#" class="footer-link" data-page="history">History</a></li>
-          </ul>
-        </div>
-        <div class="footer-column">
-          <h3>Connect With Us</h3>
-          <div class="social-links">
-            <a href="https://www.youtube.com/@kinaflix"><i class="fab fa-youtube"></i></a>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>© 2025 KINAFLIX. All rights reserved.</p>
-      </div>
-    </footer>
+    <div class="copyright-text">© 2025 KINAFLIX by btem@fficial</div>
+    <div class="social-icons">
+      <a href="https://www.youtube.com/@kinaflix" target="_blank"><i class="fab fa-youtube"></i></a>
+      <a href="https://www.instagram.com/kinaflix_official" target="_blank"><i class="fab fa-instagram"></i></a>
+    </div>
   </div>
 
   <!-- PayPal Donation Button Script -->
@@ -646,7 +610,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
-    import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, updateDoc, arrayUnion, arrayRemove, where } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
@@ -668,37 +632,36 @@
     const toast = document.createElement('div');
     toast.className = 'toast';
     document.body.appendChild(toast);
-    const authButtons = document.getElementById('auth-buttons');
+    const showToggleHeader = document.getElementById('show-toggle-header');
+    const dropdownHeader = document.getElementById('dropdown-header');
+    const genreDropdown = document.getElementById('genre-dropdown');
 
     let currentUser = null;
     let movies = [];
-    let watchHistory = [];
     let watchlist = [];
-    let themeToggleTimeout = null;
+    let watchHistory = [];
+    let themeToggleTimeout;
 
-    // Cache for Firestore data
     const cache = {
       movies: null,
-      expiry: 5 * 60 * 1000 // 5 minutes
+      expiry: 5 * 60 * 1000
     };
 
     document.addEventListener('DOMContentLoaded', () => {
       initAuth();
       initUI();
-      loadUmusobanuziPage();
+      loadGenreOrUmusobanuziPage();
       loadWatchHistoryFromCookies();
-      setupIntersectionObserver();
+      initInfiniteScroll();
     });
 
     function initAuth() {
       onAuthStateChanged(auth, async (user) => {
         if (user) {
           currentUser = user;
-          updateAuthUI(user);
           await loadUserData(user.uid);
         } else {
           currentUser = null;
-          updateAuthUI(null);
         }
       });
     }
@@ -710,7 +673,7 @@
         themeToggleTimeout = setTimeout(toggleTheme, 100);
       }));
 
-      const savedTheme = localStorage.getItem('theme');
+      const savedTheme = localStorage.getItem('theme') || (navigator.cookieEnabled ? localStorage.getItem('theme') : null);
       if (savedTheme === 'light') {
         document.body.classList.add('light-mode');
         document.querySelectorAll('.theme-toggle-header i').forEach(icon => {
@@ -719,66 +682,42 @@
         });
       }
 
-      // Event delegation for footer links
-      document.addEventListener('click', (e) => {
-        const link = e.target.closest('.footer-link');
-        if (link) {
+      showToggleHeader.addEventListener('click', (e) => {
+        e.preventDefault();
+        dropdownHeader.classList.toggle('show');
+        genreDropdown.classList.remove('show');
+      });
+
+      dropdownHeader.addEventListener('click', (e) => {
+        const type = e.target.getAttribute('data-type');
+        if (type) {
+          localStorage.removeItem('selectedGenre');
+          localStorage.setItem('displayType', type);
+          dropdownHeader.classList.remove('show');
+          loadGenreOrUmusobanuziPage();
+        } else if (e.target.id === 'choose-genre') {
           e.preventDefault();
-          const page = link.getAttribute('data-page');
-          navigateTo(page);
+          genreDropdown.classList.toggle('show');
+          dropdownHeader.classList.remove('show');
         }
       });
-    }
 
-    function navigateTo(page) {
-      showLoading();
-      switch(page) {
-        case 'home':
-          window.location.href = 'index.html';
-          break;
-        case 'for-you':
-          window.location.href = 'index.html#for-you';
-          break;
-        case 'history':
-          if (currentUser) {
-            window.location.href = 'profile.html#history';
-          } else {
-            window.location.href = 'login.html';
-          }
-          break;
-        default:
-          window.location.href = 'index.html';
-      }
-    }
+      genreDropdown.addEventListener('click', (e) => {
+        const genre = e.target.getAttribute('data-genre');
+        if (genre) {
+          localStorage.setItem('selectedGenre', genre);
+          localStorage.removeItem('displayType');
+          genreDropdown.classList.remove('show');
+          loadGenreOrUmusobanuziPage();
+        }
+      });
 
-    function updateAuthUI(user) {
-      if (user) {
-        authButtons.innerHTML = `
-          <button class="auth-btn profile-btn"><i class="fas fa-user"></i> ${user.displayName || 'Profile'}</button>
-          <button class="auth-btn logout-btn">Logout</button>
-          <button class="theme-toggle-header"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
-        `;
-        document.querySelector('.logout-btn').addEventListener('click', () => {
-          signOut(auth).then(() => showToast('Logged out successfully', 'success')).catch(error => showToast(error.message, 'error'));
-        });
-        document.querySelector('.profile-btn').addEventListener('click', () => window.location.href = 'profile.html');
-        document.querySelector('.theme-toggle-header').addEventListener('click', () => {
-          clearTimeout(themeToggleTimeout);
-          themeToggleTimeout = setTimeout(toggleTheme, 100);
-        });
-      } else {
-        authButtons.innerHTML = `
-          <button class="auth-btn login-btn">Login</button>
-          <button class="auth-btn register-btn">Register</button>
-          <button class="theme-toggle-header"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
-        `;
-        document.querySelector('.login-btn').addEventListener('click', () => window.location.href = 'login.html');
-        document.querySelector('.register-btn').addEventListener('click', () => window.location.href = 'register.html');
-        document.querySelector('.theme-toggle-header').addEventListener('click', () => {
-          clearTimeout(themeToggleTimeout);
-          themeToggleTimeout = setTimeout(toggleTheme, 100);
-        });
-      }
+      document.addEventListener('click', (e) => {
+        if (!showToggleHeader.contains(e.target) && !dropdownHeader.contains(e.target) && !genreDropdown.contains(e.target)) {
+          dropdownHeader.classList.remove('show');
+          genreDropdown.classList.remove('show');
+        }
+      });
     }
 
     function toggleTheme() {
@@ -789,13 +728,13 @@
           icon.classList.remove('fa-moon');
           icon.classList.add('fa-sun');
         });
-        localStorage.setItem('theme', 'light');
+        if (navigator.cookieEnabled) localStorage.setItem('theme', 'light');
       } else {
         icons.forEach(icon => {
           icon.classList.remove('fa-sun');
           icon.classList.add('fa-moon');
         });
-        localStorage.setItem('theme', 'dark');
+        if (navigator.cookieEnabled) localStorage.setItem('theme', 'dark');
       }
     }
 
@@ -806,20 +745,149 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    async function loadUmusobanuziPage() {
+    async function loadGenreOrUmusobanuziPage() {
       showLoading();
       try {
         movies = await getCachedData('movies', fetchMovies);
-        renderUmusobanuziPage();
+        const selectedGenre = localStorage.getItem('selectedGenre');
+        let displayType = localStorage.getItem('displayType');
+        if (!displayType && !selectedGenre) displayType = 'all';
+
+        let html = '';
+        if (!selectedGenre) {
+          if (displayType === 'abasobanuzi') {
+            const umusobanuziOrder = ['Subtitled', 'Dubbed', 'Kinyarwanda', 'Others', ''];
+            const groupedByUmusobanuzi = {};
+
+            movies.forEach(movie => {
+              const key = movie.umusobanuzi || '';
+              if (!groupedByUmusobanuzi[key]) {
+                groupedByUmusobanuzi[key] = [];
+              }
+              groupedByUmusobanuzi[key].push(movie);
+            });
+
+            const sortedGroups = [];
+            umusobanuziOrder.forEach(key => {
+              if (groupedByUmusobanuzi[key]) {
+                sortedGroups.push({
+                  umusobanuzi: key,
+                  movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
+                });
+                delete groupedByUmusobanuzi[key];
+              }
+            });
+
+            Object.keys(groupedByUmusobanuzi).forEach(key => {
+              sortedGroups.push({
+                umusobanuzi: key,
+                movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
+              });
+            });
+
+            html = sortedGroups.map(group => `
+              <section class="section umusobanuzi-section">
+                <h2 class="section-title">${group.umusobanuzi || 'Unspecified'} Movies</h2>
+                <div class="movies-grid">
+                  ${group.movies.map(movie => renderMovieCard(movie)).join('')}
+                </div>
+              </section>
+            `).join('');
+          } else if (displayType === 'genres') {
+            const genres = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Horror', 'Romance', 'Adult', 'War', 'Thriller', 'Indian', 'Sci-Fi', 'Sport'];
+            const groupedByGenre = {};
+
+            movies.forEach(movie => {
+              if (Array.isArray(movie.genres)) {
+                movie.genres.forEach(genre => {
+                  if (!groupedByGenre[genre]) {
+                    groupedByGenre[genre] = [];
+                  }
+                  groupedByGenre[genre].push(movie);
+                });
+              }
+            });
+
+            html = genres.map(genre => {
+              const genreMovies = groupedByGenre[genre] || [];
+              return `
+                <section class="section umusobanuzi-section">
+                  <h2 class="section-title">${genre} Movies</h2>
+                  <div class="movies-grid">
+                    ${genreMovies.sort((a, b) => b.releaseYear - a.releaseYear).map(movie => renderMovieCard(movie)).join('')}
+                  </div>
+                </section>
+              `;
+            }).join('');
+          } else { // 'all'
+            const umusobanuziOrder = ['Subtitled', 'Dubbed', 'Kinyarwanda', 'Others', ''];
+            const groupedByUmusobanuzi = {};
+
+            movies.forEach(movie => {
+              const key = movie.umusobanuzi || '';
+              if (!groupedByUmusobanuzi[key]) {
+                groupedByUmusobanuzi[key] = [];
+              }
+              groupedByUmusobanuzi[key].push(movie);
+            });
+
+            const sortedGroups = [];
+            umusobanuziOrder.forEach(key => {
+              if (groupedByUmusobanuzi[key]) {
+                sortedGroups.push({
+                  umusobanuzi: key,
+                  movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
+                });
+                delete groupedByUmusobanuzi[key];
+              }
+            });
+
+            Object.keys(groupedByUmusobanuzi).forEach(key => {
+              sortedGroups.push({
+                umusobanuzi: key,
+                movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
+              });
+            });
+
+            html = sortedGroups.map(group => `
+              <section class="section umusobanuzi-section">
+                <h2 class="section-title">${group.umusobanuzi || 'All'} Movies</h2>
+                <div class="movies-grid">
+                  ${group.movies.map(movie => renderMovieCard(movie)).join('')}
+                </div>
+              </section>
+            `).join('');
+          }
+
+          if (html === '') {
+            html = '<section class="section"><p>No movies found.</p></section>';
+          }
+        } else {
+          const genreMovies = movies.filter(movie => 
+            Array.isArray(movie.genres) && movie.genres.includes(selectedGenre)
+          ).sort((a, b) => b.releaseYear - a.releaseYear);
+
+          html = genreMovies.length > 0 ? `
+            <section class="section">
+              <h2 class="section-title">${selectedGenre} Movies</h2>
+              <div class="movies-grid">
+                ${genreMovies.map(movie => renderMovieCard(movie)).join('')}
+              </div>
+            </section>
+          ` : `<section class="section"><p>No movies found for ${selectedGenre}.</p></section>`;
+        }
+
+        mainContent.innerHTML = html;
+        attachMovieCardEvents();
         hideLoading();
       } catch (error) {
-        showToast('Error loading movies: ' + error.message, 'error');
+        showToast('Error loading page: ' + error.message, 'error');
         hideLoading();
       }
     }
 
     async function getCachedData(key, fetchFn) {
-      const cached = sessionStorage.getItem(key);
+      const cached = sessionStorage.getItem(key) || (navigator.cookieEnabled ? sessionStorage.getItem(key) : null);
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
         if (Date.now() - timestamp < cache.expiry) {
@@ -827,7 +895,7 @@
         }
       }
       const data = await fetchFn();
-      sessionStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+      if (navigator.cookieEnabled) sessionStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
       cache[key] = data;
       return data;
     }
@@ -849,58 +917,6 @@
           timestamp: doc.data().dateAdded?.toDate() || new Date()
         }))
         .filter(movie => movie.title);
-    }
-
-    function renderUmusobanuziPage() {
-      // Define umusobanuzi order
-      const umusobanuziOrder = ['Subtitled', 'Dubbed', 'Kinyarwanda', 'Others', ''];
-      const groupedByUmusobanuzi = {};
-
-      // Group movies by umusobanuzi
-      movies.forEach(movie => {
-        const key = movie.umusobanuzi || '';
-        if (!groupedByUmusobanuzi[key]) {
-          groupedByUmusobanuzi[key] = [];
-        }
-        groupedByUmusobanuzi[key].push(movie);
-      });
-
-      // Sort groups by umusobanuzi order and movies within by releaseYear
-      const sortedGroups = [];
-      umusobanuziOrder.forEach(key => {
-        if (groupedByUmusobanuzi[key]) {
-          sortedGroups.push({
-            umusobanuzi: key,
-            movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
-          });
-          delete groupedByUmusobanuzi[key];
-        }
-      });
-
-      // Add remaining umusobanuzi values
-      Object.keys(groupedByUmusobanuzi).forEach(key => {
-        sortedGroups.push({
-          umusobanuzi: key,
-          movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
-        });
-      });
-
-      // Render sections
-      let html = sortedGroups.map(group => `
-        <section class="section umusobanuzi-section">
-          <h2 class="section-title">${group.umusobanuzi || 'Unspecified'} Movies</h2>
-          <div class="movies-grid">
-            ${group.movies.map(movie => renderMovieCard(movie)).join('')}
-          </div>
-        </section>
-      `).join('');
-
-      if (html === '') {
-        html = '<section class="section"><p>No movies found.</p></section>';
-      }
-
-      mainContent.innerHTML = html;
-      attachMovieCardEvents();
     }
 
     function renderMovieCard(movie) {
@@ -963,8 +979,7 @@
         if (userSnap.exists()) {
           const userData = userSnap.data();
           watchlist = userData.watchlist || [];
-          const validMovieIds = movies.map(m => m.id);
-          watchHistory = (userData.history || []).filter(id => validMovieIds.includes(id));
+          watchHistory = (userData.history || []).filter(id => movies.some(m => m.id === id));
           await updateDoc(userRef, { history: watchHistory });
           saveWatchHistoryToCookies(watchHistory);
         }
@@ -978,6 +993,7 @@
         const target = e.target.closest('.movie-card, .overlay-btn:not(.watchlist-btn), .watchlist-btn');
         if (!target) return;
         if (target.classList.contains('watchlist-btn')) {
+          e.preventDefault();
           e.stopPropagation();
           const movieId = target.getAttribute('data-movie-id');
           if (!currentUser) {
@@ -1016,10 +1032,32 @@
           }
         }
       });
+
+      mainContent.addEventListener('touchend', (e) => {
+        const target = e.target.closest('.movie-card, .overlay-btn:not(.watchlist-btn), .watchlist-btn');
+        if (!target) return;
+        e.preventDefault();
+        const movieId = target.getAttribute('data-movie-id') || target.closest('.movie-card')?.getAttribute('data-movie-id');
+        if (target.classList.contains('watchlist-btn')) {
+          if (!currentUser) {
+            showToast('Please login to use watchlist', 'error');
+            window.location.href = 'login.html';
+            return;
+          }
+          attachMovieCardEvents().call(this, { target, preventDefault: () => {}, stopPropagation: () => {} });
+        } else if (movieId) {
+          if (currentUser) {
+            const userRef = doc(db, 'users', currentUser.uid);
+            watchHistory = Array.from(new Set([movieId, ...watchHistory])).slice(0, 100);
+            updateDoc(userRef, { history: watchHistory }).then(() => saveWatchHistoryToCookies(watchHistory));
+          }
+          window.location.href = `see.html?id=${movieId}`;
+        }
+      });
     }
 
     function saveWatchHistoryToCookies(history) {
-      document.cookie = `watchHistory=${JSON.stringify(history)}; path=/; max-age=${30 * 24 * 60 * 60}`;
+      if (navigator.cookieEnabled) document.cookie = `watchHistory=${JSON.stringify(history)}; path=/; max-age=${30 * 24 * 60 * 60}`;
     }
 
     function loadWatchHistoryFromCookies() {
@@ -1034,30 +1072,179 @@
       }
     }
 
-    function setupIntersectionObserver() {
-      const sections = document.querySelectorAll('.section');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = 1;
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, { threshold: 0.1 });
-      sections.forEach(section => {
-        section.style.opacity = 0;
-        section.style.transform = 'translateY(20px)';
-        section.style.transition = 'opacity 0.3s, transform 0.3s';
-        observer.observe(section);
-      });
-    }
-
     function showLoading() {
       loadingSpinner.classList.add('active');
     }
 
     function hideLoading() {
       loadingSpinner.classList.remove('active');
+    }
+
+    function initInfiniteScroll() {
+      let isLoading = false;
+      let lastScrollTop = 0;
+      let lastScrollLeft = 0;
+
+      mainContent.style.position = 'relative';
+      mainContent.style.overflow = 'hidden';
+
+      const loadMore = async () => {
+        if (isLoading) return;
+        isLoading = true;
+        showLoading();
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const newMovies = await fetchMovies();
+        movies = [...movies, ...newMovies.filter(m => !movies.some(existing => existing.id === m.id))];
+
+        const selectedGenre = localStorage.getItem('selectedGenre');
+        let displayType = localStorage.getItem('displayType') || 'all';
+        let html = '';
+
+        if (!selectedGenre) {
+          if (displayType === 'abasobanuzi') {
+            const umusobanuziOrder = ['Subtitled', 'Dubbed', 'Kinyarwanda', 'Others', ''];
+            const groupedByUmusobanuzi = {};
+
+            movies.forEach(movie => {
+              const key = movie.umusobanuzi || '';
+              if (!groupedByUmusobanuzi[key]) {
+                groupedByUmusobanuzi[key] = [];
+              }
+              groupedByUmusobanuzi[key].push(movie);
+            });
+
+            const sortedGroups = [];
+            umusobanuziOrder.forEach(key => {
+              if (groupedByUmusobanuzi[key]) {
+                sortedGroups.push({
+                  umusobanuzi: key,
+                  movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
+                });
+                delete groupedByUmusobanuzi[key];
+              }
+            });
+
+            Object.keys(groupedByUmusobanuzi).forEach(key => {
+              sortedGroups.push({
+                umusobanuzi: key,
+                movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
+              });
+            });
+
+            html = sortedGroups.map(group => `
+              <section class="section umusobanuzi-section">
+                <h2 class="section-title">${group.umusobanuzi || 'Unspecified'} Movies</h2>
+                <div class="movies-grid">
+                  ${group.movies.map(movie => renderMovieCard(movie)).join('')}
+                </div>
+              </section>
+            `).join('');
+          } else if (displayType === 'genres') {
+            const genres = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Horror', 'Romance', 'Adult', 'War', 'Thriller', 'Indian', 'Sci-Fi', 'Sport'];
+            const groupedByGenre = {};
+
+            movies.forEach(movie => {
+              if (Array.isArray(movie.genres)) {
+                movie.genres.forEach(genre => {
+                  if (!groupedByGenre[genre]) {
+                    groupedByGenre[genre] = [];
+                  }
+                  groupedByGenre[genre].push(movie);
+                });
+              }
+            });
+
+            html = genres.map(genre => {
+              const genreMovies = groupedByGenre[genre] || [];
+              return `
+                <section class="section umusobanuzi-section">
+                  <h2 class="section-title">${genre} Movies</h2>
+                  <div class="movies-grid">
+                    ${genreMovies.sort((a, b) => b.releaseYear - a.releaseYear).map(movie => renderMovieCard(movie)).join('')}
+                  </div>
+                </section>
+              `;
+            }).join('');
+          } else { // 'all'
+            const umusobanuziOrder = ['Subtitled', 'Dubbed', 'Kinyarwanda', 'Others', ''];
+            const groupedByUmusobanuzi = {};
+
+            movies.forEach(movie => {
+              const key = movie.umusobanuzi || '';
+              if (!groupedByUmusobanuzi[key]) {
+                groupedByUmusobanuzi[key] = [];
+              }
+              groupedByUmusobanuzi[key].push(movie);
+            });
+
+            const sortedGroups = [];
+            umusobanuziOrder.forEach(key => {
+              if (groupedByUmusobanuzi[key]) {
+                sortedGroups.push({
+                  umusobanuzi: key,
+                  movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
+                });
+                delete groupedByUmusobanuzi[key];
+              }
+            });
+
+            Object.keys(groupedByUmusobanuzi).forEach(key => {
+              sortedGroups.push({
+                umusobanuzi: key,
+                movies: groupedByUmusobanuzi[key].sort((a, b) => b.releaseYear - a.releaseYear)
+              });
+            });
+
+            html = sortedGroups.map(group => `
+              <section class="section umusobanuzi-section">
+                <h2 class="section-title">${group.umusobanuzi || 'All'} Movies</h2>
+                <div class="movies-grid">
+                  ${group.movies.map(movie => renderMovieCard(movie)).join('')}
+                </div>
+              </section>
+            `).join('');
+          }
+        } else {
+          const genreMovies = movies.filter(movie => 
+            Array.isArray(movie.genres) && movie.genres.includes(selectedGenre)
+          ).sort((a, b) => b.releaseYear - a.releaseYear);
+
+          html = genreMovies.length > 0 ? `
+            <section class="section">
+              <h2 class="section-title">${selectedGenre} Movies</h2>
+              <div class="movies-grid">
+                ${genreMovies.map(movie => renderMovieCard(movie)).join('')}
+              </div>
+            </section>
+          ` : `<section class="section"><p>No movies found for ${selectedGenre}.</p></section>`;
+        }
+
+        mainContent.innerHTML += html;
+        attachMovieCardEvents();
+        isLoading = false;
+        hideLoading();
+      };
+
+      mainContent.addEventListener('scroll', () => {
+        const scrollTop = mainContent.scrollTop;
+        const scrollLeft = mainContent.scrollLeft;
+        const clientHeight = mainContent.clientHeight;
+        const clientWidth = mainContent.clientWidth;
+        const scrollHeight = mainContent.scrollHeight;
+        const scrollWidth = mainContent.scrollWidth;
+
+        if ((scrollTop + clientHeight >= scrollHeight - 100 || scrollLeft + clientWidth >= scrollWidth - 100) &&
+            (scrollTop !== lastScrollTop || scrollLeft !== lastScrollLeft)) {
+          loadMore();
+        }
+        lastScrollTop = scrollTop;
+        lastScrollLeft = scrollLeft;
+      });
+
+      // Enable touch scrolling
+      mainContent.style.touchAction = 'pan-x pan-y';
+      loadMore();
     }
   </script>
 </body>
