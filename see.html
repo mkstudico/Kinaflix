@@ -181,6 +181,9 @@
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2;
     }
 
     .action-btn {
@@ -287,7 +290,7 @@
       transition: transform 0.3s ease;
     }
 
-    .series-movie-card:hover, .popular-movie-card:hover {
+    .series-movie-card:hover, .popular-movie-info:hover {
       transform: translateY(-5px);
     }
 
@@ -545,6 +548,12 @@
 
       .movie-description {
         font-size: 1.1rem;
+      }
+
+      .action-buttons {
+        padding: 0;
+        background: transparent;
+        position: static;
       }
 
       .action-btn {
