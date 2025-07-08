@@ -1,10 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>KX</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+   <meta charset="UTF-8">
+    <meta name="google-adsense-account" content="ca-pub-1889908156684044">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REBA AGASOBANUYE | KINAFLIX ⓟ</title>
+    <meta name="description" content="Reba filme zisobanuye zirenga 100, kubuntu na Kinaflix aho uri hose.">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+    <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+    <meta property="og:title" content="AGASOBANUYE KINAFLIX ⓟ" />
+    <meta property="og:description" content="Reba movie zisobanuye zirenga +100 kubuntu ukoresheje interneti gusa" />
+    <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+    <meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
+    <meta property="og:type" content="entertainment" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AGASOBANUYE KINAFLIX ⓟ" />
+    <meta name="twitter:description" content="Reba movie zisobanuye zirenga +100 kubuntu ukoresheje interneti gusa" />
+    <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "KINAFLIX",
+      "url": "https://kinaflix-fawn.vercel.app",
+      "description": "Reba filme zisobanuye zirenga 100, kubuntu na kinaflix aho uri hose.",
+      "inLanguage": "en",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://kinaflix-fawn.vercel.app/search.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   <style>
     :root {
       --primary-color: #e50914;
@@ -243,14 +272,13 @@
       display: flex;
       flex-wrap: nowrap;
       gap: 0.5rem;
-      overflow-x: auto;
+      overflow-x: hidden; /* Changed from auto to hidden to prevent touch scrolling */
       white-space: nowrap;
-      -webkit-overflow-scrolling: touch;
       padding: 0.5rem;
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
       overscroll-behavior-x: contain;
-      touch-action: pan-x;
+      touch-action: none; /* Disable touch scrolling */
     }
 
     .movie-card {
@@ -573,7 +601,7 @@
   <header>
     <div class="header-top">
       <div class="header-image-box">
-        <img src="https://i.ibb.co/DDGR4b6/KINAFLIX-1.png" alt="Download app"
+        <img src="https://i.ibb.co/DHJ8Spw4/Untitled-design-removebg-preview.png" alt="Download app"
              style="cursor:pointer;"
              onclick="window.open('https://installkx.vercel.app/', '_blank')">
       </div>
@@ -607,7 +635,7 @@
       <a href="#" class="footer-link" data-page="contact">Contact</a>
       <a href="#" class="footer-link" data-page="privacy">Privacy Policy</a>
     </div>
-    <p>© 2025 KX. All rights reserved.</p>
+    <p>© 2025 KX | by btem@fficial All rights reserved.</p>
   </footer>
 
   <script type="module">
@@ -690,84 +718,46 @@
       }
     }
 
-    // Enhanced touch scrolling for movie grids
-    function enableTouchScrolling() {
-      const movieGrids = document.querySelectorAll('.movies-grid');
-      movieGrids.forEach(grid => {
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-        let velocity = 0;
-        let lastX;
-        let lastTime;
+    // Update navigation button states for all grids in a section
+    function updateNavButtons(section) {
+      const grids = section.querySelectorAll('.movies-grid');
+      const prevBtn = section.querySelector('.grid-nav-btn.prev');
+      const nextBtn = section.querySelector('.grid-nav-btn.next');
+      if (!prevBtn || !nextBtn || !grids.length) return;
 
-        grid.addEventListener('touchstart', (e) => {
-          isDown = true;
-          startX = e.touches[0].pageX - grid.offsetLeft;
-          scrollLeft = grid.scrollLeft;
-          velocity = 0;
-          lastX = startX;
-          lastTime = Date.now();
-          clearInterval(grid.momentumInterval);
-        }, { passive: true });
+      let allAtStart = true;
+      let allAtEnd = true;
 
-        grid.addEventListener('touchmove', (e) => {
-          if (!isDown) return;
-          e.preventDefault();
-          const x = e.touches[0].pageX - grid.offsetLeft;
-          const time = Date.now();
-          const deltaX = x - lastX;
-          const deltaTime = time - lastTime || 1;
-          velocity = deltaX / deltaTime * 2.5;
-          const walk = (x - startX) * 2.5;
-          grid.scrollLeft = scrollLeft - walk;
-          lastX = x;
-          lastTime = time;
-          updateNavButtons(grid);
-        }, { passive: false });
-
-        grid.addEventListener('touchend', () => {
-          isDown = false;
-          grid.momentumInterval = setInterval(() => {
-            grid.scrollLeft -= velocity;
-            velocity *= 0.98;
-            updateNavButtons(grid);
-            if (Math.abs(velocity) < 0.1) {
-              clearInterval(grid.momentumInterval);
-            }
-          }, 16);
-        }, { passive: true });
-
-        grid.addEventListener('scroll', () => updateNavButtons(grid), { passive: true });
+      grids.forEach(grid => {
+        const maxScroll = grid.scrollWidth - grid.clientWidth;
+        if (grid.scrollLeft > 0) allAtStart = false;
+        if (grid.scrollLeft < maxScroll - 1) allAtEnd = false;
       });
+
+      prevBtn.disabled = allAtStart;
+      nextBtn.disabled = allAtEnd;
     }
 
-    // Update navigation button states
-    function updateNavButtons(grid) {
-      const prevBtn = grid.parentElement.querySelector('.grid-nav-btn.prev');
-      const nextBtn = grid.parentElement.querySelector('.grid-nav-btn.next');
-      if (!prevBtn || !nextBtn) return;
-      
-      const maxScroll = grid.scrollWidth - grid.clientWidth;
-      prevBtn.disabled = grid.scrollLeft <= 0;
-      nextBtn.disabled = grid.scrollLeft >= maxScroll - 1;
-    }
-
-    // Handle grid navigation
+    // Handle grid navigation for all grids in a section
     function handleGridNavigation(e) {
       const btn = e.target.closest('.grid-nav-btn');
       if (!btn) return;
-      const grid = btn.closest('.section').querySelector('.movies-grid');
-      if (!grid) return;
-      
+      const section = btn.closest('.section');
+      const grids = section.querySelectorAll('.movies-grid');
+      if (!grids.length) return;
+
       const scrollAmount = window.innerWidth <= 576 ? 90 : 100; // Match movie-card width
       const direction = btn.classList.contains('prev') ? -scrollAmount : scrollAmount;
-      
-      grid.scrollBy({
-        left: direction,
-        behavior: 'smooth'
+
+      requestAnimationFrame(() => {
+        grids.forEach(grid => {
+          grid.scrollBy({
+            left: direction,
+            behavior: 'smooth'
+          });
+        });
+        updateNavButtons(section);
       });
-      updateNavButtons(grid);
     }
 
     // Scroll handling for header
@@ -905,7 +895,6 @@
       window.addEventListener('resize', checkScreenSize, { passive: true });
       window.addEventListener('scroll', handleScroll, { passive: true });
       mainContent.addEventListener('click', handleInteraction, { passive: true });
-      mainContent.addEventListener('touchstart', () => {}, { passive: true });
       initAuth();
       initUI();
       checkInternetConnection();
@@ -913,6 +902,7 @@
       loadHomePage();
       loadWatchHistoryFromCookies();
       setupIntersectionObserver();
+      setupGridScrollObservers();
     });
 
     function initAuth() {
@@ -1099,7 +1089,7 @@
         allYears = [...new Set(movies.map(movie => movie.releaseYear))].sort((a, b) => b - a);
         await renderHomePage(newestData);
         startSlideshow();
-        enableTouchScrolling();
+        setupGridScrollObservers();
         hideLoading();
       } catch (error) {
         showToast('Error loading content: ' + error.message, 'error');
@@ -1441,7 +1431,7 @@
 
       mainContent.innerHTML = html;
       attachMovieCardEvents();
-      enableTouchScrolling();
+      setupGridScrollObservers();
       document.querySelectorAll('.view-all').forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
@@ -1483,7 +1473,7 @@
           }
         }
         renderMovieList(genreMovies, `${genre} Movies`);
-        enableTouchScrolling();
+        setupGridScrollObservers();
         hideLoading();
       } catch (error) {
         showToast('Error loading movies: ' + error.message, 'error');
@@ -1548,7 +1538,7 @@
           }
         }
         renderMovieList(allMovies, sort === 'popular' ? 'Popular Movies' : sort === 'newest' ? 'Newest Releases' : 'Latest Movies');
-        enableTouchScrolling();
+        setupGridScrollObservers();
         hideLoading();
       } catch (error) {
         showToast('Error loading movies: ' + error.message, 'error');
@@ -1575,7 +1565,7 @@
       `;
       mainContent.innerHTML = html;
       attachMovieCardEvents();
-      enableTouchScrolling();
+      setupGridScrollObservers();
     }
 
     function renderMovieCard(movie) {
@@ -1619,8 +1609,6 @@
     function attachMovieCardEvents() {
       mainContent.removeEventListener('click', handleInteraction);
       mainContent.addEventListener('click', handleInteraction, { passive: true });
-      mainContent.removeEventListener('touchstart', handleInteraction);
-      mainContent.addEventListener('touchstart', () => {}, { passive: true });
     }
 
     async function countView(movieId) {
@@ -1696,6 +1684,17 @@
       }, observerOptions);
 
       document.querySelectorAll('img').forEach(img => observer.observe(img));
+    }
+
+    function setupGridScrollObservers() {
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(section => {
+        const grids = section.querySelectorAll('.movies-grid');
+        grids.forEach(grid => {
+          grid.addEventListener('scroll', () => updateNavButtons(section), { passive: true });
+          updateNavButtons(section);
+        });
+      });
     }
 
     function sortMovies(movies, field, order) {
