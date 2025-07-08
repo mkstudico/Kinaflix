@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="google-adsense-account" content="ca-pub-1889908156684044">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>REBA AGASOBANUYE | KINAFLIX ⓟ</title>
     <meta name="description" content="Reba filme zisobanuye zirenga 100, kubuntu na Kinaflix aho uri hose.">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -46,6 +46,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -159,6 +160,7 @@
             position: relative;
             height: 300px;
             overflow: hidden;
+            touch-action: pan-y;
         }
 
         .hero-slide {
@@ -172,6 +174,7 @@
             background-position: center;
             opacity: 0;
             transition: opacity 1s ease;
+            touch-action: pan-y;
         }
 
         .hero-slide.active {
@@ -246,6 +249,8 @@
             padding: 0.5rem;
             scroll-behavior: smooth;
             scroll-snap-type: x mandatory;
+            touch-action: pan-y;
+            overscroll-behavior-x: contain;
         }
 
         .movie-card {
@@ -277,6 +282,7 @@
         .movie-title {
             font-size: 0.75rem;
             margin-bottom: 0.2rem;
+            white-space: normal;
         }
 
         .movie-meta {
@@ -284,6 +290,7 @@
             color: #999;
             display: flex;
             gap: 0.3rem;
+            flex-wrap: wrap;
         }
 
         .movie-rating i {
@@ -317,6 +324,7 @@
         .overlay-title {
             font-size: 0.75rem;
             margin-bottom: 0.3rem;
+            white-space: normal;
         }
 
         .overlay-genres {
@@ -331,6 +339,7 @@
             padding: 0.1rem 0.3rem;
             border-radius: 4px;
             font-size: 0.55rem;
+            white-space: nowrap;
         }
 
         .overlay-btn {
@@ -340,6 +349,7 @@
             cursor: pointer;
             font-size: 0.65rem;
             margin-top: 0.2rem;
+            white-space: nowrap;
         }
 
         .overlay-btn.watchlist-btn {
@@ -466,6 +476,7 @@
         .watchlist-notification-title {
             font-size: 0.7rem;
             margin-bottom: 0.2rem;
+            white-space: normal;
         }
 
         .watchlist-notification-actions {
@@ -503,6 +514,20 @@
             color: #999;
             text-decoration: none;
             font-size: 0.7rem;
+        }
+
+        /* Sensor control indicator */
+        .sensor-indicator {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            z-index: 100;
+            display: none;
         }
 
         @media (min-width: 769px) {
@@ -589,6 +614,7 @@
 
     <div id="loading-spinner"><i class="fas fa-spinner fa-spin"></i></div>
     <div id="watchlist-notifications"></div>
+    <div class="sensor-indicator" id="sensor-indicator">Tilt to scroll</div>
 
     <footer>
         <div class="footer-links">
@@ -599,6 +625,171 @@
         <p>© 2025 KX. All rights reserved.</p>
     </footer>
 
+    <!-- Touch and Sensor Handling Script -->
+    <script>
+        // Enhanced touch and sensor controls for mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const sensorIndicator = document.getElementById('sensor-indicator');
+            let sensorEnabled = false;
+            let lastGamma = 0;
+            let lastUpdate = 0;
+            const updateInterval = 100; // ms
+            const sensitivity = 1.5;
+            
+            // Initialize touch controls
+            function initTouchControls() {
+                const movieGrids = document.querySelectorAll('.movies-grid');
+                
+                movieGrids.forEach(grid => {
+                    let isDown = false;
+                    let startX;
+                    let scrollLeft;
+                    let velocity = 0;
+                    let lastX;
+                    let lastTime;
+                    let animationFrameId;
+                    let isScrolling = false;
+
+                    // Touch events
+                    grid.addEventListener('touchstart', (e) => {
+                        isDown = true;
+                        startX = e.touches[0].pageX - grid.offsetLeft;
+                        scrollLeft = grid.scrollLeft;
+                        velocity = 0;
+                        lastX = startX;
+                        lastTime = Date.now();
+                        cancelAnimationFrame(animationFrameId);
+                        grid.style.scrollBehavior = 'auto';
+                        isScrolling = false;
+                    }, { passive: true });
+
+                    grid.addEventListener('touchmove', (e) => {
+                        if (!isDown) return;
+                        e.preventDefault();
+                        
+                        const x = e.touches[0].pageX - grid.offsetLeft;
+                        const time = Date.now();
+                        const deltaX = x - lastX;
+                        const deltaTime = time - lastTime || 1;
+                        velocity = deltaX / deltaTime * 2.5;
+                        const walk = (x - startX) * 2.5;
+                        
+                        grid.scrollLeft = scrollLeft - walk;
+                        lastX = x;
+                        lastTime = time;
+                        
+                        // Mark as scrolling to prevent click events
+                        if (Math.abs(walk) > 5) {
+                            isScrolling = true;
+                        }
+                    }, { passive: false });
+
+                    grid.addEventListener('touchend', () => {
+                        isDown = false;
+                        grid.style.scrollBehavior = 'smooth';
+                        
+                        // Apply momentum scrolling
+                        const applyMomentum = () => {
+                            if (Math.abs(velocity) < 0.1) {
+                                isScrolling = false;
+                                return;
+                            }
+                            
+                            grid.scrollLeft -= velocity;
+                            velocity *= 0.92; // Slightly faster decay
+                            animationFrameId = requestAnimationFrame(applyMomentum);
+                        };
+                        
+                        animationFrameId = requestAnimationFrame(applyMomentum);
+                    }, { passive: true });
+
+                    // Prevent click events during scroll
+                    grid.addEventListener('click', (e) => {
+                        if (isScrolling) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    }, { passive: false });
+                });
+            }
+
+            // Initialize sensor controls
+            function initSensorControls() {
+                // Check if DeviceOrientationEvent is supported
+                if (window.DeviceOrientationEvent) {
+                    // Show sensor indicator
+                    sensorIndicator.style.display = 'block';
+                    
+                    // Request permission for iOS 13+ devices
+                    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                        document.body.addEventListener('click', function requestSensorPermission() {
+                            DeviceOrientationEvent.requestPermission()
+                                .then(permissionState => {
+                                    if (permissionState === 'granted') {
+                                        window.addEventListener('deviceorientation', handleOrientation);
+                                        sensorEnabled = true;
+                                        sensorIndicator.textContent = 'Tilt enabled ✓';
+                                        setTimeout(() => {
+                                            sensorIndicator.style.opacity = '0.5';
+                                        }, 2000);
+                                    }
+                                })
+                                .catch(console.error);
+                            document.body.removeEventListener('click', requestSensorPermission);
+                        }, { once: true });
+                    } else {
+                        // For non-iOS devices
+                        window.addEventListener('deviceorientation', handleOrientation);
+                        sensorEnabled = true;
+                        sensorIndicator.textContent = 'Tilt enabled ✓';
+                        setTimeout(() => {
+                            sensorIndicator.style.opacity = '0.5';
+                        }, 2000);
+                    }
+                }
+
+                // Handle accelerometer data for tilt scrolling
+                function handleOrientation(event) {
+                    const movieGrids = document.querySelectorAll('.movies-grid');
+                    if (!movieGrids.length || !sensorEnabled) return;
+
+                    // Get gamma (left-to-right tilt)
+                    const gamma = event.gamma; // -90 to 90
+                    if (gamma === null) return;
+
+                    const now = Date.now();
+                    if (now - lastUpdate < updateInterval) return;
+                    lastUpdate = now;
+
+                    // Apply low-pass filter to smooth values
+                    const smoothedGamma = lastGamma * 0.7 + gamma * 0.3;
+                    lastGamma = smoothedGamma;
+
+                    // Normalize gamma to -1 to 1 range with deadzone in center
+                    let normalizedGamma = Math.min(Math.max(smoothedGamma / 45, -1), 1);
+                    if (Math.abs(normalizedGamma) < 0.2) normalizedGamma = 0;
+
+                    // Calculate scroll amount with sensitivity adjustment
+                    const scrollAmount = Math.sign(normalizedGamma) * 
+                                        Math.pow(Math.abs(normalizedGamma), 1.5) * 20 * sensitivity;
+                    
+                    // Apply scrolling to all grids
+                    movieGrids.forEach(grid => {
+                        if (Math.abs(scrollAmount) > 0.5) {
+                            grid.style.scrollBehavior = 'auto';
+                            grid.scrollLeft += scrollAmount;
+                        }
+                    });
+                }
+            }
+
+            // Initialize both control systems
+            initTouchControls();
+            initSensorControls();
+        });
+    </script>
+
+    <!-- Firebase and Main Application Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
@@ -677,54 +868,6 @@
             if (window.innerWidth > 768) {
                 window.location.href = 'index.html';
             }
-        }
-
-        // Enhanced touch scrolling for movie grids
-        function enableTouchScrolling() {
-            const movieGrids = document.querySelectorAll('.movies-grid');
-            movieGrids.forEach(grid => {
-                let isDown = false;
-                let startX;
-                let scrollLeft;
-                let velocity = 0;
-                let lastX;
-                let lastTime;
-
-                grid.addEventListener('touchstart', (e) => {
-                    isDown = true;
-                    startX = e.touches[0].pageX - grid.offsetLeft;
-                    scrollLeft = grid.scrollLeft;
-                    velocity = 0;
-                    lastX = startX;
-                    lastTime = Date.now();
-                    clearInterval(grid.momentumInterval);
-                }, { passive: true });
-
-                grid.addEventListener('touchmove', (e) => {
-                    if (!isDown) return;
-                    e.preventDefault();
-                    const x = e.touches[0].pageX - grid.offsetLeft;
-                    const time = Date.now();
-                    const deltaX = x - lastX;
-                    const deltaTime = time - lastTime || 1;
-                    velocity = deltaX / deltaTime * 2.5;
-                    const walk = (x - startX) * 2.5;
-                    grid.scrollLeft = scrollLeft - walk;
-                    lastX = x;
-                    lastTime = time;
-                }, { passive: false });
-
-                grid.addEventListener('touchend', () => {
-                    isDown = false;
-                    grid.momentumInterval = setInterval(() => {
-                        grid.scrollLeft -= velocity;
-                        velocity *= 0.95;
-                        if (Math.abs(velocity) < 0.1) {
-                            clearInterval(grid.momentumInterval);
-                        }
-                    }, 16);
-                }, { passive: true });
-            });
         }
 
         // Scroll handling for header
@@ -945,7 +1088,6 @@
                 allYears = [...new Set(movies.map(movie => movie.releaseYear))].sort((a, b) => b - a);
                 await renderHomePage(newestData);
                 startSlideshow();
-                enableTouchScrolling();
                 hideLoading();
             } catch (error) {
                 showToast('Error loading content: ' + error.message, 'error');
@@ -1258,7 +1400,6 @@
 
             mainContent.innerHTML = html;
             attachMovieCardEvents();
-            enableTouchScrolling();
             document.querySelectorAll('.view-all').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -1300,7 +1441,6 @@
                     }
                 }
                 renderMovieList(genreMovies, `${genre} Movies`);
-                enableTouchScrolling();
                 hideLoading();
             } catch (error) {
                 showToast('Error loading movies: ' + error.message, 'error');
@@ -1364,7 +1504,6 @@
                     }
                 }
                 renderMovieList(allMovies, sort === 'popular' ? 'Popular Movies' : sort === 'newest' ? 'Newest Releases' : 'Latest Movies');
-                enableTouchScrolling();
                 hideLoading();
             } catch (error) {
                 showToast('Error loading movies: ' + error.message, 'error');
@@ -1386,7 +1525,6 @@
             `;
             mainContent.innerHTML = html;
             attachMovieCardEvents();
-            enableTouchScrolling();
         }
 
         function renderMovieCard(movie) {
