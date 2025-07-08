@@ -202,6 +202,7 @@
     }
 
     .movie-card {
+      position: relative;
       flex: 0 0 auto;
       width: 100px;
       min-width: 100px;
@@ -311,6 +312,7 @@
       padding: 0.1rem 0.2rem;
       font-size: 0.55rem;
       border-radius: 4px;
+      z-index: 10;
     }
 
     .genre-bar {
@@ -647,7 +649,7 @@
           velocity = 0;
           lastX = startX;
           lastTime = Date.now();
-        });
+        }, { passive: true });
 
         grid.addEventListener('touchmove', (e) => {
           if (!isDown) return;
@@ -656,19 +658,18 @@
           const time = Date.now();
           const deltaX = x - lastX;
           const deltaTime = time - lastTime || 1;
-          velocity = deltaX / deltaTime * 3; // Increased sensitivity (3x multiplier)
-          const walk = (x - startX) * 4; // Amplify scroll distance for arm gestures
+          velocity = deltaX / deltaTime * 3;
+          const walk = (x - startX) * 4;
           grid.scrollLeft = scrollLeft - walk;
           lastX = x;
           lastTime = time;
-        });
+        }, { passive: false });
 
         grid.addEventListener('touchend', () => {
           isDown = false;
-          // Apply momentum for smooth scrolling
           let momentum = setInterval(() => {
             grid.scrollLeft -= velocity;
-            velocity *= 0.95; // Decelerate
+            velocity *= 0.95;
             if (Math.abs(velocity) < 0.1) {
               clearInterval(momentum);
             }
@@ -914,7 +915,7 @@
     }
 
     async function fetchMovies() {
-      const q = query(collection(db, 'movies'), orderBy('releaseYear', 'desc'));
+      const q = query(collection(db, 'movies'), orderBy('views', 'desc')); // Sort by views for popular movies
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs
         .map(doc => ({
@@ -936,13 +937,14 @@
     }
 
     async function fetchFeaturedMovies() {
-      const q = query(collection(db, 'movies'), orderBy('releaseYear', 'desc'), limit(5));
+      const q = query(collection(db, 'movies'), orderBy('views', 'desc'), limit(5)); // Sort featured by views
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => ({ 
         id: doc.id, 
         ...doc.data(),
         genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
         releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
+        views: typeof doc.data().views === 'number' ? doc.data().views : 0,
         timestamp: doc.data().dateAdded?.toDate() || new Date()
       }));
     }
@@ -1025,6 +1027,14 @@
       return words.join(' ').toLowerCase().replace(/[^a-z0-9]/g, '');
     }
 
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
     function startSlideshow() {
       if (!featuredMovies.length) return;
       let currentSlide = 0;
@@ -1055,14 +1065,14 @@
     }
 
     async function renderHomePage(newestMovies) {
-      let sortField = 'releaseYear';
+      let sortField = 'views'; // Default to views for popular movies
       let sortOrder = 'desc';
       if (currentUser) {
         const userRef = doc(db, 'users', currentUser.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const preferences = userSnap.data().displayPreferences || {};
-          sortField = preferences.sortField || 'releaseYear';
+          sortField = preferences.sortField || 'views';
           sortOrder = preferences.sortOrder || 'desc';
         }
       }
@@ -1098,8 +1108,27 @@
         `;
       }
 
-      // Action Movies (3 rows)
-      const actionMovies = movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Action'));
+      // Popular Movies (1 row, sorted by views)
+      const popularMovies = sortMovies([...movies], 'views', 'desc').slice(0, 12);
+      if (popularMovies.length > 0) {
+        const popularRows = chunkArray(popularMovies, 12);
+        html += `
+          <section class="section">
+            <h2 class="section-title">Popular Movies <a href="#" class="view-all" data-sort="popular">See All</a></h2>
+            ${popularRows.slice(0, 1).map(row => `
+              <div class="movies-grid">
+                ${row.map(movie => renderMovieCard(movie)).join('')}
+              </div>
+            `).join('')}
+          </section>
+        `;
+      }
+
+      // Action Movies (3 rows, sorted by views then randomized)
+      const actionMovies = shuffleArray(sortMovies(
+        movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Action')),
+        'views', 'desc'
+      ));
       const actionRows = chunkArray(actionMovies, 12);
       if (actionRows.length > 0) {
         html += `
@@ -1114,8 +1143,11 @@
         `;
       }
 
-      // Romance + Drama Movies (2 rows)
-      const romanceDramaMovies = movies.filter(movie => Array.isArray(movie.genres) && (movie.genres.includes('Romance') || movie.genres.includes('Drama')));
+      // Romance + Drama Movies (2 rows, sorted by views then randomized)
+      const romanceDramaMovies = shuffleArray(sortMovies(
+        movies.filter(movie => Array.isArray(movie.genres) && (movie.genres.includes('Romance') || movie.genres.includes('Drama'))),
+        'views', 'desc'
+      ));
       const romanceDramaRows = chunkArray(romanceDramaMovies, 12);
       if (romanceDramaRows.length > 0) {
         html += `
@@ -1130,8 +1162,11 @@
         `;
       }
 
-      // Horror Movies (1 row)
-      const horrorMovies = movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Horror'));
+      // Horror Movies (1 row, sorted by views then randomized)
+      const horrorMovies = shuffleArray(sortMovies(
+        movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Horror')),
+        'views', 'desc'
+      ));
       const horrorRows = chunkArray(horrorMovies, 12);
       if (horrorRows.length > 0) {
         html += `
@@ -1157,7 +1192,7 @@
 
       // All Movies (5 rows)
       if (movies.length > 0) {
-        const allMovies = sortMovies([...movies], 'releaseYear', 'desc');
+        const allMovies = sortMovies([...movies], 'views', 'desc');
         const allMoviesRows = chunkArray(allMovies, 12);
         html += `
           <section class="section">
@@ -1196,21 +1231,22 @@
     async function loadMoviesByGenre(genre) {
       showLoading();
       try {
-        const q = query(collection(db, 'movies'), where('genres', 'array-contains', genre), orderBy('releaseYear', 'desc'), limit(24));
+        const q = query(collection(db, 'movies'), where('genres', 'array-contains', genre), orderBy('views', 'desc'), limit(24));
         const querySnapshot = await getDocs(q);
-        let genreMovies = querySnapshot.docs.map(doc => ({ 
+        let genreMovies = shuffleArray(querySnapshot.docs.map(doc => ({ 
           id: doc.id, 
           ...doc.data(),
           genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
           releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
+          views: typeof doc.data().views === 'number' ? doc.data().views : 0,
           timestamp: doc.data().dateAdded?.toDate() || new Date()
-        }));
+        })));
         if (currentUser) {
           const userRef = doc(db, 'users', currentUser.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const preferences = userSnap.data().displayPreferences || {};
-            genreMovies = sortMovies(genreMovies, preferences.sortField || 'releaseYear', preferences.sortOrder || 'desc');
+            genreMovies = sortMovies(genreMovies, preferences.sortField || 'views', preferences.sortOrder || 'desc');
           }
         }
         renderMovieList(genreMovies, `${genre} Movies`);
@@ -1226,7 +1262,7 @@
       showLoading();
       try {
         let q;
-        let sortField = 'releaseYear';
+        let sortField = 'views';
         let allMovies = [];
         if (sort === 'popular') {
           q = query(collection(db, 'movies'), orderBy('views', 'desc'));
@@ -1235,7 +1271,7 @@
           q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'));
           sortField = 'dateAdded';
         } else {
-          q = query(collection(db, 'movies'), orderBy('releaseYear', 'desc'));
+          q = query(collection(db, 'movies'), orderBy('views', 'desc'));
         }
         let querySnapshot = await getDocs(q);
         allMovies = querySnapshot.docs.map(doc => ({ 
@@ -1342,7 +1378,7 @@
     }
 
     function attachMovieCardEvents() {
-      mainContent.addEventListener('touchstart', () => {}, { passive: true }); // Ensure touch events are passive
+      mainContent.addEventListener('touchstart', () => {}, { passive: true });
       mainContent.addEventListener('click', async (e) => {
         const target = e.target.closest('.movie-card, .watch-btn, .info-btn, .overlay-btn:not(.watchlist-btn), .watchlist-btn');
         if (!target) return;
@@ -1376,7 +1412,7 @@
                   const movie = { 
                     id: movieDoc.id, 
                     title: movieDoc.data().title,
-                    coverImageUrl: movieDoc.data().coverImageUrl
+                    coverImageUrl: doc.data().coverImageUrl
                   };
                   const notification = createWatchlistNotification(movie);
                   watchlistNotifications.appendChild(notification);
@@ -1497,7 +1533,7 @@
         case 'releaseYear': sorted.sort((a, b) => isAsc ? (a.releaseYear || 0) - (b.releaseYear || 0) : (b.releaseYear || 0) - (a.releaseYear || 0)); break;
         case 'views': sorted.sort((a, b) => isAsc ? (a.views || 0) - (b.views || 0) : (b.views || 0) - (a.views || 0)); break;
         case 'dateAdded': sorted.sort((a, b) => isAsc ? a.timestamp - b.timestamp : b.timestamp - a.timestamp); break;
-        default: sorted.sort((a, b) => isAsc ? (a.releaseYear || 0) - (b.releaseYear || 0) : (b.releaseYear || 0) - (a.releaseYear || 0));
+        default: sorted.sort((a, b) => isAsc ? (a.views || 0) - (b.views || 0) : (b.views || 0) - (a.views || 0));
       }
       return sorted;
     }
