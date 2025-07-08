@@ -198,6 +198,7 @@
       white-space: nowrap;
       -webkit-overflow-scrolling: touch;
       padding: 0.5rem;
+      scroll-behavior: smooth;
     }
 
     .movie-card {
@@ -628,6 +629,54 @@
       }
     }
 
+    // Enhanced touch scrolling for arm gestures
+    function enableTouchScrolling() {
+      const movieGrids = document.querySelectorAll('.movies-grid');
+      movieGrids.forEach(grid => {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let velocity = 0;
+        let lastX;
+        let lastTime;
+
+        grid.addEventListener('touchstart', (e) => {
+          isDown = true;
+          startX = e.touches[0].pageX - grid.offsetLeft;
+          scrollLeft = grid.scrollLeft;
+          velocity = 0;
+          lastX = startX;
+          lastTime = Date.now();
+        });
+
+        grid.addEventListener('touchmove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.touches[0].pageX - grid.offsetLeft;
+          const time = Date.now();
+          const deltaX = x - lastX;
+          const deltaTime = time - lastTime || 1;
+          velocity = deltaX / deltaTime * 3; // Increased sensitivity (3x multiplier)
+          const walk = (x - startX) * 4; // Amplify scroll distance for arm gestures
+          grid.scrollLeft = scrollLeft - walk;
+          lastX = x;
+          lastTime = time;
+        });
+
+        grid.addEventListener('touchend', () => {
+          isDown = false;
+          // Apply momentum for smooth scrolling
+          let momentum = setInterval(() => {
+            grid.scrollLeft -= velocity;
+            velocity *= 0.95; // Decelerate
+            if (Math.abs(velocity) < 0.1) {
+              clearInterval(momentum);
+            }
+          }, 16);
+        });
+      });
+    }
+
     // Scroll handling for mobile header
     let lastScrollY = 0;
     let ticking = false;
@@ -648,34 +697,6 @@
         });
         ticking = true;
       }
-    }
-
-    // Enable smooth touch scrolling for movie grids
-    function enableTouchScrolling() {
-      const movieGrids = document.querySelectorAll('.movies-grid');
-      movieGrids.forEach(grid => {
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        grid.addEventListener('touchstart', (e) => {
-          isDown = true;
-          startX = e.touches[0].pageX - grid.offsetLeft;
-          scrollLeft = grid.scrollLeft;
-        });
-
-        grid.addEventListener('touchend', () => {
-          isDown = false;
-        });
-
-        grid.addEventListener('touchmove', (e) => {
-          if (!isDown) return;
-          e.preventDefault();
-          const x = e.touches[0].pageX - grid.offsetLeft;
-          const walk = (x - startX) * 2;
-          grid.scrollLeft = scrollLeft - walk;
-        });
-      });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -927,7 +948,7 @@
     }
 
     async function fetchNewestMovies() {
-      let q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(16));
+      let q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(24));
       let querySnapshot = await getDocs(q);
       let movies = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -957,15 +978,15 @@
           group.splice(randomIndex, 1);
         }
         uniqueMovies.push(...selectedMovies);
-        if (uniqueMovies.length >= 10) break;
+        if (uniqueMovies.length >= 12) break;
       }
 
-      while (uniqueMovies.length < 10 && querySnapshot.docs.length >= 16) {
+      while (uniqueMovies.length < 12 && querySnapshot.docs.length >= 24) {
         q = query(
           collection(db, 'movies'),
           orderBy('dateAdded', 'desc'),
           startAfter(querySnapshot.docs[querySnapshot.docs.length - 1]),
-          limit(16)
+          limit(24)
         );
         querySnapshot = await getDocs(q);
         const moreMovies = querySnapshot.docs.map(doc => ({
@@ -992,11 +1013,11 @@
             }
             uniqueMovies.push(...selectedMovies);
           }
-          if (uniqueMovies.length >= 10) break;
+          if (uniqueMovies.length >= 12) break;
         }
       }
 
-      return uniqueMovies.slice(0, 10);
+      return uniqueMovies.slice(0, 12);
     }
 
     function getTitlePrefix(title) {
@@ -1028,8 +1049,8 @@
       slideInterval = setInterval(nextSlide, 15000);
 
       document.querySelectorAll('.hero-slide').forEach(slide => {
-        slide.addEventListener('mouseenter', () => clearInterval(slideInterval));
-        slide.addEventListener('mouseleave', () => slideInterval = setInterval(nextSlide, 15000));
+        slide.addEventListener('touchstart', () => clearInterval(slideInterval));
+        slide.addEventListener('touchend', () => slideInterval = setInterval(nextSlide, 15000));
       });
     }
 
@@ -1064,19 +1085,22 @@
       ` : '';
 
       if (newestMovies && newestMovies.length > 0) {
+        const newestRows = chunkArray(newestMovies, 12);
         html += `
           <section class="section">
             <h2 class="section-title">Newest Releases <a href="#" class="view-all" data-sort="newest">See All</a></h2>
-            <div class="movies-grid">
-              ${newestMovies.map(movie => renderMovieCard(movie)).slice(0, 10).join('')}
-            </div>
+            ${newestRows.slice(0, 1).map(row => `
+              <div class="movies-grid">
+                ${row.map(movie => renderMovieCard(movie)).join('')}
+              </div>
+            `).join('')}
           </section>
         `;
       }
 
       // Action Movies (3 rows)
       const actionMovies = movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Action'));
-      const actionRows = chunkArray(actionMovies, 5);
+      const actionRows = chunkArray(actionMovies, 12);
       if (actionRows.length > 0) {
         html += `
           <section class="section">
@@ -1092,7 +1116,7 @@
 
       // Romance + Drama Movies (2 rows)
       const romanceDramaMovies = movies.filter(movie => Array.isArray(movie.genres) && (movie.genres.includes('Romance') || movie.genres.includes('Drama')));
-      const romanceDramaRows = chunkArray(romanceDramaMovies, 5);
+      const romanceDramaRows = chunkArray(romanceDramaMovies, 12);
       if (romanceDramaRows.length > 0) {
         html += `
           <section class="section">
@@ -1108,7 +1132,7 @@
 
       // Horror Movies (1 row)
       const horrorMovies = movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Horror'));
-      const horrorRows = chunkArray(horrorMovies, 5);
+      const horrorRows = chunkArray(horrorMovies, 12);
       if (horrorRows.length > 0) {
         html += `
           <section class="section">
@@ -1122,10 +1146,19 @@
         `;
       }
 
+      // Genre Bar
+      html += `
+        <div class="genre-bar">
+          ${['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Horror', 'Romance', 'Adult', 'War', 'Thriller', 'Indian', 'Sci-Fi', 'Sport'].map(genre => `
+            <a href="#" class="genre-bar" data-genre="${genre}">${genre}</a>
+          `).join('')}
+        </div>
+      `;
+
       // All Movies (5 rows)
       if (movies.length > 0) {
         const allMovies = sortMovies([...movies], 'releaseYear', 'desc');
-        const allMoviesRows = chunkArray(allMovies, 5);
+        const allMoviesRows = chunkArray(allMovies, 12);
         html += `
           <section class="section">
             <h2 class="section-title">All Movies</h2>
@@ -1137,14 +1170,6 @@
           </section>
         `;
       }
-
-      html += `
-        <div class="genre-bar">
-          ${['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Horror', 'Romance', 'Adult', 'War', 'Thriller', 'Indian', 'Sci-Fi', 'Sport'].map(genre => `
-            <a href="#" class="genre-bar" data-genre="${genre}">${genre}</a>
-          `).join('')}
-        </div>
-      `;
 
       mainContent.innerHTML = html;
       attachMovieCardEvents();
@@ -1171,7 +1196,7 @@
     async function loadMoviesByGenre(genre) {
       showLoading();
       try {
-        const q = query(collection(db, 'movies'), where('genres', 'array-contains', genre), orderBy('releaseYear', 'desc'), limit(20));
+        const q = query(collection(db, 'movies'), where('genres', 'array-contains', genre), orderBy('releaseYear', 'desc'), limit(24));
         const querySnapshot = await getDocs(q);
         let genreMovies = querySnapshot.docs.map(doc => ({ 
           id: doc.id, 
@@ -1262,10 +1287,15 @@
     }
 
     function renderMovieList(movies, title) {
+      const rows = chunkArray(movies, 12);
       const html = `
         <section class="section">
           <h2 class="section-title">${title}</h2>
-          ${movies.length > 0 ? `<div class="movies-grid">${movies.map(movie => renderMovieCard(movie)).join('')}</div>` : '<p>No movies found.</p>'}
+          ${rows.length > 0 ? rows.map(row => `
+            <div class="movies-grid">
+              ${row.map(movie => renderMovieCard(movie)).join('')}
+            </div>
+          `).join('') : '<p>No movies found.</p>'}
         </section>
       `;
       mainContent.innerHTML = html;
@@ -1312,6 +1342,7 @@
     }
 
     function attachMovieCardEvents() {
+      mainContent.addEventListener('touchstart', () => {}, { passive: true }); // Ensure touch events are passive
       mainContent.addEventListener('click', async (e) => {
         const target = e.target.closest('.movie-card, .watch-btn, .info-btn, .overlay-btn:not(.watchlist-btn), .watchlist-btn');
         if (!target) return;
