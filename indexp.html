@@ -198,11 +198,9 @@
       white-space: nowrap;
       -webkit-overflow-scrolling: touch;
       padding: 0.5rem;
-      scroll-behavior: smooth;
     }
 
     .movie-card {
-      position: relative;
       flex: 0 0 auto;
       width: 100px;
       min-width: 100px;
@@ -312,7 +310,6 @@
       padding: 0.1rem 0.2rem;
       font-size: 0.55rem;
       border-radius: 4px;
-      z-index: 10;
     }
 
     .genre-bar {
@@ -631,53 +628,6 @@
       }
     }
 
-    // Enhanced touch scrolling for arm gestures
-    function enableTouchScrolling() {
-      const movieGrids = document.querySelectorAll('.movies-grid');
-      movieGrids.forEach(grid => {
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-        let velocity = 0;
-        let lastX;
-        let lastTime;
-
-        grid.addEventListener('touchstart', (e) => {
-          isDown = true;
-          startX = e.touches[0].pageX - grid.offsetLeft;
-          scrollLeft = grid.scrollLeft;
-          velocity = 0;
-          lastX = startX;
-          lastTime = Date.now();
-        }, { passive: true });
-
-        grid.addEventListener('touchmove', (e) => {
-          if (!isDown) return;
-          e.preventDefault();
-          const x = e.touches[0].pageX - grid.offsetLeft;
-          const time = Date.now();
-          const deltaX = x - lastX;
-          const deltaTime = time - lastTime || 1;
-          velocity = deltaX / deltaTime * 3;
-          const walk = (x - startX) * 4;
-          grid.scrollLeft = scrollLeft - walk;
-          lastX = x;
-          lastTime = time;
-        }, { passive: false });
-
-        grid.addEventListener('touchend', () => {
-          isDown = false;
-          let momentum = setInterval(() => {
-            grid.scrollLeft -= velocity;
-            velocity *= 0.95;
-            if (Math.abs(velocity) < 0.1) {
-              clearInterval(momentum);
-            }
-          }, 16);
-        });
-      });
-    }
-
     // Scroll handling for mobile header
     let lastScrollY = 0;
     let ticking = false;
@@ -698,6 +648,34 @@
         });
         ticking = true;
       }
+    }
+
+    // Enable smooth touch scrolling for movie grids
+    function enableTouchScrolling() {
+      const movieGrids = document.querySelectorAll('.movies-grid');
+      movieGrids.forEach(grid => {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        grid.addEventListener('touchstart', (e) => {
+          isDown = true;
+          startX = e.touches[0].pageX - grid.offsetLeft;
+          scrollLeft = grid.scrollLeft;
+        });
+
+        grid.addEventListener('touchend', () => {
+          isDown = false;
+        });
+
+        grid.addEventListener('touchmove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.touches[0].pageX - grid.offsetLeft;
+          const walk = (x - startX) * 2;
+          grid.scrollLeft = scrollLeft - walk;
+        });
+      });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -915,7 +893,7 @@
     }
 
     async function fetchMovies() {
-      const q = query(collection(db, 'movies'), orderBy('views', 'desc')); // Sort by views for popular movies
+      const q = query(collection(db, 'movies'), orderBy('releaseYear', 'desc'));
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs
         .map(doc => ({
@@ -937,20 +915,19 @@
     }
 
     async function fetchFeaturedMovies() {
-      const q = query(collection(db, 'movies'), orderBy('views', 'desc'), limit(5)); // Sort featured by views
+      const q = query(collection(db, 'movies'), orderBy('releaseYear', 'desc'), limit(5));
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => ({ 
         id: doc.id, 
         ...doc.data(),
         genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
         releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
-        views: typeof doc.data().views === 'number' ? doc.data().views : 0,
         timestamp: doc.data().dateAdded?.toDate() || new Date()
       }));
     }
 
     async function fetchNewestMovies() {
-      let q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(24));
+      let q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'), limit(16));
       let querySnapshot = await getDocs(q);
       let movies = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -980,15 +957,15 @@
           group.splice(randomIndex, 1);
         }
         uniqueMovies.push(...selectedMovies);
-        if (uniqueMovies.length >= 12) break;
+        if (uniqueMovies.length >= 10) break;
       }
 
-      while (uniqueMovies.length < 12 && querySnapshot.docs.length >= 24) {
+      while (uniqueMovies.length < 10 && querySnapshot.docs.length >= 16) {
         q = query(
           collection(db, 'movies'),
           orderBy('dateAdded', 'desc'),
           startAfter(querySnapshot.docs[querySnapshot.docs.length - 1]),
-          limit(24)
+          limit(16)
         );
         querySnapshot = await getDocs(q);
         const moreMovies = querySnapshot.docs.map(doc => ({
@@ -1015,24 +992,16 @@
             }
             uniqueMovies.push(...selectedMovies);
           }
-          if (uniqueMovies.length >= 12) break;
+          if (uniqueMovies.length >= 10) break;
         }
       }
 
-      return uniqueMovies.slice(0, 12);
+      return uniqueMovies.slice(0, 10);
     }
 
     function getTitlePrefix(title) {
       const words = title.split(' ').slice(0, Math.ceil(title.split(' ').length * 0.7));
       return words.join(' ').toLowerCase().replace(/[^a-z0-9]/g, '');
-    }
-
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
     }
 
     function startSlideshow() {
@@ -1059,20 +1028,20 @@
       slideInterval = setInterval(nextSlide, 15000);
 
       document.querySelectorAll('.hero-slide').forEach(slide => {
-        slide.addEventListener('touchstart', () => clearInterval(slideInterval));
-        slide.addEventListener('touchend', () => slideInterval = setInterval(nextSlide, 15000));
+        slide.addEventListener('mouseenter', () => clearInterval(slideInterval));
+        slide.addEventListener('mouseleave', () => slideInterval = setInterval(nextSlide, 15000));
       });
     }
 
     async function renderHomePage(newestMovies) {
-      let sortField = 'views'; // Default to views for popular movies
+      let sortField = 'releaseYear';
       let sortOrder = 'desc';
       if (currentUser) {
         const userRef = doc(db, 'users', currentUser.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const preferences = userSnap.data().displayPreferences || {};
-          sortField = preferences.sortField || 'views';
+          sortField = preferences.sortField || 'releaseYear';
           sortOrder = preferences.sortOrder || 'desc';
         }
       }
@@ -1095,41 +1064,19 @@
       ` : '';
 
       if (newestMovies && newestMovies.length > 0) {
-        const newestRows = chunkArray(newestMovies, 12);
         html += `
           <section class="section">
             <h2 class="section-title">Newest Releases <a href="#" class="view-all" data-sort="newest">See All</a></h2>
-            ${newestRows.slice(0, 1).map(row => `
-              <div class="movies-grid">
-                ${row.map(movie => renderMovieCard(movie)).join('')}
-              </div>
-            `).join('')}
+            <div class="movies-grid">
+              ${newestMovies.map(movie => renderMovieCard(movie)).slice(0, 10).join('')}
+            </div>
           </section>
         `;
       }
 
-      // Popular Movies (1 row, sorted by views)
-      const popularMovies = sortMovies([...movies], 'views', 'desc').slice(0, 12);
-      if (popularMovies.length > 0) {
-        const popularRows = chunkArray(popularMovies, 12);
-        html += `
-          <section class="section">
-            <h2 class="section-title">Popular Movies <a href="#" class="view-all" data-sort="popular">See All</a></h2>
-            ${popularRows.slice(0, 1).map(row => `
-              <div class="movies-grid">
-                ${row.map(movie => renderMovieCard(movie)).join('')}
-              </div>
-            `).join('')}
-          </section>
-        `;
-      }
-
-      // Action Movies (3 rows, sorted by views then randomized)
-      const actionMovies = shuffleArray(sortMovies(
-        movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Action')),
-        'views', 'desc'
-      ));
-      const actionRows = chunkArray(actionMovies, 12);
+      // Action Movies (3 rows)
+      const actionMovies = movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Action'));
+      const actionRows = chunkArray(actionMovies, 5);
       if (actionRows.length > 0) {
         html += `
           <section class="section">
@@ -1143,12 +1090,9 @@
         `;
       }
 
-      // Romance + Drama Movies (2 rows, sorted by views then randomized)
-      const romanceDramaMovies = shuffleArray(sortMovies(
-        movies.filter(movie => Array.isArray(movie.genres) && (movie.genres.includes('Romance') || movie.genres.includes('Drama'))),
-        'views', 'desc'
-      ));
-      const romanceDramaRows = chunkArray(romanceDramaMovies, 12);
+      // Romance + Drama Movies (2 rows)
+      const romanceDramaMovies = movies.filter(movie => Array.isArray(movie.genres) && (movie.genres.includes('Romance') || movie.genres.includes('Drama')));
+      const romanceDramaRows = chunkArray(romanceDramaMovies, 5);
       if (romanceDramaRows.length > 0) {
         html += `
           <section class="section">
@@ -1162,12 +1106,9 @@
         `;
       }
 
-      // Horror Movies (1 row, sorted by views then randomized)
-      const horrorMovies = shuffleArray(sortMovies(
-        movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Horror')),
-        'views', 'desc'
-      ));
-      const horrorRows = chunkArray(horrorMovies, 12);
+      // Horror Movies (1 row)
+      const horrorMovies = movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Horror'));
+      const horrorRows = chunkArray(horrorMovies, 5);
       if (horrorRows.length > 0) {
         html += `
           <section class="section">
@@ -1181,19 +1122,10 @@
         `;
       }
 
-      // Genre Bar
-      html += `
-        <div class="genre-bar">
-          ${['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Horror', 'Romance', 'Adult', 'War', 'Thriller', 'Indian', 'Sci-Fi', 'Sport'].map(genre => `
-            <a href="#" class="genre-bar" data-genre="${genre}">${genre}</a>
-          `).join('')}
-        </div>
-      `;
-
       // All Movies (5 rows)
       if (movies.length > 0) {
-        const allMovies = sortMovies([...movies], 'views', 'desc');
-        const allMoviesRows = chunkArray(allMovies, 12);
+        const allMovies = sortMovies([...movies], 'releaseYear', 'desc');
+        const allMoviesRows = chunkArray(allMovies, 5);
         html += `
           <section class="section">
             <h2 class="section-title">All Movies</h2>
@@ -1205,6 +1137,14 @@
           </section>
         `;
       }
+
+      html += `
+        <div class="genre-bar">
+          ${['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Horror', 'Romance', 'Adult', 'War', 'Thriller', 'Indian', 'Sci-Fi', 'Sport'].map(genre => `
+            <a href="#" class="genre-bar" data-genre="${genre}">${genre}</a>
+          `).join('')}
+        </div>
+      `;
 
       mainContent.innerHTML = html;
       attachMovieCardEvents();
@@ -1231,22 +1171,21 @@
     async function loadMoviesByGenre(genre) {
       showLoading();
       try {
-        const q = query(collection(db, 'movies'), where('genres', 'array-contains', genre), orderBy('views', 'desc'), limit(24));
+        const q = query(collection(db, 'movies'), where('genres', 'array-contains', genre), orderBy('releaseYear', 'desc'), limit(20));
         const querySnapshot = await getDocs(q);
-        let genreMovies = shuffleArray(querySnapshot.docs.map(doc => ({ 
+        let genreMovies = querySnapshot.docs.map(doc => ({ 
           id: doc.id, 
           ...doc.data(),
           genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
           releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
-          views: typeof doc.data().views === 'number' ? doc.data().views : 0,
           timestamp: doc.data().dateAdded?.toDate() || new Date()
-        })));
+        }));
         if (currentUser) {
           const userRef = doc(db, 'users', currentUser.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const preferences = userSnap.data().displayPreferences || {};
-            genreMovies = sortMovies(genreMovies, preferences.sortField || 'views', preferences.sortOrder || 'desc');
+            genreMovies = sortMovies(genreMovies, preferences.sortField || 'releaseYear', preferences.sortOrder || 'desc');
           }
         }
         renderMovieList(genreMovies, `${genre} Movies`);
@@ -1262,7 +1201,7 @@
       showLoading();
       try {
         let q;
-        let sortField = 'views';
+        let sortField = 'releaseYear';
         let allMovies = [];
         if (sort === 'popular') {
           q = query(collection(db, 'movies'), orderBy('views', 'desc'));
@@ -1271,7 +1210,7 @@
           q = query(collection(db, 'movies'), orderBy('dateAdded', 'desc'));
           sortField = 'dateAdded';
         } else {
-          q = query(collection(db, 'movies'), orderBy('views', 'desc'));
+          q = query(collection(db, 'movies'), orderBy('releaseYear', 'desc'));
         }
         let querySnapshot = await getDocs(q);
         allMovies = querySnapshot.docs.map(doc => ({ 
@@ -1323,15 +1262,10 @@
     }
 
     function renderMovieList(movies, title) {
-      const rows = chunkArray(movies, 12);
       const html = `
         <section class="section">
           <h2 class="section-title">${title}</h2>
-          ${rows.length > 0 ? rows.map(row => `
-            <div class="movies-grid">
-              ${row.map(movie => renderMovieCard(movie)).join('')}
-            </div>
-          `).join('') : '<p>No movies found.</p>'}
+          ${movies.length > 0 ? `<div class="movies-grid">${movies.map(movie => renderMovieCard(movie)).join('')}</div>` : '<p>No movies found.</p>'}
         </section>
       `;
       mainContent.innerHTML = html;
@@ -1378,7 +1312,6 @@
     }
 
     function attachMovieCardEvents() {
-      mainContent.addEventListener('touchstart', () => {}, { passive: true });
       mainContent.addEventListener('click', async (e) => {
         const target = e.target.closest('.movie-card, .watch-btn, .info-btn, .overlay-btn:not(.watchlist-btn), .watchlist-btn');
         if (!target) return;
@@ -1412,7 +1345,7 @@
                   const movie = { 
                     id: movieDoc.id, 
                     title: movieDoc.data().title,
-                    coverImageUrl: doc.data().coverImageUrl
+                    coverImageUrl: movieDoc.data().coverImageUrl
                   };
                   const notification = createWatchlistNotification(movie);
                   watchlistNotifications.appendChild(notification);
@@ -1533,7 +1466,7 @@
         case 'releaseYear': sorted.sort((a, b) => isAsc ? (a.releaseYear || 0) - (b.releaseYear || 0) : (b.releaseYear || 0) - (a.releaseYear || 0)); break;
         case 'views': sorted.sort((a, b) => isAsc ? (a.views || 0) - (b.views || 0) : (b.views || 0) - (a.views || 0)); break;
         case 'dateAdded': sorted.sort((a, b) => isAsc ? a.timestamp - b.timestamp : b.timestamp - a.timestamp); break;
-        default: sorted.sort((a, b) => isAsc ? (a.views || 0) - (b.views || 0) : (b.views || 0) - (a.views || 0));
+        default: sorted.sort((a, b) => isAsc ? (a.releaseYear || 0) - (b.releaseYear || 0) : (b.releaseYear || 0) - (a.releaseYear || 0));
       }
       return sorted;
     }
