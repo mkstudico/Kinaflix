@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>KX</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
   <style>
     :root {
       --primary-color: #e50914;
@@ -29,8 +29,7 @@
     }
 
     header {
-      position: sticky;
-      top: 0;
+      position: relative;
       z-index: 1000;
       background: var(--background-color);
     }
@@ -40,6 +39,19 @@
       justify-content: space-between;
       align-items: center;
       padding: 0.5rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1001;
+      background: var(--background-color);
+      will-change: opacity;
+      transition: opacity 0.3s ease;
+    }
+
+    .header-top.hidden {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .header-image-box img {
@@ -74,14 +86,19 @@
     }
 
     .header-bottom {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      width: 100%;
       padding: 0.5rem;
       background: var(--background-color);
       transition: transform 0.3s ease;
+      z-index: 1000;
+      will-change: transform;
     }
 
     .header-bottom.hidden {
       transform: translateY(-100%);
-      display: none;
     }
 
     .nav-menu {
@@ -126,6 +143,7 @@
       background-position: center;
       opacity: 0;
       transition: opacity 1s ease;
+      will-change: opacity;
     }
 
     .hero-slide.active {
@@ -199,6 +217,9 @@
       -webkit-overflow-scrolling: touch;
       padding: 0.5rem;
       scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x;
     }
 
     .movie-card {
@@ -210,6 +231,7 @@
       border-radius: 8px;
       overflow: hidden;
       transition: transform 0.3s;
+      scroll-snap-align: start;
     }
 
     .movie-card:hover {
@@ -580,24 +602,6 @@
     const authButtons = document.getElementById('auth-buttons');
     const watchlistNotifications = document.getElementById('watchlist-notifications');
 
-    let currentUser = null;
-    let movies = [];
-    let genres = [];
-    let featuredMovies = [];
-    let watchHistory = [];
-    let watchlist = [];
-    let lastViewTimestamps = {};
-    let allYears = [];
-    let slideInterval = null;
-    let lastAddedMovieId = null;
-
-    const cache = {
-      movies: null,
-      genres: null,
-      featured: null,
-      expiry: 5 * 60 * 1000
-    };
-
     // No Internet Overlay
     const noInternetOverlay = document.createElement('div');
     noInternetOverlay.id = 'no-internet-overlay';
@@ -624,6 +628,24 @@
     `;
     document.body.appendChild(noInternetOverlay);
 
+    let currentUser = null;
+    let movies = [];
+    let genres = [];
+    let featuredMovies = [];
+    let watchHistory = [];
+    let watchlist = [];
+    let lastViewTimestamps = {};
+    let allYears = [];
+    let slideInterval = null;
+    let lastAddedMovieId = null;
+
+    const cache = {
+      movies: null,
+      genres: null,
+      featured: null,
+      expiry: 5 * 60 * 1000
+    };
+
     // Redirect to index.html on large screens
     function checkScreenSize() {
       if (window.innerWidth > 768) {
@@ -631,7 +653,7 @@
       }
     }
 
-    // Enhanced touch scrolling for arm gestures
+    // Enhanced touch scrolling for movie grids
     function enableTouchScrolling() {
       const movieGrids = document.querySelectorAll('.movies-grid');
       movieGrids.forEach(grid => {
@@ -649,6 +671,7 @@
           velocity = 0;
           lastX = startX;
           lastTime = Date.now();
+          clearInterval(grid.momentumInterval);
         }, { passive: true });
 
         grid.addEventListener('touchmove', (e) => {
@@ -658,8 +681,8 @@
           const time = Date.now();
           const deltaX = x - lastX;
           const deltaTime = time - lastTime || 1;
-          velocity = deltaX / deltaTime * 3;
-          const walk = (x - startX) * 4;
+          velocity = deltaX / deltaTime * 2.5;
+          const walk = (x - startX) * 2.5;
           grid.scrollLeft = scrollLeft - walk;
           lastX = x;
           lastTime = time;
@@ -667,42 +690,148 @@
 
         grid.addEventListener('touchend', () => {
           isDown = false;
-          let momentum = setInterval(() => {
+          grid.momentumInterval = setInterval(() => {
             grid.scrollLeft -= velocity;
-            velocity *= 0.95;
+            velocity *= 0.98;
             if (Math.abs(velocity) < 0.1) {
-              clearInterval(momentum);
+              clearInterval(grid.momentumInterval);
             }
           }, 16);
-        });
+        }, { passive: true });
       });
     }
 
-    // Scroll handling for mobile header
+    // Scroll handling for header
     let lastScrollY = 0;
-    let ticking = false;
+    let scrollTimeout = null;
+    let isScrolling = false;
 
     function handleScroll() {
+      const headerTop = document.querySelector('.header-top');
       const headerBottom = document.querySelector('.header-bottom');
       const currentScrollY = window.scrollY;
 
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (currentScrollY > lastScrollY && currentScrollY > 50) {
-            headerBottom.classList.add('hidden');
-          } else {
-            headerBottom.classList.remove('hidden');
+      isScrolling = true;
+      clearTimeout(scrollTimeout);
+
+      headerBottom.classList.add('hidden');
+      headerTop.classList.add('hidden');
+
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+        if (currentScrollY <= 50) {
+          headerTop.classList.remove('hidden');
+          headerBottom.classList.remove('hidden');
+        }
+        lastScrollY = currentScrollY;
+      }, 300);
+    }
+
+    // Consolidated interaction handler
+    function handleInteraction(e) {
+      const link = e.target.closest('.nav-item, .footer-link, .genre-bar a');
+      if (link) {
+        if (link.classList.contains('genre-bar')) {
+          const genre = link.textContent.trim();
+          localStorage.setItem('selectedGenre', genre);
+          window.location.href = 'genre.html';
+          return;
+        }
+        e.preventDefault();
+        const page = link.getAttribute('data-page');
+        navigateTo(page);
+        if (link.classList.contains('nav-item')) {
+          document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+          link.classList.add('active');
+        }
+        return;
+      }
+
+      const target = e.target.closest('.movie-card, .watch-btn, .info-btn, .overlay-btn:not(.watchlist-btn), .watchlist-btn');
+      if (!target) return;
+
+      if (target.classList.contains('watchlist-btn')) {
+        e.stopPropagation();
+        const movieId = target.getAttribute('data-movie-id');
+        if (!currentUser) {
+          showToast('Please login to use watchlist', 'error');
+          window.location.href = 'login.html';
+          return;
+        }
+        handleWatchlist(movieId, target);
+      } else {
+        const movieId = target.getAttribute('data-movie-id') || target.closest('.movie-card')?.getAttribute('data-movie-id');
+        if (movieId) {
+          handleMovieClick(movieId);
+        }
+      }
+    }
+
+    async function handleWatchlist(movieId, target) {
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        if (watchlist.includes(movieId)) {
+          await updateDoc(userRef, { watchlist: arrayRemove(movieId) });
+          watchlist = watchlist.filter(id => id !== movieId);
+          showToast('Removed from watchlist', 'success');
+          target.classList.remove('in-watchlist');
+          target.innerHTML = `<i class="fas fa-plus"></i> Add to Watchlist`;
+        } else {
+          await updateDoc(userRef, { watchlist: arrayUnion(movieId) });
+          watchlist.push(movieId);
+          showToast('Added to watchlist', 'success');
+          target.classList.add('in-watchlist');
+          target.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
+
+          if (movieId !== lastAddedMovieId) {
+            lastAddedMovieId = movieId;
+            const movieDoc = await getDoc(doc(db, 'movies', movieId));
+            if (movieDoc.exists()) {
+              const movie = {
+                id: movieDoc.id,
+                title: movieDoc.data().title,
+                coverImageUrl: movieDoc.data().coverImageUrl || 'https://via.placeholder.com/30x45?text=No+Image'
+              };
+              const notification = createWatchlistNotification(movie);
+              watchlistNotifications.appendChild(notification);
+              setTimeout(() => notification.classList.add('show'), 50);
+              setTimeout(() => lastAddedMovieId = null, 2000);
+            }
           }
-          lastScrollY = currentScrollY;
-          ticking = false;
-        });
-        ticking = true;
+        }
+        watchlistNotifications.innerHTML = '';
+        if (watchlist.length > 0) showWatchlistNotifications();
+      } catch (error) {
+        showToast('Error updating watchlist: ' + error.message, 'error');
+        console.error('Watchlist error:', error);
+      }
+    }
+
+    async function handleMovieClick(movieId) {
+      try {
+        await countView(movieId);
+        if (currentUser) {
+          const userRef = doc(db, 'users', currentUser.uid);
+          if (!watchHistory.includes(movieId)) {
+            watchHistory.unshift(movieId);
+            watchHistory = watchHistory.slice(0, 50);
+            await updateDoc(userRef, { history: watchHistory });
+            saveWatchHistoryToCookies(watchHistory);
+          }
+        }
+        window.location.href = `see.html?id=${movieId}`;
+      } catch (error) {
+        showToast('Error navigating to movie: ' + error.message, 'error');
+        console.error('Movie click error:', error);
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       checkScreenSize();
-      window.addEventListener('resize', checkScreenSize);
+      window.addEventListener('resize', checkScreenSize, { passive: true });
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      mainContent.addEventListener('click', handleInteraction, { passive: true });
+      mainContent.addEventListener('touchstart', () => {}, { passive: true });
       initAuth();
       initUI();
       checkInternetConnection();
@@ -710,68 +839,60 @@
       loadHomePage();
       loadWatchHistoryFromCookies();
       setupIntersectionObserver();
-      window.addEventListener('scroll', handleScroll);
     });
 
     function initAuth() {
       onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          currentUser = user;
-          updateAuthUI(user);
-          await loadUserData(user.uid);
-          if (watchlist.length > 0) {
-            showWatchlistNotifications();
+        try {
+          if (user) {
+            currentUser = user;
+            updateAuthUI(user);
+            await loadUserData(user.uid);
+            if (watchlist.length > 0) {
+              showWatchlistNotifications();
+            }
+          } else {
+            currentUser = null;
+            updateAuthUI(null);
           }
-        } else {
-          currentUser = null;
-          updateAuthUI(null);
+        } catch (error) {
+          showToast('Error initializing auth: ' + error.message, 'error');
+          console.error('Auth error:', error);
         }
       });
     }
 
     function initUI() {
-      document.addEventListener('click', (e) => {
-        const link = e.target.closest('.nav-item, .footer-link, .genre-bar a');
-        if (link) {
-          if (link.classList.contains('genre-bar')) {
-            const genre = link.textContent.trim();
-            localStorage.setItem('selectedGenre', genre);
-            window.location.href = 'genre.html';
-            return;
-          }
-          e.preventDefault();
-          const page = link.getAttribute('data-page');
-          navigateTo(page);
-          if (link.classList.contains('nav-item')) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            link.classList.add('active');
-          }
-        }
-      });
+      updateAuthUI(null);
     }
 
     async function showWatchlistNotifications() {
       if (!currentUser || watchlist.length === 0) return;
-      
+
       watchlistNotifications.innerHTML = '';
       const uniqueMovies = new Map();
-      const notificationPromises = watchlist.map(movieId => 
-        getDoc(doc(db, 'movies', movieId)).then(docSnap => 
-          docSnap.exists() ? { 
-            id: docSnap.id, 
-            title: docSnap.data().title,
-            coverImageUrl: docSnap.data().coverImageUrl
+      const notificationPromises = watchlist.map(movieId =>
+        getDoc(doc(db, 'movies', movieId)).then(docSnap =>
+          docSnap.exists() ? {
+            id: docSnap.id,
+            title: docSnap.data().title || 'Unknown Title',
+            coverImageUrl: docSnap.data().coverImageUrl || 'https://via.placeholder.com/30x45?text=No+Image'
           } : null
         )
       );
-      
-      const notificationMovies = (await Promise.all(notificationPromises)).filter(Boolean);
-      notificationMovies.forEach(movie => uniqueMovies.set(movie.id, movie));
-      
-      for (const movie of uniqueMovies.values()) {
-        const notification = createWatchlistNotification(movie);
-        watchlistNotifications.appendChild(notification);
-        setTimeout(() => notification.classList.add('show'), 50);
+
+      try {
+        const notificationMovies = (await Promise.all(notificationPromises)).filter(Boolean);
+        notificationMovies.forEach(movie => uniqueMovies.set(movie.id, movie));
+
+        for (const movie of uniqueMovies.values()) {
+          const notification = createWatchlistNotification(movie);
+          watchlistNotifications.appendChild(notification);
+          setTimeout(() => notification.classList.add('show'), 50);
+        }
+      } catch (error) {
+        showToast('Error loading watchlist notifications: ' + error.message, 'error');
+        console.error('Watchlist notifications error:', error);
       }
     }
 
@@ -779,10 +900,9 @@
       const notification = document.createElement('div');
       notification.className = 'watchlist-notification';
       notification.dataset.movieId = movie.id;
-      
+
       notification.innerHTML = `
-        <img src="${movie.coverImageUrl || 'https://via.placeholder.com/30x45?text=No+Image'}" 
-             alt="${movie.title}" class="watchlist-notification-poster">
+        <img src="${movie.coverImageUrl}" alt="${movie.title}" class="watchlist-notification-poster">
         <div class="watchlist-notification-content">
           <div class="watchlist-notification-title">${movie.title}</div>
           <div class="watchlist-notification-actions">
@@ -795,12 +915,12 @@
           </div>
         </div>
       `;
-      
+
       notification.querySelector('.close').addEventListener('click', () => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
-      });
-      
+      }, { passive: true });
+
       notification.querySelector('.remove').addEventListener('click', async () => {
         try {
           const userRef = doc(db, 'users', currentUser.uid);
@@ -813,16 +933,17 @@
           if (watchlist.length > 0) showWatchlistNotifications();
         } catch (error) {
           showToast('Error removing from watchlist: ' + error.message, 'error');
+          console.error('Remove watchlist error:', error);
         }
-      });
-      
+      }, { passive: true });
+
       setTimeout(() => {
         if (notification.parentNode) {
           notification.classList.remove('show');
           setTimeout(() => notification.remove(), 300);
         }
       }, 8000);
-      
+
       return notification;
     }
 
@@ -851,22 +972,34 @@
     }
 
     function updateAuthUI(user) {
+      authButtons.innerHTML = user ? `
+        <button class="auth-btn profile-btn"><i class="fas fa-user"></i> ${user.displayName || 'Profile'}</button>
+        <button class="auth-btn logout-btn">Logout</button>
+      ` : `
+        <button class="auth-btn login-btn">Login</button>
+        <button class="auth-btn register-btn">Register</button>
+      `;
+
       if (user) {
-        authButtons.innerHTML = `
-          <button class="auth-btn profile-btn"><i class="fas fa-user"></i> ${user.displayName || 'Profile'}</button>
-          <button class="auth-btn logout-btn">Logout</button>
-        `;
-        document.querySelector('.logout-btn').addEventListener('click', () => {
-          signOut(auth).then(() => showToast('Logged out successfully', 'success')).catch(error => showToast(error.message, 'error'));
-        });
-        document.querySelector('.profile-btn').addEventListener('click', () => window.location.href = 'profile.html');
+        const logoutBtn = authButtons.querySelector('.logout-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => showToast('Logged out successfully', 'success')).catch(error => showToast(error.message, 'error'));
+          }, { once: true });
+        }
+        const profileBtn = authButtons.querySelector('.profile-btn');
+        if (profileBtn) {
+          profileBtn.addEventListener('click', () => window.location.href = 'profile.html', { once: true });
+        }
       } else {
-        authButtons.innerHTML = `
-          <button class="auth-btn login-btn">Login</button>
-          <button class="auth-btn register-btn">Register</button>
-        `;
-        document.querySelector('.login-btn').addEventListener('click', () => window.location.href = 'login.html');
-        document.querySelector('.register-btn').addEventListener('click', () => window.location.href = 'register.html');
+        const loginBtn = authButtons.querySelector('.login-btn');
+        if (loginBtn) {
+          loginBtn.addEventListener('click', () => window.location.href = 'login.html', { once: true });
+        }
+        const registerBtn = authButtons.querySelector('.register-btn');
+        if (registerBtn) {
+          registerBtn.addEventListener('click', () => window.location.href = 'register.html', { once: true });
+        }
       }
     }
 
@@ -896,6 +1029,7 @@
         hideLoading();
       } catch (error) {
         showToast('Error loading content: ' + error.message, 'error');
+        console.error('Load homepage error:', error);
         hideLoading();
       }
     }
@@ -915,7 +1049,7 @@
     }
 
     async function fetchMovies() {
-      const q = query(collection(db, 'movies'), orderBy('views', 'desc')); // Sort by views for popular movies
+      const q = query(collection(db, 'movies'), orderBy('views', 'desc'));
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs
         .map(doc => ({
@@ -937,10 +1071,10 @@
     }
 
     async function fetchFeaturedMovies() {
-      const q = query(collection(db, 'movies'), orderBy('views', 'desc'), limit(5)); // Sort featured by views
+      const q = query(collection(db, 'movies'), orderBy('views', 'desc'), limit(5));
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ 
-        id: doc.id, 
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
         ...doc.data(),
         genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
         releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
@@ -1038,7 +1172,7 @@
     function startSlideshow() {
       if (!featuredMovies.length) return;
       let currentSlide = 0;
-      
+
       function showSlide(index) {
         const slides = document.querySelectorAll('.hero-slide');
         if (!slides.length) return;
@@ -1059,40 +1193,47 @@
       slideInterval = setInterval(nextSlide, 15000);
 
       document.querySelectorAll('.hero-slide').forEach(slide => {
-        slide.addEventListener('touchstart', () => clearInterval(slideInterval));
-        slide.addEventListener('touchend', () => slideInterval = setInterval(nextSlide, 15000));
+        slide.addEventListener('touchstart', () => clearInterval(slideInterval), { passive: true });
+        slide.addEventListener('touchend', () => slideInterval = setInterval(nextSlide, 15000), { passive: true });
       });
     }
 
     async function renderHomePage(newestMovies) {
-      let sortField = 'views'; // Default to views for popular movies
+      let sortField = 'views';
       let sortOrder = 'desc';
       if (currentUser) {
-        const userRef = doc(db, 'users', currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const preferences = userSnap.data().displayPreferences || {};
-          sortField = preferences.sortField || 'views';
-          sortOrder = preferences.sortOrder || 'desc';
+        try {
+          const userRef = doc(db, 'users', currentUser.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const preferences = userSnap.data().displayPreferences || {};
+            sortField = preferences.sortField || 'views';
+            sortOrder = preferences.sortOrder || 'desc';
+          }
+        } catch (error) {
+          console.error('Error fetching user preferences:', error);
         }
       }
 
-      let html = featuredMovies.length > 0 ? `
-        <section class="hero-slideshow">
-          ${featuredMovies.map(movie => `
-            <div class="hero-slide" style="--hero-background: url('${movie.coverImageUrl || 'https://via.placeholder.com/1920x1080?text=Featured+Movie'}')">
-              <div class="hero-content">
-                <h1>${movie.title}</h1>
-                <p>${movie.description?.substring(0, 100) || 'No description available.'}...</p>
-                <div class="hero-buttons">
-                  <button class="watch-btn" data-movie-id="${movie.id}"><i class="fas fa-play"></i> Watch</button>
-                  <button class="info-btn" data-movie-id="${movie.id}"><i class="fas fa-info-circle"></i> Info</button>
+      let html = '';
+      if (featuredMovies.length > 0) {
+        html += `
+          <section class="hero-slideshow">
+            ${featuredMovies.map(movie => `
+              <div class="hero-slide" style="--hero-background: url('${movie.coverImageUrl || 'https://via.placeholder.com/1920x1080?text=Featured+Movie'}')">
+                <div class="hero-content">
+                  <h1>${movie.title}</h1>
+                  <p>${movie.description?.substring(0, 100) || 'No description available.'}...</p>
+                  <div class="hero-buttons">
+                    <button class="watch-btn" data-movie-id="${movie.id}"><i class="fas fa-play"></i> Watch</button>
+                    <button class="info-btn" data-movie-id="${movie.id}"><i class="fas fa-info-circle"></i> Info</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          `).join('')}
-        </section>
-      ` : '';
+            `).join('')}
+          </section>
+        `;
+      }
 
       if (newestMovies && newestMovies.length > 0) {
         const newestRows = chunkArray(newestMovies, 12);
@@ -1108,7 +1249,6 @@
         `;
       }
 
-      // Popular Movies (1 row, sorted by views)
       const popularMovies = sortMovies([...movies], 'views', 'desc').slice(0, 12);
       if (popularMovies.length > 0) {
         const popularRows = chunkArray(popularMovies, 12);
@@ -1124,7 +1264,6 @@
         `;
       }
 
-      // Action Movies (3 rows, sorted by views then randomized)
       const actionMovies = shuffleArray(sortMovies(
         movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Action')),
         'views', 'desc'
@@ -1143,7 +1282,6 @@
         `;
       }
 
-      // Romance + Drama Movies (2 rows, sorted by views then randomized)
       const romanceDramaMovies = shuffleArray(sortMovies(
         movies.filter(movie => Array.isArray(movie.genres) && (movie.genres.includes('Romance') || movie.genres.includes('Drama'))),
         'views', 'desc'
@@ -1162,7 +1300,6 @@
         `;
       }
 
-      // Horror Movies (1 row, sorted by views then randomized)
       const horrorMovies = shuffleArray(sortMovies(
         movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Horror')),
         'views', 'desc'
@@ -1181,7 +1318,6 @@
         `;
       }
 
-      // Genre Bar
       html += `
         <div class="genre-bar">
           ${['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Horror', 'Romance', 'Adult', 'War', 'Thriller', 'Indian', 'Sci-Fi', 'Sport'].map(genre => `
@@ -1190,7 +1326,6 @@
         </div>
       `;
 
-      // All Movies (5 rows)
       if (movies.length > 0) {
         const allMovies = sortMovies([...movies], 'views', 'desc');
         const allMoviesRows = chunkArray(allMovies, 12);
@@ -1216,7 +1351,7 @@
           const genre = link.getAttribute('data-genre');
           if (genre) loadMoviesByGenre(genre);
           else if (sort) loadAllMovies(sort);
-        });
+        }, { passive: true });
       });
     }
 
@@ -1233,8 +1368,8 @@
       try {
         const q = query(collection(db, 'movies'), where('genres', 'array-contains', genre), orderBy('views', 'desc'), limit(24));
         const querySnapshot = await getDocs(q);
-        let genreMovies = shuffleArray(querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
+        let genreMovies = shuffleArray(querySnapshot.docs.map(doc => ({
+          id: doc.id,
           ...doc.data(),
           genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
           releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
@@ -1254,6 +1389,7 @@
         hideLoading();
       } catch (error) {
         showToast('Error loading movies: ' + error.message, 'error');
+        console.error('Load genre movies error:', error);
         hideLoading();
       }
     }
@@ -1274,8 +1410,8 @@
           q = query(collection(db, 'movies'), orderBy('views', 'desc'));
         }
         let querySnapshot = await getDocs(q);
-        allMovies = querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
+        allMovies = querySnapshot.docs.map(doc => ({
+          id: doc.id,
           ...doc.data(),
           genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
           releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
@@ -1318,6 +1454,7 @@
         hideLoading();
       } catch (error) {
         showToast('Error loading movies: ' + error.message, 'error');
+        console.error('Load all movies error:', error);
         hideLoading();
       }
     }
@@ -1378,71 +1515,10 @@
     }
 
     function attachMovieCardEvents() {
+      mainContent.removeEventListener('click', handleInteraction);
+      mainContent.addEventListener('click', handleInteraction, { passive: true });
+      mainContent.removeEventListener('touchstart', handleInteraction);
       mainContent.addEventListener('touchstart', () => {}, { passive: true });
-      mainContent.addEventListener('click', async (e) => {
-        const target = e.target.closest('.movie-card, .watch-btn, .info-btn, .overlay-btn:not(.watchlist-btn), .watchlist-btn');
-        if (!target) return;
-        if (target.classList.contains('watchlist-btn')) {
-          e.stopPropagation();
-          const movieId = target.getAttribute('data-movie-id');
-          if (!currentUser) {
-            showToast('Please login to use watchlist', 'error');
-            window.location.href = 'login.html';
-            return;
-          }
-          try {
-            const userRef = doc(db, 'users', currentUser.uid);
-            if (watchlist.includes(movieId)) {
-              await updateDoc(userRef, { watchlist: arrayRemove(movieId) });
-              watchlist = watchlist.filter(id => id !== movieId);
-              showToast('Removed from watchlist', 'success');
-              target.classList.remove('in-watchlist');
-              target.innerHTML = `<i class="fas fa-plus"></i> Add to Watchlist`;
-            } else {
-              await updateDoc(userRef, { watchlist: arrayUnion(movieId) });
-              watchlist.push(movieId);
-              showToast('Added to watchlist', 'success');
-              target.classList.add('in-watchlist');
-              target.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
-              
-              if (movieId !== lastAddedMovieId) {
-                lastAddedMovieId = movieId;
-                const movieDoc = await getDoc(doc(db, 'movies', movieId));
-                if (movieDoc.exists()) {
-                  const movie = { 
-                    id: movieDoc.id, 
-                    title: movieDoc.data().title,
-                    coverImageUrl: doc.data().coverImageUrl
-                  };
-                  const notification = createWatchlistNotification(movie);
-                  watchlistNotifications.appendChild(notification);
-                  setTimeout(() => notification.classList.add('show'), 50);
-                  setTimeout(() => lastAddedMovieId = null, 2000);
-                }
-              }
-            }
-            watchlistNotifications.innerHTML = '';
-            if (watchlist.length > 0) showWatchlistNotifications();
-          } catch (error) {
-            showToast('Error updating watchlist: ' + error.message, 'error');
-          }
-        } else {
-          const movieId = target.getAttribute('data-movie-id') || target.closest('.movie-card')?.getAttribute('data-movie-id');
-          if (movieId) {
-            await countView(movieId);
-            if (currentUser) {
-              const userRef = doc(db, 'users', currentUser.uid);
-              if (!watchHistory.includes(movieId)) {
-                watchHistory.unshift(movieId);
-                watchHistory = watchHistory.slice(0, 50);
-                await updateDoc(userRef, { history: watchHistory });
-                saveWatchHistoryToCookies(watchHistory);
-              }
-            }
-            window.location.href = `see.html?id=${movieId}`;
-          }
-        }
-      });
     }
 
     async function countView(movieId) {
@@ -1497,17 +1573,13 @@
     }
 
     function checkInternetConnection() {
-      if (!navigator.onLine) {
-        noInternetOverlay.style.display = 'flex';
-      } else {
-        noInternetOverlay.style.display = 'none';
-      }
+      noInternetOverlay.style.display = navigator.onLine ? 'none' : 'flex';
     }
 
     function setupIntersectionObserver() {
       const observerOptions = {
         root: null,
-        rootMargin: '0px',
+        rootMargin: '100px',
         threshold: 0.1
       };
 
@@ -1515,13 +1587,13 @@
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const img = entry.target;
-            img.src = img.dataset.src;
+            img.src = img.dataset.src || img.src;
             observer.unobserve(img);
           }
         });
       }, observerOptions);
 
-      document.querySelectorAll('img[data-src]').forEach(img => observer.observe(img));
+      document.querySelectorAll('img').forEach(img => observer.observe(img));
     }
 
     function sortMovies(movies, field, order) {
