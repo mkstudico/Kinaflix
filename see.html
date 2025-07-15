@@ -4,18 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Watch Movie - KINAFLIX</title>
-  <!-- Open Graph / Facebook / LinkedIn / WhatsApp (Dynamic) -->
-  <meta property="og:title" content="" id="og-title" />
-  <meta property="og:description" content="" id="og-description" />
-  <meta property="og:image" content="" id="og-image" />
-  <meta property="og:url" content="" id="og-url" />
-  <meta property="og:type" content="entertainment" />
-  <!-- Twitter Card (Dynamic) -->
+  
+  <!-- Default Open Graph / Facebook / LinkedIn / WhatsApp -->
+  <meta property="og:title" content="Watch Movie - KINAFLIX" />
+  <meta property="og:description" content="Watch this movie on KINAFLIX" />
+  <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+  <meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
+  <meta property="og:type" content="video.movie" />
+  
+  <!-- Default Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="" id="twitter-title" />
-  <meta name="twitter:description" content="" id="twitter-description" />
-  <meta name="twitter:image" content="" id="twitter-image" />
-  <meta name="twitter:url" content="" id="twitter-url" />
+  <meta name="twitter:title" content="Watch Movie - KINAFLIX" />
+  <meta name="twitter:description" content="Watch this movie on KINAFLIX" />
+  <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     :root {
@@ -968,6 +970,23 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    function updateMetaTags(movieData) {
+      const title = movieData.title || 'Watch Movie - KINAFLIX';
+      const description = movieData.description || 'Watch this movie on KINAFLIX';
+      const imageUrl = movieData.coverImageUrl || 'https://i.ibb.co/RpdRMfDm/Capture.png';
+      const url = window.location.href;
+      
+      // Update or create meta tags
+      document.querySelector('meta[property="og:title"]').setAttribute('content', title);
+      document.querySelector('meta[property="og:description"]').setAttribute('content', description);
+      document.querySelector('meta[property="og:image"]').setAttribute('content', imageUrl);
+      document.querySelector('meta[property="og:url"]').setAttribute('content', url);
+      
+      document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
+      document.querySelector('meta[name="twitter:description"]').setAttribute('content', description);
+      document.querySelector('meta[name="twitter:image"]').setAttribute('content', imageUrl);
+    }
+
     function formatEmail(email) {
       if (email && email.includes('@gmail.com')) {
         return email.replace('@gmail.com', '');
@@ -1137,35 +1156,8 @@
           timestamp: movieSnap.data().dateAdded?.toDate() || new Date()
         };
 
-        // Update Open Graph and Twitter Card meta tags dynamically
-        const defaultImage = 'https://kinaflix-fawn.vercel.app/default-poster.jpg'; // Ensure this exists
-        const imageUrl = currentMovie.coverImageUrl || defaultImage;
-
-        if (document.getElementById('og-image')) {
-          document.getElementById('og-image').setAttribute('content', imageUrl);
-        }
-        if (document.getElementById('twitter-image')) {
-          document.getElementById('twitter-image').setAttribute('content', imageUrl);
-        }
-        if (document.getElementById('og-title')) {
-          document.getElementById('og-title').setAttribute('content', currentMovie.title || 'Watch Movie - KINAFLIX');
-        }
-        if (document.getElementById('og-description')) {
-          document.getElementById('og-description').setAttribute('content', currentMovie.description || 'Enjoy streaming movies on KINAFLIX');
-        }
-        if (document.getElementById('og-url')) {
-          document.getElementById('og-url').setAttribute('content', window.location.href);
-        }
-        if (document.getElementById('twitter-title')) {
-          document.getElementById('twitter-title').setAttribute('content', currentMovie.title || 'Watch Movie - KINAFLIX');
-        }
-        if (document.getElementById('twitter-description')) {
-          document.getElementById('twitter-description').setAttribute('content', currentMovie.description || 'Enjoy streaming movies on KINAFLIX');
-        }
-        if (document.getElementById('twitter-url')) {
-          document.getElementById('twitter-url').setAttribute('content', window.location.href);
-        }
-
+        // Update meta tags with movie data
+        updateMetaTags(currentMovie);
         renderMovieDetails();
         loadComments();
         checkWatchlistStatus();
