@@ -4,17 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Watch Movie - KINAFLIX</title>
-  <!-- Open Graph / Facebook / LinkedIn / WhatsApp (Dynamic image will be injected) -->
-  <meta property="og:title" content="Click to watch.." />
-  <meta property="og:description" content="Fungura ino link urebe movie zisobanuye zirenga +100 kubuntu." />
+  <!-- Open Graph / Facebook / LinkedIn / WhatsApp (Dynamic) -->
+  <meta property="og:title" content="" id="og-title" />
+  <meta property="og:description" content="" id="og-description" />
   <meta property="og:image" content="" id="og-image" />
-  <meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
+  <meta property="og:url" content="" id="og-url" />
   <meta property="og:type" content="entertainment" />
-  <!-- Twitter Card -->
+  <!-- Twitter Card (Dynamic) -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Click to watch.." />
-  <meta name="twitter:description" content="Fungura ino link urebe movie zisobanuye zirenga +100 kubuntu." />
+  <meta name="twitter:title" content="" id="twitter-title" />
+  <meta name="twitter:description" content="" id="twitter-description" />
   <meta name="twitter:image" content="" id="twitter-image" />
+  <meta name="twitter:url" content="" id="twitter-url" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     :root {
@@ -951,8 +952,6 @@
     const descriptionPopup = document.getElementById('description-popup');
     const commentsPopup = document.getElementById('comments-popup');
     const showAllComments = document.getElementById('show-all-comments');
-    const ogImageMeta = document.getElementById('og-image');
-    const twitterImageMeta = document.getElementById('twitter-image');
 
     let currentMovie = null;
     let currentUser = null;
@@ -1138,12 +1137,33 @@
           timestamp: movieSnap.data().dateAdded?.toDate() || new Date()
         };
 
-        // Update Open Graph and Twitter image meta tags with movie cover image
-        if (ogImageMeta && currentMovie.coverImageUrl) {
-          ogImageMeta.setAttribute('content', currentMovie.coverImageUrl);
+        // Update Open Graph and Twitter Card meta tags dynamically
+        const defaultImage = 'https://kinaflix-fawn.vercel.app/default-poster.jpg'; // Ensure this exists
+        const imageUrl = currentMovie.coverImageUrl || defaultImage;
+
+        if (document.getElementById('og-image')) {
+          document.getElementById('og-image').setAttribute('content', imageUrl);
         }
-        if (twitterImageMeta && currentMovie.coverImageUrl) {
-          twitterImageMeta.setAttribute('content', currentMovie.coverImageUrl);
+        if (document.getElementById('twitter-image')) {
+          document.getElementById('twitter-image').setAttribute('content', imageUrl);
+        }
+        if (document.getElementById('og-title')) {
+          document.getElementById('og-title').setAttribute('content', currentMovie.title || 'Watch Movie - KINAFLIX');
+        }
+        if (document.getElementById('og-description')) {
+          document.getElementById('og-description').setAttribute('content', currentMovie.description || 'Enjoy streaming movies on KINAFLIX');
+        }
+        if (document.getElementById('og-url')) {
+          document.getElementById('og-url').setAttribute('content', window.location.href);
+        }
+        if (document.getElementById('twitter-title')) {
+          document.getElementById('twitter-title').setAttribute('content', currentMovie.title || 'Watch Movie - KINAFLIX');
+        }
+        if (document.getElementById('twitter-description')) {
+          document.getElementById('twitter-description').setAttribute('content', currentMovie.description || 'Enjoy streaming movies on KINAFLIX');
+        }
+        if (document.getElementById('twitter-url')) {
+          document.getElementById('twitter-url').setAttribute('content', window.location.href);
         }
 
         renderMovieDetails();
