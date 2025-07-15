@@ -4,20 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Watch Movie - KINAFLIX</title>
-  
-  <!-- Default Open Graph / Facebook / LinkedIn / WhatsApp -->
-  <meta property="og:title" content="Watch Movie - KINAFLIX" />
-  <meta property="og:description" content="Watch this movie on KINAFLIX" />
-  <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
-  <meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
-  <meta property="og:type" content="video.movie" />
-  
-  <!-- Default Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Watch Movie - KINAFLIX" />
-  <meta name="twitter:description" content="Watch this movie on KINAFLIX" />
-  <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
-
+  <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+<meta property="og:title" content="Click to watch.." />
+<meta property="og:description" content="Fungura ino link urebe movie zisobanuye zirenga +100 kubuntu." />
+<meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+<meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
+<meta property="og:type" content="entertainment" />
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Click to watch.." />
+<meta name="twitter:description" content="Fungura ino link urebe movie zisobanuye zirenga +100 kubuntu." />
+<meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     :root {
@@ -970,23 +967,6 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    function updateMetaTags(movieData) {
-      const title = movieData.title || 'Watch Movie - KINAFLIX';
-      const description = movieData.description || 'Watch this movie on KINAFLIX';
-      const imageUrl = movieData.coverImageUrl || 'https://i.ibb.co/RpdRMfDm/Capture.png';
-      const url = window.location.href;
-      
-      // Update or create meta tags
-      document.querySelector('meta[property="og:title"]').setAttribute('content', title);
-      document.querySelector('meta[property="og:description"]').setAttribute('content', description);
-      document.querySelector('meta[property="og:image"]').setAttribute('content', imageUrl);
-      document.querySelector('meta[property="og:url"]').setAttribute('content', url);
-      
-      document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
-      document.querySelector('meta[name="twitter:description"]').setAttribute('content', description);
-      document.querySelector('meta[name="twitter:image"]').setAttribute('content', imageUrl);
-    }
-
     function formatEmail(email) {
       if (email && email.includes('@gmail.com')) {
         return email.replace('@gmail.com', '');
@@ -1156,8 +1136,6 @@
           timestamp: movieSnap.data().dateAdded?.toDate() || new Date()
         };
 
-        // Update meta tags with movie data
-        updateMetaTags(currentMovie);
         renderMovieDetails();
         loadComments();
         checkWatchlistStatus();
