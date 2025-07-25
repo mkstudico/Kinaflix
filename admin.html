@@ -395,338 +395,340 @@
       <button>ADS</button>
     </a>
   </footer>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
-    authDomain: "kinaflix.firebaseapp.com",
-    projectId: "kinaflix",
-    storageBucket: "kinaflix.firebasestorage.app",
-    messagingSenderId: "318239806217",
-    appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
-    measurementId: "G-DC1T9B6B9W"
-  };
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      authDomain: "kinaflix.firebaseapp.com",
+      projectId: "kinaflix",
+      storageBucket: "kinaflix.firebasestorage.app",
+      messagingSenderId: "318239806217",
+      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+      measurementId: "G-DC1T9B6B9W"
+    };
 
-  const movieForm = document.getElementById('movie-form');
-  const loadingSpinner = document.getElementById('loading-spinner');
-  const authButtons = document.getElementById('auth-buttons');
-  const seriesSelect = document.getElementById('series');
-  const newSeriesInput = document.getElementById('new-series');
-  const addSeriesBtn = document.getElementById('add-series-btn');
-  const umusobanuziSelect = document.getElementById('umusobanuzi');
-  const newUmusobanuziInput = document.getElementById('new-umusobanuzi');
-  const addUmusobanuziBtn = document.getElementById('add-umusobanuzi-btn');
-  const coverImageInput = document.getElementById('coverImage');
-  const imagePreview = document.getElementById('imagePreview');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  document.body.appendChild(toast);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  document.addEventListener('DOMContentLoaded', () => {
-    initAuth();
-    initUI();
-    loadSeries();
-    loadUmusobanuzi();
-  });
+    const movieForm = document.getElementById('movie-form');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const authButtons = document.getElementById('auth-buttons');
+    const seriesSelect = document.getElementById('series');
+    const newSeriesInput = document.getElementById('new-series');
+    const addSeriesBtn = document.getElementById('add-series-btn');
+    const umusobanuziSelect = document.getElementById('umusobanuzi');
+    const newUmusobanuziInput = document.getElementById('new-umusobanuzi');
+    const addUmusobanuziBtn = document.getElementById('add-umusobanuzi-btn');
+    const coverImageInput = document.getElementById('coverImage');
+    const imagePreview = document.getElementById('imagePreview');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
 
-  function initAuth() {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        updateAuthUI(user);
-      } else {
-        showToast('Please login to access the admin panel', 'error');
-        window.location.href = 'login.html';
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+      initUI();
+      loadSeries();
+      loadUmusobanuzi();
+    });
+
+    function initAuth() {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          updateAuthUI(user);
+        } else {
+          showToast('Please login to access the admin panel', 'error');
+          window.location.href = 'login.html';
+        }
+      });
+    }
+
+    function initUI() {
+      const themeToggle = document.querySelector('.theme-toggle');
+      themeToggle.addEventListener('click', toggleTheme);
+
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        document.querySelector('.theme-toggle i').classList.remove('fa-moon');
+        document.querySelector('.theme-toggle i').classList.add('fa-sun');
       }
-    });
-  }
 
-  function initUI() {
-    const themeToggle = document.querySelector('.theme-toggle');
-    themeToggle.addEventListener('click', toggleTheme);
+      movieForm.addEventListener('submit', handleFormSubmit);
+      addSeriesBtn.addEventListener('click', createSeries);
+      addUmusobanuziBtn.addEventListener('click', createUmusobanuzi);
+      coverImageInput.addEventListener('change', handleImagePreview);
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      document.body.classList.add('light-mode');
-      document.querySelector('.theme-toggle i').classList.remove('fa-moon');
-      document.querySelector('.theme-toggle i').classList.add('fa-sun');
+      // Enforce uppercase input in real-time for title
+      document.getElementById('title').addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+      });
     }
 
-    movieForm.addEventListener('submit', handleFormSubmit);
-    addSeriesBtn.addEventListener('click', createSeries);
-    addUmusobanuziBtn.addEventListener('click', createUmusobanuzi);
-    coverImageInput.addEventListener('change', handleImagePreview);
+    function handleImagePreview(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        imagePreview.style.display = 'none';
+        imagePreview.src = '';
+        return;
+      }
+      if (!window.FileReader) {
+        showToast('FileReader not supported in this browser', 'error');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file', 'error');
+        imagePreview.style.display = 'none';
+        imagePreview.src = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+      };
+      reader.onerror = function() {
+        showToast('Error reading image file', 'error');
+        imagePreview.style.display = 'none';
+        imagePreview.src = '';
+      };
+      reader.readAsDataURL(file);
+    }
 
-    // Enforce uppercase input in real-time for title
-    document.getElementById('title').addEventListener('input', (e) => {
-      e.target.value = e.target.value.toUpperCase();
-    });
-  }
+    async function uploadImage(file, retries = 3, delay = 1000) {
+      if (!file) {
+        throw new Error('No image file selected');
+      }
+      const formData = new FormData();
+      formData.append('image', file);
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          const response = await fetch('https://api.imgbb.com/1/upload?key=a45316a9315903e0b0de4f2e66797256', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json',
+              'Connection': 'close'
+            }
+          });
+          const data = await response.json();
+          if (data.success) {
+            return data.data.url;
+          } else {
+            throw new Error(data.error.message);
+          }
+        } catch (error) {
+          if (attempt === retries) {
+            throw new Error('Image upload failed after ' + retries + ' attempts: ' + error.message);
+          }
+          console.warn(`Upload attempt ${attempt} failed: ${error.message}. Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
 
-  function handleImagePreview(e) {
-    const file = e.target.files[0];
-    if (!file) {
-      imagePreview.style.display = 'none';
-      imagePreview.src = '';
-      return;
+    function updateAuthUI(user) {
+      authButtons.innerHTML = `
+        <button class="auth-btn logout-btn">Logout</button>
+        <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
+      `;
+      document.querySelector('.logout-btn').addEventListener('click', () => {
+        signOut(auth).then(() => {
+          showToast('Logged out successfully', 'success');
+          window.location.href = 'index.html';
+        }).catch((error) => {
+          showToast(error.message, 'error');
+        });
+      });
+      document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
     }
-    if (!window.FileReader) {
-      showToast('FileReader not supported in this browser', 'error');
-      return;
-    }
-    if (!file.type.startsWith('image/')) {
-      showToast('Please select a valid image file', 'error');
-      imagePreview.style.display = 'none';
-      imagePreview.src = '';
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      imagePreview.src = e.target.result;
-      imagePreview.style.display = 'block';
-    };
-    reader.onerror = function() {
-      showToast('Error reading image file', 'error');
-      imagePreview.style.display = 'none';
-      imagePreview.src = '';
-    };
-    reader.readAsDataURL(file);
-  }
 
-  async function uploadImage(file, retries = 3, delay = 1000) {
-    if (!file) {
-      throw new Error('No image file selected');
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const icon = document.querySelector('.theme-toggle i');
+      if (document.body.classList.contains('light-mode')) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        localStorage.setItem('theme', 'light');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+        localStorage.setItem('theme', 'dark');
+      }
     }
-    const formData = new FormData();
-    formData.append('image', file);
-    for (let attempt = 1; attempt <= retries; attempt++) {
+
+    async function loadSeries() {
       try {
-        const response = await fetch('https://api.imgbb.com/1/upload?key=a45316a9315903e0b0de4f2e66797256', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json'
+        const q = query(collection(db, 'series'), orderBy('name'));
+        const querySnapshot = await getDocs(q);
+        seriesSelect.innerHTML = '<option value="">None (Standalone Movie)</option>';
+        if (querySnapshot.empty) {
+          console.log('No series found in Firestore');
+        }
+        querySnapshot.forEach(doc => {
+          const series = doc.data();
+          if (series.name) {
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.textContent = series.name;
+            seriesSelect.appendChild(option);
           }
         });
-        const data = await response.json();
-        if (data.success) {
-          return data.data.url;
-        } else {
-          throw new Error(data.error.message);
-        }
       } catch (error) {
-        if (attempt === retries) {
-          throw new Error('Image upload failed after ' + retries + ' attempts: ' + error.message);
+        console.error('Error loading series:', error);
+        showToast('Error loading series: ' + error.message, 'error');
+      }
+    }
+
+    async function createSeries() {
+      const seriesName = newSeriesInput.value.trim();
+      if (!seriesName) {
+        showToast('Please enter a series name', 'error');
+        return;
+      }
+      showLoading();
+      try {
+        const docRef = await addDoc(collection(db, 'series'), {
+          name: seriesName,
+          dateAdded: new Date()
+        });
+        showToast('Series added successfully', 'success');
+        newSeriesInput.value = '';
+        await loadSeries();
+        seriesSelect.value = docRef.id;
+      } catch (error) {
+        console.error('Error adding series:', error);
+        showToast('Error adding series: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function loadUmusobanuzi() {
+      try {
+        const q = query(collection(db, 'movies'));
+        const querySnapshot = await getDocs(q);
+        const umusobanuziValues = [...new Set(
+          querySnapshot.docs
+            .map(doc => {
+              const data = doc.data();
+              return data.umusobanuzi && typeof data.umusobanuzi === 'string' ? data.umusobanuzi.toUpperCase() : null;
+            })
+            .filter(value => value)
+        )].sort();
+        umusobanuziSelect.innerHTML = '<option value="">Select Umusobanuzi</option>';
+        if (umusobanuziValues.length === 0) {
+          console.log('No umusobanuzi values found in Firestore');
         }
-        console.warn(`Upload attempt ${attempt} failed: ${error.message}. Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
-  }
-
-  function updateAuthUI(user) {
-    authButtons.innerHTML = `
-      <button class="auth-btn logout-btn">Logout</button>
-      <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
-    `;
-    document.querySelector('.logout-btn').addEventListener('click', () => {
-      signOut(auth).then(() => {
-        showToast('Logged out successfully', 'success');
-        window.location.href = 'index.html';
-      }).catch((error) => {
-        showToast(error.message, 'error');
-      });
-    });
-    document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
-  }
-
-  function toggleTheme() {
-    document.body.classList.toggle('light-mode');
-    const icon = document.querySelector('.theme-toggle i');
-    if (document.body.classList.contains('light-mode')) {
-      icon.classList.remove('fa-moon');
-      icon.classList.add('fa-sun');
-      localStorage.setItem('theme', 'light');
-    } else {
-      icon.classList.remove('fa-sun');
-      icon.classList.add('fa-moon');
-      localStorage.setItem('theme', 'dark');
-    }
-  }
-
-  async function loadSeries() {
-    try {
-      const q = query(collection(db, 'series'), orderBy('name'));
-      const querySnapshot = await getDocs(q);
-      seriesSelect.innerHTML = '<option value="">None (Standalone Movie)</option>';
-      if (querySnapshot.empty) {
-        console.log('No series found in Firestore');
-      }
-      querySnapshot.forEach(doc => {
-        const series = doc.data();
-        if (series.name) {
+        umusobanuziValues.forEach(value => {
           const option = document.createElement('option');
-          option.value = doc.id;
-          option.textContent = series.name;
-          seriesSelect.appendChild(option);
+          option.value = value;
+          option.textContent = value;
+          umusobanuziSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading umusobanuzi:', error);
+        showToast('Error loading umusobanuzi values: ' + error.message, 'error');
+      }
+    }
+
+    async function createUmusobanuzi() {
+      const umusobanuziName = newUmusobanuziInput.value.trim().toUpperCase();
+      if (!umusobanuziName) {
+        showToast('Please enter an umusobanuzi name', 'error');
+        return;
+      }
+      showLoading();
+      try {
+        await addDoc(collection(db, 'movies'), {
+          title: 'TEMPORARY_MOVIE_' + Date.now(),
+          umusobanuzi: umusobanuziName,
+          dateAdded: new Date(),
+          views: 0,
+          isTemporary: true
+        });
+        showToast('Umusobanuzi added successfully', 'success');
+        newUmusobanuziInput.value = '';
+        await loadUmusobanuzi();
+        umusobanuziSelect.value = umusobanuziName;
+      } catch (error) {
+        console.error('Error adding umusobanuzi:', error);
+        showToast('Error adding umusobanuzi: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      showLoading();
+      try {
+        const title = document.getElementById('title').value.trim().toUpperCase();
+        const description = document.getElementById('description').value.trim();
+        const genres = Array.from(document.getElementById('genres').selectedOptions).map(option => option.value);
+        const seriesId = document.getElementById('series').value || null;
+        const releaseYear = parseInt(document.getElementById('releaseYear').value) || null;
+        const rating = parseFloat(document.getElementById('rating').value) || null;
+        const coverImageFile = document.getElementById('coverImage').files[0];
+        const googleDriveLink = document.getElementById('googleDriveLink').value.trim();
+        const youtubeTrailerUrl = document.getElementById('youtubeTrailerUrl').value.trim();
+        const umusobanuzi = document.getElementById('umusobanuzi').value;
+
+        let coverImageUrl = null;
+        if (coverImageFile) {
+          coverImageUrl = await uploadImage(coverImageFile);
         }
-      });
-    } catch (error) {
-      console.error('Error loading series:', error);
-      showToast('Error loading series: ' + error.message, 'error');
-    }
-  }
 
-  async function createSeries() {
-    const seriesName = newSeriesInput.value.trim();
-    if (!seriesName) {
-      showToast('Please enter a series name', 'error');
-      return;
-    }
-    showLoading();
-    try {
-      const docRef = await addDoc(collection(db, 'series'), {
-        name: seriesName,
-        dateAdded: new Date()
-      });
-      showToast('Series added successfully', 'success');
-      newSeriesInput.value = '';
-      await loadSeries();
-      seriesSelect.value = docRef.id;
-    } catch (error) {
-      console.error('Error adding series:', error);
-      showToast('Error adding series: ' + error.message, 'error');
-    } finally {
-      hideLoading();
-    }
-  }
+        await addDoc(collection(db, 'movies'), {
+          title,
+          description: description || null,
+          genres: genres.length > 0 ? genres : null,
+          seriesId,
+          releaseYear,
+          rating,
+          coverImageUrl: coverImageUrl || null,
+          googleDriveLink: googleDriveLink || null,
+          youtubeTrailerUrl: youtubeTrailerUrl || null,
+          umusobanuzi: umusobanuzi || null,
+          dateAdded: new Date(),
+          views: 0
+        });
 
-  async function loadUmusobanuzi() {
-    try {
-      const q = query(collection(db, 'movies'));
-      const querySnapshot = await getDocs(q);
-      const umusobanuziValues = [...new Set(
-        querySnapshot.docs
-          .map(doc => {
-            const data = doc.data();
-            return data.umusobanuzi && typeof data.umusobanuzi === 'string' ? data.umusobanuzi.toUpperCase() : null;
-          })
-          .filter(value => value)
-      )].sort();
-      umusobanuziSelect.innerHTML = '<option value="">Select Umusobanuzi</option>';
-      if (umusobanuziValues.length === 0) {
-        console.log('No umusobanuzi values found in Firestore');
+        showToast('Movie added successfully', 'success');
+        movieForm.reset();
+        seriesSelect.value = '';
+        umusobanuziSelect.value = '';
+        imagePreview.style.display = 'none';
+        imagePreview.src = '';
+      } catch (error) {
+        console.error('Error adding movie:', error);
+        showToast('Error adding movie: ' + error.message, 'error');
+      } finally {
+        hideLoading();
       }
-      umusobanuziValues.forEach(value => {
-        const option = document.createElement('option');
-        option.value = value;
-        option.textContent = value;
-        umusobanuziSelect.appendChild(option);
-      });
-    } catch (error) {
-      console.error('Error loading umusobanuzi:', error);
-      showToast('Error loading umusobanuzi values: ' + error.message, 'error');
     }
-  }
 
-  async function createUmusobanuzi() {
-    const umusobanuziName = newUmusobanuziInput.value.trim().toUpperCase();
-    if (!umusobanuziName) {
-      showToast('Please enter an umusobanuzi name', 'error');
-      return;
+    function showLoading() {
+      loadingSpinner.classList.add('active');
     }
-    showLoading();
-    try {
-      await addDoc(collection(db, 'movies'), {
-        title: 'TEMPORARY_MOVIE_' + Date.now(),
-        umusobanuzi: umusobanuziName,
-        dateAdded: new Date(),
-        views: 0,
-        isTemporary: true
-      });
-      showToast('Umusobanuzi added successfully', 'success');
-      newUmusobanuziInput.value = '';
-      await loadUmusobanuzi();
-      umusobanuziSelect.value = umusobanuziName;
-    } catch (error) {
-      console.error('Error adding umusobanuzi:', error);
-      showToast('Error adding umusobanuzi: ' + error.message, 'error');
-    } finally {
-      hideLoading();
+
+    function hideLoading() {
+      loadingSpinner.classList.remove('active');
     }
-  }
 
-  async function handleFormSubmit(e) {
-    e.preventDefault();
-    showLoading();
-    try {
-      const title = document.getElementById('title').value.trim().toUpperCase();
-      const description = document.getElementById('description').value.trim();
-      const genres = Array.from(document.getElementById('genres').selectedOptions).map(option => option.value);
-      const seriesId = document.getElementById('series').value || null;
-      const releaseYear = parseInt(document.getElementById('releaseYear').value) || null;
-      const rating = parseFloat(document.getElementById('rating').value) || null;
-      const coverImageFile = document.getElementById('coverImage').files[0];
-      const googleDriveLink = document.getElementById('googleDriveLink').value.trim();
-      const youtubeTrailerUrl = document.getElementById('youtubeTrailerUrl').value.trim();
-      const umusobanuzi = document.getElementById('umusobanuzi').value;
-
-      let coverImageUrl = null;
-      if (coverImageFile) {
-        coverImageUrl = await uploadImage(coverImageFile);
-      }
-
-      await addDoc(collection(db, 'movies'), {
-        title,
-        description: description || null,
-        genres: genres.length > 0 ? genres : null,
-        seriesId,
-        releaseYear,
-        rating,
-        coverImageUrl: coverImageUrl || null,
-        googleDriveLink: googleDriveLink || null,
-        youtubeTrailerUrl: youtubeTrailerUrl || null,
-        umusobanuzi: umusobanuzi || null,
-        dateAdded: new Date(),
-        views: 0
-      });
-
-      showToast('Movie added successfully', 'success');
-      movieForm.reset();
-      seriesSelect.value = '';
-      umusobanuziSelect.value = '';
-      imagePreview.style.display = 'none';
-      imagePreview.src = '';
-    } catch (error) {
-      console.error('Error adding movie:', error);
-      showToast('Error adding movie: ' + error.message, 'error');
-    } finally {
-      hideLoading();
+    function showToast(message, type = 'info') {
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type, 'show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
     }
-  }
-
-  function showLoading() {
-    loadingSpinner.classList.add('active');
-  }
-
-  function hideLoading() {
-    loadingSpinner.classList.remove('active');
-  }
-
-  function showToast(message, type = 'info') {
-    toast.textContent = message;
-    toast.className = 'toast';
-    toast.classList.add(type, 'show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-    }, 3000);
-  }
-</script>
+  </script>
 </body>
 </html>
