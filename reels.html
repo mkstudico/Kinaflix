@@ -4,19 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reels | KINAFLIX</title>
-  <meta name="description" content="Browse movie teasers on KINAFLIX.">
+  <meta name="description" content="Discover short movie reels on KINAFLIX.">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
-  <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
   <meta property="og:title" content="Reels | KINAFLIX" />
-  <meta property="og:description" content="Explore exciting movie teasers on KINAFLIX." />
+  <meta property="og:description" content="Explore a dynamic feed of short movie reels on KINAFLIX." />
   <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
   <meta property="og:url" content="https://kinaflix-fawn.vercel.app/reels.html" />
   <meta property="og:type" content="entertainment" />
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Reels | KINAFLIX" />
-  <meta name="twitter:description" content="Explore exciting movie teasers on KINAFLIX." />
+  <meta name="twitter:description" content="Explore a dynamic feed of short movie reels on KINAFLIX." />
   <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
   <script type="application/ld+json">
   {
@@ -24,7 +22,7 @@
     "@type": "WebPage",
     "name": "Reels | KINAFLIX",
     "url": "https://kinaflix-fawn.vercel.app/reels.html",
-    "description": "Browse movie teasers on KINAFLIX.",
+    "description": "Discover short movie reels on KINAFLIX.",
     "inLanguage": "en"
   }
   </script>
@@ -47,17 +45,19 @@
       background: var(--dark);
       color: var(--light);
       min-height: 100vh;
-      padding: 2rem;
-    }
-    .main-content {
-      max-width: 1200px;
-      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
     }
     .header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2rem;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--dark);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid var(--primary);
     }
     .back-btn {
       color: var(--light);
@@ -71,11 +71,9 @@
       color: var(--primary);
     }
     .search-bar {
-      display: flex;
-      align-items: center;
-      max-width: 400px;
-      width: 100%;
+      flex: 1;
       position: relative;
+      max-width: 400px;
     }
     .search-bar input {
       width: 100%;
@@ -84,21 +82,86 @@
       border-radius: 4px;
       background: #222;
       color: var(--light);
-      font-size: 1rem;
+      font-size: 0.9rem;
     }
     .search-bar i {
       position: absolute;
       right: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
       color: var(--gray);
-      font-size: 1rem;
+      font-size: 0.9rem;
+    }
+    .channels-carousel {
+      padding: 1rem;
+      background: var(--dark);
+      position: relative;
+    }
+    .channels-list {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 0.5rem;
+      scrollbar-width: none;
+    }
+    .channels-list::-webkit-scrollbar {
+      display: none;
+    }
+    .channel-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      min-width: 80px;
+    }
+    .channel-item img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .channel-item span {
+      font-size: 0.8rem;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+    }
+    .carousel-nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    .carousel-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+    .carousel-btn:hover {
+      background: var(--primary-dark);
     }
     .reels-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
     .reel-card {
+      background: #222;
+      border-radius: 8px;
+      overflow: hidden;
       cursor: pointer;
       transition: transform 0.3s;
     }
@@ -107,53 +170,71 @@
     }
     .reel-poster {
       width: 100%;
-      height: 200px;
+      height: 150px;
       object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 0.5rem;
+    }
+    .reel-info {
+      padding: 0.5rem;
+      text-align: left;
     }
     .reel-title {
-      font-size: 0.9rem;
-      color: var(--light);
+      font-size: 0.8rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      text-align: center;
     }
     .reel-genre {
-      font-size: 0.8rem;
+      font-size: 0.6rem;
       color: var(--gray);
-      text-align: center;
+      margin-bottom: 0.3rem;
     }
-    .scroll-top-btn {
+    .channel-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--light);
+    }
+    .channel-link img {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .channel-link span {
+      font-size: 0.6rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .channel-link:hover span {
+      color: var(--primary);
+    }
+    .scroll-top {
       position: fixed;
       bottom: 20px;
       right: 20px;
       background: var(--primary);
       color: white;
       border: none;
+      padding: 0.7rem;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 1.2rem;
       cursor: pointer;
       display: none;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow);
+      z-index: 1000;
       transition: background 0.3s;
     }
-    .scroll-top-btn:hover {
+    .scroll-top:hover {
       background: var(--primary-dark);
-    }
-    .scroll-top-btn.visible {
-      display: flex;
     }
     .footer {
       text-align: center;
+      padding: 1rem;
+      background: var(--dark);
       color: var(--gray);
-      font-size: 0.9rem;
-      padding: 1rem 0;
+      font-size: 0.8rem;
+      border-top: 1px solid var(--primary);
     }
     .loading-overlay {
       display: none;
@@ -171,28 +252,38 @@
       display: flex;
     }
     .loading-spinner {
-      width: 60px;
-      height: 60px;
-      border: 6px solid rgba(255, 255, 255, 0.2);
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.2);
       border-radius: 50%;
       border-top-color: var(--primary);
       animation: spin 1s ease-in-out infinite;
-    }
-    .grid-spinner {
-      display: none;
-      width: 40px;
-      height: 40px;
-      margin: 2rem auto;
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--primary);
-      animation: spin 1s ease-in-out infinite;
-    }
-    .grid-spinner.active {
-      display: block;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+    .error-message {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #f44336;
+      color: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      z-index: 2000;
+      max-width: 300px;
+      box-shadow: var(--shadow);
+    }
+    .error-message i {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .error-message .support {
+      font-style: italic;
+      margin-top: 0.5rem;
     }
     .toast {
       position: fixed;
@@ -212,125 +303,80 @@
       transform: translateY(0);
       opacity: 1;
     }
+    .toast.success {
+      background: #4CAF50;
+    }
     .toast.error {
       background: #f44336;
     }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: var(--dark);
-      padding: 2rem;
-      border-radius: 8px;
-      max-width: 800px;
-      width: 90%;
-      position: relative;
-      border: 1px solid var(--primary);
-    }
-    .modal-close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      color: var(--light);
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    .modal-close:hover {
-      color: var(--primary);
-    }
-    .modal iframe {
-      width: 100%;
-      height: 450px;
-      border: none;
-    }
-    @media (max-width: 768px) {
-      body {
-        padding: 1rem;
-      }
+    @media (min-width: 768px) {
       .reels-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       }
       .reel-poster {
-        height: 180px;
+        height: 225px;
       }
       .reel-title {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
       }
-      .reel-genre {
-        font-size: 0.75rem;
+      .reel-genre,
+      .channel-link span {
+        font-size: 0.7rem;
       }
-      .search-bar {
-        max-width: 300px;
+      .channel-link img {
+        width: 30px;
+        height: 30px;
       }
     }
     @media (max-width: 576px) {
-      body {
+      .header {
         padding: 0.5rem;
       }
-      .reels-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 0.8rem;
-      }
-      .reel-poster {
-        height: 150px;
-      }
-      .reel-title {
+      .search-bar input {
         font-size: 0.8rem;
       }
-      .reel-genre {
+      .channel-item img {
+        width: 50px;
+        height: 50px;
+      }
+      .channel-item span {
         font-size: 0.7rem;
-      }
-      .search-bar {
-        max-width: 100%;
-      }
-      .header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
+        max-width: 50px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="main-content">
-    <div class="header">
-      <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i></button>
-      <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search teasers...">
-        <i class="fas fa-search"></i>
-      </div>
+  <div class="header">
+    <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i></button>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search reels...">
+      <i class="fas fa-search"></i>
     </div>
-    <div class="reels-grid" id="reels-grid"></div>
-    <div class="grid-spinner" id="grid-spinner"></div>
-    <button class="scroll-top-btn" id="scroll-top-btn"><i class="fas fa-arrow-up"></i></button>
-    <div class="footer">Kinaflix Teasers - 2025 btem@fficial</div>
   </div>
-  <div class="loading-overlay" id="initial-loading-overlay">
+  <div class="channels-carousel">
+    <div class="channels-list" id="channels-list"></div>
+    <div class="carousel-nav">
+      <button class="carousel-btn prev"><i class="fas fa-chevron-left"></i></button>
+      <button class="carousel-btn next"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+  <div class="reels-grid" id="reels-grid"></div>
+  <button class="scroll-top" id="scroll-top"><i class="fas fa-arrow-up"></i></button>
+  <footer class="footer">Kinaflix Teasers - 2025 btem@fficial</footer>
+  <div class="loading-overlay" id="loading-overlay">
     <div class="loading-spinner"></div>
   </div>
-  <div class="modal" id="trailer-modal">
-    <div class="modal-content">
-      <button class="modal-close"><i class="fas fa-times"></i></button>
-      <iframe id="trailer-iframe" src="" allowfullscreen></iframe>
-    </div>
+  <div class="error-message" id="error-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>Sorry, we detect a slow network. Please check your connection.</p>
+    <p class="support">Remember to support <em>btem@fficial</em></p>
   </div>
   <div class="toast" id="toast"></div>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
@@ -347,121 +393,224 @@
     getAnalytics(app);
     const db = getFirestore(app);
 
-    const reelsGrid = document.getElementById('reels-grid');
     const searchInput = document.getElementById('search-input');
-    const gridSpinner = document.getElementById('grid-spinner');
-    const initialLoadingOverlay = document.getElementById('initial-loading-overlay');
-    const scrollTopBtn = document.getElementById('scroll-top-btn');
-    const trailerModal = document.getElementById('trailer-modal');
-    const trailerIframe = document.getElementById('trailer-iframe');
-    const modalClose = document.querySelector('.modal-close');
-    const toast = document.getElementById('toast');
+    const channelsList = document.getElementById('channels-list');
+    const reelsGrid = document.querySelector('#reels-grid');
+    const prevBtn = document.querySelector('.carousel-btn.prev');
+    const nextBtn = document.querySelector('.carousel-btn.next');
+    const scrollTopBtn = document.querySelector('#scroll-top');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const errorMessageEl = document.getElementById('error-message');
+    const toastEl = document.getElementById('toast');
+    let channels = [];
     let trailers = [];
+    let userPreferences = JSON.parse(localStorage.getItem('kinaflix')) || {
+      userPreferences: {
+        likedVideos: [],
+        preferredVideos: [],
+        likedChannels: [],
+        dislikedChannels: [],
+        viewedVideos: [],
+        preferredCategories: {}
+      }
+    };
+    userPreferences = userPreferences.userPreferences || {
+      likedVideos: [],
+      preferredVideos: [],
+      likedChannels: [],
+      dislikedChannels: [],
+      viewedVideos: [],
+      preferredCategories: {}
+    };
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initialLoadingOverlay.classList.add('active');
-      loadTrailers();
-
-      let searchTimeout;
-      searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-          const query = searchInput.value.trim().toLowerCase();
-          filterTrailers(query);
-        }, 300);
-      });
-
-      scrollTopBtn.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-
-      window.addEventListener('scroll', () => {
-        scrollTopBtn.classList.toggle('visible', window.scrollY > 300);
-      });
-
-      reelsGrid.addEventListener('click', (e) => {
-        const reelCard = e.target.closest('.reel-card');
-        if (reelCard) {
-          const videoUrl = reelCard.dataset.videoUrl;
-          trailerIframe.src = videoUrl;
-          trailerModal.style.display = 'flex';
-        }
-      });
-
-      modalClose.addEventListener('click', () => {
-        trailerModal.style.display = 'none';
-        trailerIframe.src = '';
-      });
-
-      trailerModal.addEventListener('click', (e) => {
-        if (e.target === trailerModal) {
-          trailerModal.style.display = 'none';
-          trailerIframe.src = '';
-        }
-      });
+    document.addEventListener('DOMContentLoaded', async () => {
+      loadingOverlay.classList.add('active');
+      try {
+        await Promise.all([loadChannels(), loadTrailers()]);
+        renderReels(sortReels(trailers));
+        checkNetwork();
+        setupReelClickHandlers();
+      } catch (error) {
+        showToast('Error loading content: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.remove('active');
+      }
     });
 
+    async function loadChannels() {
+      try {
+        const q = query(collection(db, 'channels'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        channels = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderChannels();
+      } catch (error) {
+        console.error('Error loading channels:', error);
+        showToast('Error loading channels', 'error');
+      }
+    }
+
     async function loadTrailers() {
-      showGridLoading();
       try {
         const q = query(collection(db, 'trailers'), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         trailers = querySnapshot.docs.map(doc => ({
           id: doc.id,
+          views: 0,
           ...doc.data()
         }));
-        renderTrailers(trailers);
       } catch (error) {
         console.error('Error loading trailers:', error);
-        showToast('Error loading trailers: ' + error.message, 'error');
-      } finally {
-        hideGridLoading();
-        initialLoadingOverlay.classList.remove('active');
+        showToast('Error loading trailers', 'error');
       }
     }
 
-    function renderTrailers(trailersToRender) {
-      reelsGrid.innerHTML = trailersToRender.length > 0 ? trailersToRender.map(trailer => `
-        <div class="reel-card" data-video-url="${trailer.videoUrl}">
-          <img src="${trailer.posterUrl || 'https://via.placeholder.com/140x200?text=No+Image'}" alt="${trailer.title}" class="reel-poster" loading="lazy">
-          <h3 class="reel-title">${trailer.title}</h3>
-          <p class="reel-genre">${trailer.genre}</p>
+    function renderChannels() {
+      channelsList.innerHTML = channels.map(channel => `
+        <div class="channel-item" data-id="${channel.id}" data-channel-link>
+          <img src="${channel.imageUrl}" alt="${channel.channelName}" loading="lazy">
+          <span>${channel.channelName}</span>
         </div>
-      `).join('') : '<p>No teasers found.</p>';
+      `).join('');
+      document.querySelectorAll('[data-channel-link]').forEach(item => {
+        item.addEventListener('click', () => {
+          window.location.href = `channel.html?id=${item.dataset.id}`;
+        });
+      });
     }
 
-    function filterTrailers(query) {
-      if (!query) {
-        renderTrailers(trailers);
-        return;
+    function renderReels(reels) {
+      reelsGrid.innerHTML = reels.map(trailer => {
+        const channel = channels.find(c => c.id === trailer.channelId);
+        return `
+          <div class="reel-card" data-id="${trailer.id}">
+            <img src="${trailer.posterUrl}" alt="${trailer.title}" class="reel-poster" loading="lazy">
+            <div class="reel-info">
+              <h3 class="reel-title">${trailer.title}</h3>
+              <p class="reel-genre">${channel ? channel.category : 'Unknown'}</p>
+              <div class="channel-link" data-id="${trailer.channelId}">
+                <img src="${channel ? channel.imageUrl : 'https://via.placeholder.com/25'}" alt="${channel ? channel.channelName : 'Unknown'}" loading="lazy">
+                <span>${channel ? channel.channelName : 'Unknown'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function sortReels(reels) {
+      if (!userPreferences.viewedVideos.length) {
+        return shuffleArray([...reels]);
       }
-      const filteredTrailers = trailers.filter(trailer => {
-        const descriptionMatch = trailer.description?.toLowerCase().includes(query);
-        const titleMatch = trailer.title.toLowerCase().includes(query);
-        return descriptionMatch || titleMatch;
-      }).sort((a, b) => {
-        const aDescriptionMatch = a.description?.toLowerCase().includes(query) ? 1 : 0;
-        const bDescriptionMatch = b.description?.toLowerCase().includes(query) ? 1 : 0;
-        return bDescriptionMatch - aDescriptionMatch;
+      const now = new Date();
+      const oneDay = 24 * 60 * 60 * 1000;
+      const newVideos = reels.filter(t => (now - new Date(t.createdAt)) < oneDay);
+      const likedChannelVideos = reels.filter(t => userPreferences.likedChannels.includes(t.channelId));
+      const preferredCategoryVideos = reels.filter(t => {
+        const channel = channels.find(c => c.id === t.channelId);
+        return channel && userPreferences.preferredCategories[channel.category] > 0 && !userPreferences.dislikedChannels.includes(t.channelId);
       });
-      renderTrailers(filteredTrailers);
+      const randomVideos = shuffleArray(reels.filter(t => !newVideos.includes(t) && !likedChannelVideos.includes(t) && !preferredCategoryVideos.includes(t) && !userPreferences.dislikedChannels.includes(t.channelId))).slice(0, 5);
+
+      return [
+        ...new Set([
+          ...likedChannelVideos.filter(t => (now - new Date(t.createdAt)) < oneDay),
+          ...newVideos,
+          ...preferredCategoryVideos,
+          ...randomVideos
+        ])
+      ];
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    async function trackView(videoId) {
+      const trailer = trailers.find(t => t.id === videoId);
+      if (!trailer) return;
+      userPreferences.viewedVideos.push(videoId);
+      const channel = channels.find(c => c.id === trailer.channelId);
+      if (channel) {
+        userPreferences.preferredCategories[channel.category] = (userPreferences.preferredCategories[channel.category] || 0) + 1;
+      }
+      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
+      try {
+        const trailerRef = doc(db, 'trailers', videoId);
+        await updateDoc(trailerRef, { views: (trailer.views || 0) + 1 });
+      } catch (error) {
+        console.error('Error updating views:', error);
+      }
+    }
+
+    function setupReelClickHandlers() {
+      reelsGrid.addEventListener('click', (e) => {
+        const channelLink = e.target.closest('.channel-link');
+        const reelCard = e.target.closest('.reel-card');
+        if (channelLink) {
+          const channelId = channelLink.dataset.id;
+          window.location.href = `channel.html?id=${channelId}`;
+        } else if (reelCard) {
+          const videoId = reelCard.dataset.id;
+          trackView(videoId);
+          window.location.href = `view.html?id=${videoId}`;
+        }
+      });
+    }
+
+    let searchTimeout;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const query = searchInput.value.trim().toLowerCase();
+        renderReels(filterReels(query));
+      }, 300);
+    });
+
+    function filterReels(query) {
+      if (!query) return sortReels(trailers);
+      return trailers.filter(trailer => {
+        const titleMatch = trailer.title.toLowerCase().includes(query);
+        const descriptionMatch = trailer.description?.toLowerCase().includes(query);
+        return titleMatch || descriptionMatch;
+      }).sort((a, b) => {
+        const aTitleMatch = a.title.toLowerCase().includes(query) ? 1 : 0;
+        const bTitleMatch = b.title.toLowerCase().includes(query) ? 1 : 0;
+        return bTitleMatch - aTitleMatch || (a.description?.toLowerCase().includes(query) ? 1 : 0) - (b.description?.toLowerCase().includes(query) ? 1 : 0);
+      });
+    }
+
+    prevBtn.addEventListener('click', () => {
+      channelsList.scrollBy({ left: -200, behavior: 'smooth' });
+    });
+
+    nextBtn.addEventListener('click', () => {
+      channelsList.scrollBy({ left: 200, behavior: 'smooth' });
+    });
+
+    window.addEventListener('scroll', () => {
+      scrollTopBtn.style.display = window.scrollY > 200 ? 'block' : 'none';
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    function checkNetwork() {
+      if (!navigator.onLine || navigator.connection?.effectiveType === 'slow-2g') {
+        errorMessageEl.style.display = 'block';
+        setTimeout(() => errorMessageEl.style.display = 'none', 5000);
+      }
     }
 
     function showToast(message, type = 'info') {
-      toast.textContent = message;
-      toast.className = 'toast';
-      toast.classList.add(type, 'show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    function showGridLoading() {
-      gridSpinner.classList.add('active');
-      reelsGrid.style.opacity = '0.6';
-    }
-
-    function hideGridLoading() {
-      gridSpinner.classList.remove('active');
-      reelsGrid.style.opacity = '1';
+      toastEl.textContent = message;
+      toastEl.className = 'toast';
+      toastEl.classList.add(type, 'show');
+      setTimeout(() => toastEl.classList.remove('show'), 3000);
     }
   </script>
 </body>
