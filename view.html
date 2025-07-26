@@ -437,10 +437,11 @@
   
   <!-- Toast notification -->
   <div class="toast" id="toast"></div>
- <script type="module">
+
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-    import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
@@ -457,6 +458,7 @@
     getAnalytics(app);
     const db = getFirestore(app);
 
+    // DOM elements
     const videoIframe = document.getElementById('video-iframe');
     const videoPlaceholder = document.getElementById('video-placeholder');
     const playOverlay = document.getElementById('play-overlay');
@@ -470,11 +472,14 @@
     const likeBtn = document.getElementById('like-btn');
     const dislikeBtn = document.getElementById('dislike-btn');
     const viewCount = document.getElementById('view-count');
+    const likeCount = document.getElementById('like-count');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const loadingOverlay = document.getElementById('loading-overlay');
     const errorMessage = document.getElementById('error-message');
     const toast = document.getElementById('toast');
+    
+    // App state
     let currentVideo = null;
     let channels = [];
     let trailers = [];
@@ -489,7 +494,12 @@
       preferredCategories: {}
     };
 
-    // Ensure arrays are initialized
+    // Navigation control variables
+    let isNavigating = false;
+    let lastNavTime = 0;
+    const debounceDelay = 500; // Increased debounce time for better UX
+
+    // Initialize arrays if they don't exist
     userPreferences.dislikedChannels = userPreferences.dislikedChannels || [];
     userPreferences.dislikedVideos = userPreferences.dislikedVideos || [];
     localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
@@ -514,23 +524,19 @@
         const videoId = new URLSearchParams(window.location.search).get('id');
         if (!videoId) throw new Error('No video ID provided');
         
-        // Load metadata first for immediate UI update
-        await loadChannels();
-        currentVideo = (await getDoc(doc(db, 'trailers', videoId))?.data();
+        // Load data in parallel
+        await Promise.all([loadChannels(), loadTrailers()]);
+        
+        currentVideo = trailers.find(t => t.id === videoId);
         if (!currentVideo) throw new Error('Video not found');
         
-        // Render basic info immediately
-        renderVideoMetadata();
-        
-        // Load full trailer list in background
-        loadTrailers().then(() => {
-          currentIndex = trailers.findIndex(t => t.id === videoId);
-        });
-        
+        currentIndex = trailers.findIndex(t => t.id === videoId);
+        renderVideo();
         trackView(videoId);
         checkNetwork();
         setupNavigation();
         setupAutoplayFallback();
+        
       } catch (error) {
         showToast('Error loading video: ' + error.message, 'error');
       } finally {
@@ -557,6 +563,7 @@
           .map(doc => ({
             id: doc.id,
             views: 0,
+            likes: 0,
             ...doc.data()
           }))
           .filter(t => t.channelId && !userPreferences.dislikedChannels.includes(t.channelId) && !userPreferences.dislikedVideos.includes(t.id));
@@ -566,9 +573,17 @@
       }
     }
 
-    function renderVideoMetadata() {
+    function renderVideo() {
       if (!currentVideo) return;
+      
+      // Show loading state
+      videoPlaceholder.style.display = 'flex';
+      videoIframe.style.display = 'none';
+      
       const channel = channels.find(c => c.id === currentVideo.channelId);
+      const embedUrl = currentVideo.gdriveLink.replace(/\/view.*/, '/preview');
+      
+      // Load metadata first for perceived performance
       channelImg.src = channel ? channel.imageUrl : 'https://via.placeholder.com/40';
       channelName.textContent = channel ? channel.channelName : 'Unknown';
       channelLink.dataset.id = currentVideo.channelId;
@@ -576,63 +591,75 @@
       videoTitle.textContent = currentVideo.title;
       videoDescription.textContent = currentVideo.description || 'No description available';
       viewCount.textContent = `${(currentVideo.views || 0).toLocaleString()} views`;
+      likeCount.textContent = (currentVideo.likes || 0).toLocaleString();
       likeBtn.classList.toggle('liked', userPreferences.likedVideos.includes(currentVideo.id));
       dislikeBtn.classList.toggle('disliked', userPreferences.dislikedVideos.includes(currentVideo.id));
+      updateNavButtons();
+      
+      // Update URL without reload
       window.history.replaceState({}, '', `view.html?id=${currentVideo.id}`);
       
-      // Start loading video immediately after metadata
-      loadVideoContent();
-    }
-
-    function loadVideoContent() {
-      if (!currentVideo) return;
-      
-      const embedUrl = currentVideo.gdriveLink.replace(/\/view.*/, '/preview');
+      // Load video after metadata is shown
       videoIframe.src = embedUrl;
-      
-      // Show video as soon as it's ready
       videoIframe.onload = () => {
         videoPlaceholder.style.display = 'none';
-        attemptAutoplay();
-      };
-      
-      // Fallback in case onload doesn't fire
-      setTimeout(() => {
-        if (videoPlaceholder.style.display !== 'none') {
-          videoPlaceholder.style.display = 'none';
-          attemptAutoplay();
-        }
-      }, 1000);
-    }
-
-    function attemptAutoplay() {
-      try {
+        videoIframe.style.display = 'block';
+        
+        // Try to autoplay
         const playPromise = videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
         if (!playPromise) {
           playOverlay.classList.add('active');
         }
-      } catch (e) {
-        playOverlay.classList.add('active');
-      }
+      };
     }
 
-    function renderVideo() {
-      renderVideoMetadata();
+    function updateNavButtons() {
       prevBtn.classList.toggle('disabled', currentIndex === 0);
       nextBtn.classList.toggle('disabled', currentIndex === trailers.length - 1);
     }
 
+    async function navigateToVideo(newIndex) {
+      if (isNavigating) return;
+      isNavigating = true;
+      
+      const now = Date.now();
+      if (now - lastNavTime < debounceDelay) {
+        isNavigating = false;
+        return;
+      }
+      lastNavTime = now;
+      
+      if (newIndex >= 0 && newIndex < trailers.length) {
+        currentIndex = newIndex;
+        currentVideo = trailers[currentIndex];
+        
+        // Show loading state during transition
+        videoPlaceholder.style.display = 'flex';
+        videoIframe.style.display = 'none';
+        
+        renderVideo();
+        trackView(currentVideo.id);
+        updateNavButtons();
+      }
+      
+      isNavigating = false;
+    }
+
     async function trackView(videoId) {
       if (userPreferences.viewedVideos.includes(videoId)) return;
+      
       userPreferences.viewedVideos.push(videoId);
       const channel = channels.find(c => c.id === currentVideo.channelId);
       if (channel) {
         userPreferences.preferredCategories[channel.category] = (userPreferences.preferredCategories[channel.category] || 0) + 1;
       }
       localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
+      
       try {
         const trailerRef = doc(db, 'trailers', videoId);
-        await updateDoc(trailerRef, { views: (currentVideo.views || 0) + 1 });
+        await updateDoc(trailerRef, { 
+          views: (currentVideo.views || 0) + 1 
+        });
         currentVideo.views = (currentVideo.views || 0) + 1;
         viewCount.textContent = `${currentVideo.views.toLocaleString()} views`;
       } catch (error) {
@@ -647,25 +674,106 @@
       });
     }
 
+    function setupNavigation() {
+      // Button navigation
+      prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          navigateToVideo(currentIndex - 1);
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (currentIndex < trailers.length - 1) {
+          navigateToVideo(currentIndex + 1);
+        }
+      });
+
+      // Swipe navigation for mobile
+      let touchStartY = 0;
+      let touchStartTime = 0;
+      const swipeThreshold = 50; // Minimum vertical swipe distance
+      const swipeTimeThreshold = 300; // Maximum swipe duration in ms
+      
+      const videoContainer = document.getElementById('video-container');
+      
+      videoContainer.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now();
+      }, { passive: true });
+
+      videoContainer.addEventListener('touchend', (e) => {
+        const touchEndY = e.changedTouches[0].clientY;
+        const touchEndTime = Date.now();
+        const deltaY = touchEndY - touchStartY;
+        const timeDelta = touchEndTime - touchStartTime;
+        
+        // Check if it's a valid swipe
+        if (timeDelta > swipeTimeThreshold) return;
+        
+        if (deltaY > swipeThreshold && currentIndex > 0) {
+          // Swipe down - previous video
+          navigateToVideo(currentIndex - 1);
+        } else if (deltaY < -swipeThreshold && currentIndex < trailers.length - 1) {
+          // Swipe up - next video
+          navigateToVideo(currentIndex + 1);
+        }
+      }, { passive: true });
+
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp' && currentIndex > 0) {
+          e.preventDefault();
+          navigateToVideo(currentIndex - 1);
+        } else if (e.key === 'ArrowDown' && currentIndex < trailers.length - 1) {
+          e.preventDefault();
+          navigateToVideo(currentIndex + 1);
+        }
+      });
+    }
+
     // ... (rest of your existing functions remain exactly the same) ...
-    likeBtn.addEventListener('click', () => {
+    likeBtn.addEventListener('click', async () => {
       const isLiked = userPreferences.likedVideos.includes(currentVideo.id);
-      if (isLiked) {
-        userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
-        userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
-      } else {
-        userPreferences.likedVideos.push(currentVideo.id);
-        userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
-        userPreferences.preferredCategories[currentVideo.category] = (userPreferences.preferredCategories[currentVideo.category] || 0) + 1);
+      
+      try {
+        const trailerRef = doc(db, 'trailers', currentVideo.id);
+        
+        if (isLiked) {
+          // Unlike
+          userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
+          userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
+          
+          await updateDoc(trailerRef, {
+            likes: (currentVideo.likes || 0) - 1
+          });
+          currentVideo.likes = (currentVideo.likes || 0) - 1;
+        } else {
+          // Like
+          userPreferences.likedVideos.push(currentVideo.id);
+          userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
+          userPreferences.preferredCategories[currentVideo.category] = (userPreferences.preferredCategories[currentVideo.category] || 0) + 1;
+          
+          await updateDoc(trailerRef, {
+            likes: (currentVideo.likes || 0) + 1
+          });
+          currentVideo.likes = (currentVideo.likes || 0) + 1;
+        }
+        
+        localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
+        likeBtn.classList.toggle('liked', !isLiked);
+        dislikeBtn.classList.toggle('disliked', false);
+        likeCount.textContent = currentVideo.likes.toLocaleString();
+        showToast(isLiked ? 'Video unliked' : 'Video liked', 'success');
+      } catch (error) {
+        console.error('Error updating likes:', error);
+        showToast('Error updating like status', 'error');
       }
-      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
-      likeBtn.classList.toggle('liked', !isLiked);
-      dislikeBtn.classList.toggle('disliked', false);
-      showToast(isLiked ? 'Video unliked' : 'Video liked', 'success');
     });
 
+    // Dislike button handler
     dislikeBtn.addEventListener('click', () => {
       const isDisliked = userPreferences.dislikedVideos.includes(currentVideo.id);
+      
       if (isDisliked) {
         userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
       } else {
@@ -673,66 +781,29 @@
         userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
         userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
       }
+      
       localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
       dislikeBtn.classList.toggle('disliked', !isDisliked);
       likeBtn.classList.toggle('liked', false);
       showToast(isDisliked ? 'Video dislike removed' : 'Video disliked', 'success');
     });
 
+    // Channel link handler
     channelLink.addEventListener('click', () => {
       window.location.href = `channel.html?id=${channelLink.dataset.id}`;
     });
 
+    // Show more description handler
     unhideBtn.addEventListener('click', () => {
       videoDescription.classList.add('visible');
       unhideBtn.style.display = 'none';
       setTimeout(() => {
         videoDescription.classList.remove('visible');
-        unhideBtn.style.display = 'block';
+        unhideBtn.style.display = 'inline-block';
       }, 5000);
     });
 
-    function setupNavigation() {
-      prevBtn.addEventListener('click', () => {
-        if (currentIndex > 0) {
-          currentIndex--;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        }
-      });
-
-      nextBtn.addEventListener('click', () => {
-        if (currentIndex < trailers.length - 1) {
-          currentIndex++;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        }
-      });
-
-      const videoContainer = document.getElementById('video-container');
-      let startY = 0;
-      videoContainer.addEventListener('touchstart', (e) => {
-        startY = e.touches[0].clientY;
-      });
-      videoContainer.addEventListener('touchend', (e) => {
-        const endY = e.changedTouches[0].clientY;
-        const deltaY = endY - startY;
-        if (deltaY > 75 && currentIndex > 0) {
-          currentIndex--;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        } else if (deltaY < -75 && currentIndex < trailers.length - 1) {
-          currentIndex++;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        }
-      });
-    }
-
+    // Network check
     function checkNetwork() {
       if (!navigator.onLine || navigator.connection?.effectiveType === 'slow-2g' || window.location.protocol === 'file:') {
         errorMessage.style.display = 'block';
@@ -740,6 +811,7 @@
       }
     }
 
+    // Toast notification
     function showToast(message, type = 'info') {
       toast.textContent = message;
       toast.className = 'toast';
