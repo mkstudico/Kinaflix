@@ -2,49 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Channel | KINAFLIX</title>
   <meta name="description" content="Explore channels and their short movie reels on KINAFLIX.">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
       --primary: #e50914;
       --primary-dark: #b2070f;
       --dark: #141414;
+      --darker: #0a0a0a;
       --light: #f4f4f4;
+      --lighter: #ffffff;
       --gray: #999;
+      --light-gray: #333;
       --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      --glow: 0 0 10px rgba(229, 9, 20, 0.5);
     }
+    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
+    
     html, body {
       width: 100%;
       height: 100%;
       overflow-x: hidden;
+      background: var(--dark);
     }
+    
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: var(--dark);
       color: var(--light);
       display: flex;
       flex-direction: column;
       position: relative;
     }
+    
+    /* Header Styles */
     .header {
       display: flex;
       align-items: center;
       padding: 1rem;
-      background: var(--dark);
+      background: linear-gradient(to bottom, var(--darker), transparent);
       position: sticky;
       top: 0;
       z-index: 1000;
-      border-bottom: 1px solid var(--primary);
     }
+    
     .back-btn {
       background: var(--primary);
       color: white;
@@ -53,125 +62,183 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 0.9rem;
-      transition: background 0.3s;
-    }
-    .back-btn:hover {
-      background: var(--primary-dark);
-    }
-    .channel-details {
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 1rem;
-      background: #222;
-      border-bottom: 1px solid var(--primary);
+      gap: 0.5rem;
     }
+    
+    .back-btn:hover {
+      background: var(--primary-dark);
+      box-shadow: var(--glow);
+    }
+    
+    /* Channel Header Section */
+    .channel-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1rem;
+      background: linear-gradient(to right, var(--darker), var(--dark));
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
     .channel-image {
-      width: 100px;
-      height: 100px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       object-fit: cover;
-      flex-shrink: 0;
+      border: 3px solid var(--primary);
+      box-shadow: var(--glow);
     }
-    .channel-text {
+    
+    .channel-info {
       flex: 1;
-      min-width: 0; /* Prevent flex item from overflowing */
+      min-width: 0;
     }
+    
     .channel-name {
       font-size: 1.5rem;
-      margin-bottom: 0.3rem;
+      font-weight: bold;
+      color: var(--lighter);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-bottom: 0.3rem;
     }
+    
+    .channel-stats {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
     .channel-category {
       font-size: 0.9rem;
-      color: var(--gray);
-      margin-bottom: 0.5rem;
+      color: var(--primary);
+      font-weight: 500;
     }
-    .channel-description {
-      font-size: 0.9rem;
-      color: var(--gray);
-      margin-bottom: 0.5rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .channel-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-    .action-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.5rem;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s;
-      flex-shrink: 0;
-    }
-    .action-btn:hover {
-      background: var(--primary-dark);
-    }
-    .action-btn.liked {
-      background: #4CAF50;
-    }
-    .action-btn.disliked {
-      background: #f44336;
-    }
+    
     .channel-views {
       font-size: 0.8rem;
       color: var(--gray);
+    }
+    
+    /* Channel Actions */
+    .channel-actions {
+      display: flex;
+      gap: 0.75rem;
       margin-top: 0.5rem;
     }
-    .content-wrapper {
-      flex: 1;
+    
+    .action-btn {
+      background: var(--light-gray);
+      color: white;
+      border: none;
+      padding: 0.5rem 0.8rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
       display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      align-items: center;
+      gap: 0.3rem;
     }
+    
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
+    
+    .action-btn.liked {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .action-btn.disliked {
+      background: #f44336;
+      color: white;
+    }
+    
+    /* Channel Description */
+    .channel-description {
+      padding: 1rem;
+      background: var(--darker);
+      border-bottom: 1px solid var(--light-gray);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--gray);
+    }
+    
+    /* Videos Grid */
     .videos-container {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      padding-bottom: 1rem;
     }
+    
+    .section-title {
+      padding: 1rem 1rem 0.5rem;
+      font-size: 1.2rem;
+      color: var(--lighter);
+      font-weight: bold;
+    }
+    
     .videos-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 1rem;
-      padding: 1rem;
-      max-width: 1200px;
-      margin: 0 auto;
+      padding: 0 1rem 1rem;
     }
+    
     .video-card {
-      background: #222;
+      background: var(--darker);
       border-radius: 8px;
       overflow: hidden;
       cursor: pointer;
-      transition: transform 0.3s;
-      aspect-ratio: 2/3;
+      transition: all 0.3s ease;
+      aspect-ratio: 9/16;
+      position: relative;
+      border: 1px solid var(--light-gray);
     }
+    
     .video-card:hover {
-      transform: scale(1.05);
+      transform: translateY(-5px);
+      box-shadow: var(--glow);
+      border-color: var(--primary);
     }
+    
     .video-poster {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.3s ease;
     }
+    
+    .video-card:hover .video-poster {
+      transform: scale(1.05);
+    }
+    
     .video-info {
-      padding: 0.5rem;
-      text-align: left;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.8rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
     }
+    
     .video-title {
-      font-size: 0.8rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--lighter);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    
+    /* Scroll to top button */
     .scroll-top {
       position: fixed;
       bottom: 20px;
@@ -179,25 +246,32 @@
       background: var(--primary);
       color: white;
       border: none;
-      padding: 0.7rem;
+      padding: 0.8rem;
       border-radius: 50%;
       cursor: pointer;
       display: none;
       z-index: 1000;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
     }
+    
     .scroll-top:hover {
       background: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: var(--glow);
     }
+    
+    /* Footer */
     .footer {
       text-align: center;
       padding: 1rem;
-      background: var(--dark);
+      background: var(--darker);
       color: var(--gray);
       font-size: 0.8rem;
-      border-top: 1px solid var(--primary);
-      flex-shrink: 0;
+      border-top: 1px solid var(--light-gray);
     }
+    
+    /* Loading and Error States */
     .loading-overlay {
       display: none;
       position: fixed;
@@ -210,9 +284,11 @@
       justify-content: center;
       align-items: center;
     }
+    
     .loading-overlay.active {
       display: flex;
     }
+    
     .loading-spinner {
       width: 50px;
       height: 50px;
@@ -221,9 +297,11 @@
       border-top-color: var(--primary);
       animation: spin 1s ease-in-out infinite;
     }
+    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    
     .error-message {
       display: none;
       position: fixed;
@@ -239,14 +317,7 @@
       max-width: 300px;
       box-shadow: var(--shadow);
     }
-    .error-message i {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .error-message .support {
-      font-style: italic;
-      margin-top: 0.5rem;
-    }
+    
     .toast {
       position: fixed;
       bottom: 20px;
@@ -261,107 +332,107 @@
       transition: all 0.3s;
       z-index: 1000;
     }
+    
     .toast.show {
       transform: translateY(0);
       opacity: 1;
     }
-    .toast.success {
-      background: #4CAF50;
-    }
-    .toast.error {
-      background: #f44336;
-    }
-    @media (min-width: 768px) {
-      .videos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .channel-header {
+        gap: 1rem;
+        padding: 1rem 0.75rem;
       }
-      .video-title {
-        font-size: 0.9rem;
-      }
+      
       .channel-image {
-        width: 120px;
-        height: 120px;
+        width: 70px;
+        height: 70px;
       }
+      
       .channel-name {
-        font-size: 1.8rem;
+        font-size: 1.3rem;
       }
-      .channel-category,
-      .channel-description {
-        font-size: 1rem;
+      
+      .channel-actions {
+        gap: 0.5rem;
       }
-    }
-    @media (max-width: 576px) {
-      .header {
-        padding: 0.5rem;
-      }
-      .channel-details {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .channel-image {
-        width: 80px;
-        height: 80px;
-        align-self: center;
-      }
-      .channel-name {
-        font-size: 1.2rem;
-      }
-      .channel-category,
-      .channel-description {
+      
+      .action-btn {
+        padding: 0.4rem 0.6rem;
         font-size: 0.8rem;
       }
-      .action-btn {
-        padding: 0.4rem;
-        font-size: 0.9rem;
-      }
-      .channel-views {
-        font-size: 0.7rem;
-      }
+      
       .videos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 0.75rem;
-        padding: 0.75rem;
       }
     }
-    /* Prevent horizontal scrolling on mobile */
+    
     @media (max-width: 480px) {
-      body {
-        overflow-x: hidden;
+      .channel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
       }
-      .channel-details {
-        padding: 0.75rem;
+      
+      .channel-image {
+        width: 60px;
+        height: 60px;
       }
-      .videos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+      
+      .channel-info {
+        width: 100%;
+      }
+      
+      .channel-stats {
+        flex-wrap: wrap;
         gap: 0.5rem;
-        padding: 0.5rem;
+      }
+      
+      .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.5rem;
+        padding: 0 0.75rem 0.75rem;
+      }
+      
+      .video-title {
+        font-size: 0.8rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <button class="back-btn" onclick="window.history.back()">BACK</button>
+    <button class="back-btn" onclick="window.location.href='reels.html'">
+      <i class="fas fa-arrow-left"></i> BACK
+    </button>
   </div>
   
-  <div class="content-wrapper">
-    <div class="channel-details">
-      <div class="channel-text">
-        <h1 class="channel-name" id="channel-name"></h1>
-        <p class="channel-category" id="channel-category"></p>
-        <p class="channel-description" id="channel-description"></p>
-        <div class="channel-actions">
-          <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
-          <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
-        </div>
-        <p class="channel-views" id="channel-views"></p>
+  <div class="channel-header">
+    <img id="channel-image" class="channel-image" src="" alt="Channel Image">
+    <div class="channel-info">
+      <h1 class="channel-name" id="channel-name"></h1>
+      <div class="channel-stats">
+        <span class="channel-category" id="channel-category"></span>
+        <span class="channel-views" id="channel-views"></span>
       </div>
-      <img id="channel-image" class="channel-image" src="" alt="Channel Image">
+      <div class="channel-actions">
+        <button id="like-btn" class="action-btn">
+          <i class="fas fa-heart"></i> Like
+        </button>
+        <button id="dislike-btn" class="action-btn">
+          <i class="fas fa-thumbs-down"></i> Dislike
+        </button>
+      </div>
     </div>
-    
-    <div class="videos-container">
-      <div class="videos-grid" id="videos-grid"></div>
-    </div>
+  </div>
+  
+  <div class="channel-description" id="channel-description"></div>
+  
+  <div class="videos-container">
+    <h2 class="section-title">Latest Reels</h2>
+    <div class="videos-grid" id="videos-grid"></div>
   </div>
   
   <footer class="footer">Kinaflix Teasers - 2025 btem@fficial</footer>
@@ -397,6 +468,7 @@
     getAnalytics(app);
     const db = getFirestore(app);
 
+    // DOM Elements
     const channelNameEl = document.getElementById('channel-name');
     const channelCategoryEl = document.getElementById('channel-category');
     const channelImageEl = document.getElementById('channel-image');
@@ -409,6 +481,7 @@
     const loadingOverlay = document.getElementById('loading-overlay');
     const errorMessageEl = document.getElementById('error-message');
     const toastEl = document.getElementById('toast');
+    
     let channel = null;
     let trailers = [];
     let userPreferences = JSON.parse(localStorage.getItem('kinaflix')) || {
@@ -480,7 +553,7 @@
       channelImageEl.src = channel.imageUrl;
       channelDescriptionEl.textContent = channel.description;
       const totalViews = trailers.reduce((sum, t) => sum + (t.views || 0), 0);
-      channelViewsEl.textContent = `Total Views: ${totalViews.toLocaleString()}`;
+      channelViewsEl.textContent = `${totalViews.toLocaleString()} views`;
     }
 
     function renderVideos() {
@@ -514,28 +587,30 @@
       if (isLiked) {
         userPreferences.likedChannels = userPreferences.likedChannels.filter(id => id !== channel.id);
         userPreferences.preferredCategories[channel.category] = Math.max(0, (userPreferences.preferredCategories[channel.category] || 0) - 1);
+        showToast('Channel unliked', 'success');
       } else {
         userPreferences.likedChannels.push(channel.id);
         userPreferences.dislikedChannels = userPreferences.dislikedChannels.filter(id => id !== channel.id);
         userPreferences.preferredCategories[channel.category] = (userPreferences.preferredCategories[channel.category] || 0) + 1;
+        showToast('Channel liked', 'success');
       }
       localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
       updateActionButtons();
-      showToast(isLiked ? 'Channel unliked' : 'Channel liked', 'success');
     });
 
     dislikeBtn.addEventListener('click', () => {
       const isDisliked = userPreferences.dislikedChannels.includes(channel.id);
       if (isDisliked) {
         userPreferences.dislikedChannels = userPreferences.dislikedChannels.filter(id => id !== channel.id);
+        showToast('Channel dislike removed', 'success');
       } else {
         userPreferences.dislikedChannels.push(channel.id);
         userPreferences.likedChannels = userPreferences.likedChannels.filter(id => id !== channel.id);
         userPreferences.preferredCategories[channel.category] = Math.max(0, (userPreferences.preferredCategories[channel.category] || 0) - 1);
+        showToast('Channel disliked', 'success');
       }
       localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
       updateActionButtons();
-      showToast(isDisliked ? 'Channel dislike removed' : 'Channel disliked', 'success');
     });
 
     window.addEventListener('scroll', () => {
@@ -559,14 +634,6 @@
       toastEl.classList.add(type, 'show');
       setTimeout(() => toastEl.classList.remove('show'), 3000);
     }
-    
-    // Prevent default touch behavior that could cause scrolling
-    document.addEventListener('touchmove', function(e) {
-      if (e.target.classList.contains('videos-container')) {
-        return;
-      }
-      e.preventDefault();
-    }, { passive: false });
   </script>
 </body>
 </html>
