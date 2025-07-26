@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Channel | KINAFLIX</title>
   <meta name="description" content="Explore channels and their short movie reels on KINAFLIX.">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -20,14 +20,20 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
     }
     body {
       font-family: 'Segoe UI', sans-serif;
       background: var(--dark);
       color: var(--light);
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
     .header {
       display: flex;
@@ -65,13 +71,18 @@
       height: 100px;
       border-radius: 50%;
       object-fit: cover;
+      flex-shrink: 0;
     }
     .channel-text {
       flex: 1;
+      min-width: 0; /* Prevent flex item from overflowing */
     }
     .channel-name {
       font-size: 1.5rem;
       margin-bottom: 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .channel-category {
       font-size: 0.9rem;
@@ -82,7 +93,10 @@
       font-size: 0.9rem;
       color: var(--gray);
       margin-bottom: 0.5rem;
-      max-width: 600px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .channel-actions {
       display: flex;
@@ -97,6 +111,7 @@
       cursor: pointer;
       font-size: 1rem;
       transition: background 0.3s;
+      flex-shrink: 0;
     }
     .action-btn:hover {
       background: var(--primary-dark);
@@ -112,6 +127,17 @@
       color: var(--gray);
       margin-top: 0.5rem;
     }
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .videos-container {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
     .videos-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -126,13 +152,14 @@
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.3s;
+      aspect-ratio: 2/3;
     }
     .video-card:hover {
       transform: scale(1.05);
     }
     .video-poster {
       width: 100%;
-      height: 150px;
+      height: 100%;
       object-fit: cover;
     }
     .video-info {
@@ -169,6 +196,7 @@
       color: var(--gray);
       font-size: 0.8rem;
       border-top: 1px solid var(--primary);
+      flex-shrink: 0;
     }
     .loading-overlay {
       display: none;
@@ -247,9 +275,6 @@
       .videos-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       }
-      .video-poster {
-        height: 225px;
-      }
       .video-title {
         font-size: 0.9rem;
       }
@@ -276,6 +301,7 @@
       .channel-image {
         width: 80px;
         height: 80px;
+        align-self: center;
       }
       .channel-name {
         font-size: 1.2rem;
@@ -291,6 +317,25 @@
       .channel-views {
         font-size: 0.7rem;
       }
+      .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 0.75rem;
+        padding: 0.75rem;
+      }
+    }
+    /* Prevent horizontal scrolling on mobile */
+    @media (max-width: 480px) {
+      body {
+        overflow-x: hidden;
+      }
+      .channel-details {
+        padding: 0.75rem;
+      }
+      .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        gap: 0.5rem;
+        padding: 0.5rem;
+      }
     }
   </style>
 </head>
@@ -298,22 +343,30 @@
   <div class="header">
     <button class="back-btn" onclick="window.history.back()">BACK</button>
   </div>
-  <div class="channel-details">
-    <div class="channel-text">
-      <h1 class="channel-name" id="channel-name"></h1>
-      <p class="channel-category" id="channel-category"></p>
-      <p class="channel-description" id="channel-description"></p>
-      <div class="channel-actions">
-        <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
-        <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+  
+  <div class="content-wrapper">
+    <div class="channel-details">
+      <div class="channel-text">
+        <h1 class="channel-name" id="channel-name"></h1>
+        <p class="channel-category" id="channel-category"></p>
+        <p class="channel-description" id="channel-description"></p>
+        <div class="channel-actions">
+          <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
+          <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+        </div>
+        <p class="channel-views" id="channel-views"></p>
       </div>
-      <p class="channel-views" id="channel-views"></p>
+      <img id="channel-image" class="channel-image" src="" alt="Channel Image">
     </div>
-    <img id="channel-image" class="channel-image" src="" alt="Channel Image">
+    
+    <div class="videos-container">
+      <div class="videos-grid" id="videos-grid"></div>
+    </div>
   </div>
-  <div class="videos-grid" id="videos-grid"></div>
-  <button class="scroll-top" id="scroll-top"><i class="fas fa-arrow-up"></i></button>
+  
   <footer class="footer">Kinaflix Teasers - 2025 btem@fficial</footer>
+  <button class="scroll-top" id="scroll-top"><i class="fas fa-arrow-up"></i></button>
+  
   <div class="loading-overlay" id="loading-overlay">
     <div class="loading-spinner"></div>
   </div>
@@ -323,6 +376,7 @@
     <p class="support">Remember to support <em>btem@fficial</em></p>
   </div>
   <div class="toast" id="toast"></div>
+  
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
@@ -438,6 +492,8 @@
           </div>
         </div>
       `).join('');
+      
+      // Use event delegation for better performance
       videosGrid.addEventListener('click', (e) => {
         const videoCard = e.target.closest('.video-card');
         if (videoCard) {
@@ -503,6 +559,14 @@
       toastEl.classList.add(type, 'show');
       setTimeout(() => toastEl.classList.remove('show'), 3000);
     }
+    
+    // Prevent default touch behavior that could cause scrolling
+    document.addEventListener('touchmove', function(e) {
+      if (e.target.classList.contains('videos-container')) {
+        return;
+      }
+      e.preventDefault();
+    }, { passive: false });
   </script>
 </body>
 </html>
