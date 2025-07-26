@@ -43,7 +43,7 @@
       position: relative;
     }
     
-    /* Header Styles - Made more compact */
+    /* Header Styles */
     .header {
       display: flex;
       align-items: center;
@@ -106,7 +106,7 @@
       font-size: 0.9rem;
     }
     
-    /* Channels Carousel - Made more compact */
+    /* Channels Carousel */
     .channels-section {
       padding: 0.5rem 0.8rem;
       background: var(--darker);
@@ -308,16 +308,6 @@
       transform: translateY(-3px);
     }
     
-    /* Footer - Made more compact */
-    .footer {
-      text-align: center;
-      padding: 1rem;
-      background: var(--darker);
-      color: var(--gray);
-      font-size: 0.75rem;
-      border-top: 1px solid var(--light-gray);
-    }
-    
     /* Loading and Error States */
     .loading-overlay {
       display: none;
@@ -461,7 +451,6 @@
     <div class="reels-grid" id="reels-grid"></div>
   </div>
   
-  <footer class="footer">Kinaflix Teasers - 2025 btem@fficial</footer>
   <button class="scroll-top" id="scroll-top"><i class="fas fa-arrow-up"></i></button>
   
   <div class="loading-overlay" id="loading-overlay">
@@ -568,9 +557,9 @@
     }
 
     function sortChannels(channels) {
-      // Sort by views and creation date, then shuffle with some priority
+      // First sort by views (descending) and creation date (newest first)
       const sorted = [...channels].sort((a, b) => {
-        // First sort by views (descending)
+        // Prioritize views first
         if (b.totalViews !== a.totalViews) {
           return b.totalViews - a.totalViews;
         }
@@ -578,62 +567,78 @@
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
       
-      // Take top 10 and shuffle with some priority for newest
-      const topChannels = sorted.slice(0, 10);
-      const shuffled = [...topChannels];
+      // Now create a pattern: high views, high views, new, high views, high views, new, etc.
+      const patternSorted = [];
+      const highViewed = [];
+      const newest = [];
       
-      // Move some newer channels up in the list (e.g., 3rd position)
-      if (shuffled.length > 3) {
-        const newestChannel = [...shuffled].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-        const newestIndex = shuffled.findIndex(c => c.id === newestChannel.id);
-        if (newestIndex > 2) {
-          // Move newest channel to 3rd position
-          shuffled.splice(2, 0, shuffled.splice(newestIndex, 1)[0]);
+      // Separate channels into two groups
+      sorted.forEach(channel => {
+        const isNew = isNewChannel(channel.createdAt);
+        if (isNew) {
+          newest.push(channel);
+        } else {
+          highViewed.push(channel);
+        }
+      });
+      
+      // Mix them according to the pattern
+      let highIndex = 0;
+      let newIndex = 0;
+      
+      while (highIndex < highViewed.length || newIndex < newest.length) {
+        // Add 2 high viewed channels
+        if (highIndex < highViewed.length) {
+          patternSorted.push(highViewed[highIndex++]);
+          if (highIndex < highViewed.length) {
+            patternSorted.push(highViewed[highIndex++]);
+          }
+        }
+        
+        // Add 1 new channel
+        if (newIndex < newest.length) {
+          patternSorted.push(newest[newIndex++]);
         }
       }
       
-      return shuffled;
+      return patternSorted;
+    }
+    
+    function isNewChannel(createdAt) {
+      const oneWeek = 7 * 24 * 60 * 60 * 1000;
+      return (new Date() - new Date(createdAt)) < oneWeek;
     }
 
     function sortReels(reels) {
-      // First filter and sort reels
+      // Separate reels into groups
       const now = new Date();
       const oneWeek = 7 * 24 * 60 * 60 * 1000;
       
-      // Get highest viewed reels
-      const highestViewed = [...reels].sort((a, b) => b.views - a.views).slice(0, 5);
+      const viewedReels = reels.filter(t => userPreferences.viewedVideos.includes(t.id));
+      const notViewedReels = reels.filter(t => !userPreferences.viewedVideos.includes(t.id));
       
-      // Get newest reels (from last week)
-      const newest = reels.filter(t => (now - new Date(t.createdAt)) < oneWeek)
-                         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                         .slice(0, 5);
-      
-      // Get reels from liked channels
-      const likedChannelReels = reels.filter(t => userPreferences.likedChannels.includes(t.channelId));
-      
-      // Get reels from preferred categories
-      const preferredCategoryReels = reels.filter(t => {
-        const channel = channels.find(c => c.id === t.channelId);
-        return channel && userPreferences.preferredCategories[channel.category] > 0;
+      // Sort not viewed reels by views and newness
+      const sortedNotViewed = [...notViewedReels].sort((a, b) => {
+        // First by views
+        if (b.views !== a.views) {
+          return b.views - a.views;
+        }
+        // Then by creation date (newest first)
+        return new Date(b.createdAt) - new Date(a.createdAt);
       });
       
-      // Get random reels (excluding disliked channels)
-      const randomReels = shuffleArray(
-        reels.filter(t => !userPreferences.dislikedChannels.includes(t.channelId))
-      ).slice(0, 5);
+      // Sort viewed reels (these will go to the bottom)
+      const sortedViewed = [...viewedReels].sort((a, b) => {
+        // First by views
+        if (b.views !== a.views) {
+          return b.views - a.views;
+        }
+        // Then by creation date (newest first)
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
       
-      // Combine all with priority
-      const combined = [
-        ...new Set([
-          ...highestViewed,
-          ...newest,
-          ...likedChannelReels,
-          ...preferredCategoryReels,
-          ...randomReels
-        ])
-      ];
-      
-      return shuffleArray(combined).slice(0, 20); // Limit to 20 reels
+      // Combine with not viewed first, then viewed
+      return [...sortedNotViewed, ...sortedViewed];
     }
 
     function renderChannels(channels) {
@@ -660,7 +665,6 @@
               <h3 class="reel-title">${trailer.title}</h3>
               <div class="reel-stats">
                 <span><i class="fas fa-eye"></i> ${trailer.views || 0}</span>
-                <span><i class="fas fa-calendar-alt"></i> ${new Date(trailer.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
               </div>
               <div class="channel-link" data-id="${trailer.channelId}">
                 <img src="${channel ? channel.imageUrl : 'https://via.placeholder.com/25'}" alt="${channel ? channel.channelName : 'Unknown'}" loading="lazy">
@@ -670,14 +674,6 @@
           </div>
         `;
       }).join('');
-    }
-
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
     }
 
     async function trackView(videoId) {
@@ -727,7 +723,7 @@
         const titleMatch = trailer.title.toLowerCase().includes(query);
         const descriptionMatch = trailer.description?.toLowerCase().includes(query);
         return titleMatch || descriptionMatch;
-      }).sort((a, b) => b.views - a.views); // Sort filtered results by views
+      }).sort((a, b) => b.views - a.views);
     }
 
     window.addEventListener('scroll', () => {
