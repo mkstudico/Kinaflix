@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Reel | KINAFLIX</title>
+  <meta name="description" content="Watch short movie reels on KINAFLIX, YouTube Shorts style.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+  <meta property="og:title" content="View Reel | KINAFLIX" />
+  <meta property="og:description" content="Enjoy a short movie reel on KINAFLIX, YouTube Shorts style." />
+  <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+  <meta property="og:url" content="https://kinaflix-fawn.vercel.app/view1.html" />
+  <meta property="og:type" content="entertainment" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="View Reel | KINAFLIX" />
+  <meta name="twitter:description" content="Enjoy a short movie reel on KINAFLIX, YouTube Shorts style." />
+  <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "View Reel | KINAFLIX",
+    "url": "https://kinaflix-fawn.vercel.app/view1.html",
+    "description": "Watch short movie reels on KINAFLIX, YouTube Shorts style.",
+    "inLanguage": "en"
+  }
+  </script>
+  <style>
+    :root {
+      --primary: #e50914;
+      --primary-dark: #b2070f;
+      --dark: #141414;
+      --light: #f4f4f4;
+      --gray: #999;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--dark);
+      color: var(--light);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: calc(100vh - 4rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 177.78%;
+      background: black;
+      z-index: 1;
+    }
+    .video-iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .play-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--light);
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 10;
+      display: none;
+    }
+    .play-overlay.active {
+      display: flex;
+    }
+    .left-panel {
+      position: absolute;
+      left: -150px;
+      bottom: 0;
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      z-index: 2;
+    }
+    .channel-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--light);
+      position: absolute;
+      bottom: 100px;
+    }
+    .channel-link img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .channel-link span {
+      font-size: 1.2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+    .channel-link:hover span {
+      color: var(--primary);
+    }
+    .video-title {
+      font-size: 1.2rem;
+      position: absolute;
+      bottom: 60px;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .video-description {
+      display: none;
+      font-size: 1rem;
+      color: var(--gray);
+      position: absolute;
+      bottom: 10px;
+      max-width: 200px;
+      max-height: 6em;
+      overflow: hidden;
+    }
+    .video-description.visible {
+      display: block;
+    }
+    .unhide-btn {
+      font-size: 1rem;
+      color: var(--primary);
+      cursor: pointer;
+      position: absolute;
+      bottom: 0;
+    }
+    .video-actions {
+      display: flex;
+      gap: 0.5rem;
+      position: absolute;
+      top: 10px;
+    }
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--light);
+      font-size: 2.5rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .action-btn.liked {
+      color: #4CAF50;
+    }
+    .action-btn.disliked {
+      color: #f44336;
+    }
+    .action-btn:hover {
+      color: var(--primary);
+    }
+    .view-count {
+      font-size: 1rem;
+      color: var(--gray);
+      position: absolute;
+      top: 50px;
+    }
+    .nav-buttons {
+      position: absolute;
+      top: 50%;
+      left: 1rem;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      z-index: 2;
+    }
+    .nav-btn {
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.3s;
+    }
+    .nav-btn:hover {
+      background: var(--primary);
+    }
+    .nav-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .back-btn {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.3s;
+      z-index: 2;
+    }
+    .back-btn:hover {
+      background: var(--primary);
+    }
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    .loading-overlay.active {
+      display: flex;
+    }
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .error-message {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #f44336;
+      color: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      z-index: 2000;
+      max-width: 300px;
+      box-shadow: var(--shadow);
+    }
+    .error-message i {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .error-message .support {
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--dark);
+      color: white;
+      padding: 1rem;
+      border-radius: 4px;
+      box-shadow: var(--shadow);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .toast.success {
+      background: #4CAF50;
+    }
+    .toast.error {
+      background: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container" id="video-container">
+    <div class="video-wrapper">
+      <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" muted></iframe>
+      <div class="play-overlay" id="play-overlay">Click to play</div>
+      <div class="nav-buttons">
+        <button id="prev-btn" class="nav-btn"><i class="fas fa-chevron-up"></i></button>
+        <button id="next-btn" class="nav-btn"><i class="fas fa-chevron-down"></i></button>
+      </div>
+    </div>
+    <div class="left-panel">
+      <div class="channel-link" id="channel-link">
+        <img src="" alt="Channel Image" loading="lazy">
+        <span></span>
+      </div>
+      <h2 class="video-title" id="video-title"></h2>
+      <p class="video-description" id="video-description"></p>
+      <span class="unhide-btn" id="unhide-btn">Unhide</span>
+      <div class="video-actions">
+        <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
+        <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+      </div>
+      <span class="view-count" id="view-count"></span>
+    </div>
+  </div>
+  <button class="back-btn" id="back-btn"><i class="fas fa-arrow-left"></i></button>
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+  <div class="error-message" id="error-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>Sorry, we detect a slow network or local file access. Please host on a secure server (https://).</p>
+    <p class="support">Remember to support <em>btem@fficial</em></p>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+    import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      authDomain: "kinaflix.firebaseapp.com",
+      databaseURL: "https://kinaflix-default-rtdb.firebaseio.com",
+      projectId: "kinaflix",
+      storageBucket: "kinaflix.firebasestorage.app",
+      messagingSenderId: "318239806217",
+      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+      measurementId: "G-DC1T9B6B9W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+    const db = getFirestore(app);
+
+    const videoIframe = document.getElementById('video-iframe');
+    const playOverlay = document.getElementById('play-overlay');
+    const channelLink = document.getElementById('channel-link');
+    const channelImg = channelLink.querySelector('img');
+    const channelName = channelLink.querySelector('span');
+    const videoTitle = document.getElementById('video-title');
+    const videoDescription = document.getElementById('video-description');
+    const unhideBtn = document.getElementById('unhide-btn');
+    const likeBtn = document.getElementById('like-btn');
+    const dislikeBtn = document.getElementById('dislike-btn');
+    const viewCount = document.getElementById('view-count');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const backBtn = document.getElementById('back-btn');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const errorMessage = document.getElementById('error-message');
+    const toast = document.getElementById('toast');
+    let currentVideo = null;
+    let channels = [];
+    let trailers = [];
+    let currentIndex = 0;
+    let userPreferences = JSON.parse(localStorage.getItem('kinaflix'))?.userPreferences || {
+      likedVideos: [],
+      preferredVideos: [],
+      likedChannels: [],
+      dislikedChannels: [],
+      dislikedVideos: [],
+      viewedVideos: [],
+      preferredCategories: {}
+    };
+
+    // Ensure arrays are initialized
+    userPreferences.dislikedChannels = userPreferences.dislikedChannels || [];
+    userPreferences.dislikedVideos = userPreferences.dislikedVideos || [];
+    localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Redirect to view.html if screen width <= 576px
+      if (window.innerWidth <= 576) {
+        const videoId = new URLSearchParams(window.location.search).get('id');
+        window.location.replace(`view.html${videoId ? `?id=${videoId}` : ''}`);
+        return;
+      }
+
+      // Check if running on file://
+      if (window.location.protocol === 'file:') {
+        errorMessage.style.display = 'block';
+        setTimeout(() => errorMessage.style.display = 'none', 5000);
+        return;
+      }
+
+      loadingOverlay.classList.add('active');
+      try {
+        const videoId = new URLSearchParams(window.location.search).get('id');
+        if (!videoId) throw new Error('No video ID provided');
+        await Promise.all([loadChannels(), loadTrailers()]);
+        currentVideo = trailers.find(t => t.id === videoId);
+        if (!currentVideo) throw new Error('Video not found');
+        currentIndex = trailers.findIndex(t => t.id === videoId);
+        renderVideo();
+        trackView(videoId);
+        checkNetwork();
+        setupNavigation();
+        setupAutoplayFallback();
+      } catch (error) {
+        showToast('Error loading video: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.remove('active');
+      }
+    });
+
+    async function loadChannels() {
+      try {
+        const q = query(collection(db, 'channels'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        channels = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (error) {
+        console.error('Error loading channels:', error);
+        showToast('Error loading channels', 'error');
+      }
+    }
+
+    async function loadTrailers() {
+      try {
+        const q = query(collection(db, 'trailers'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        trailers = querySnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            views: 0,
+            ...doc.data()
+          }))
+          .filter(t => t.channelId && !userPreferences.dislikedChannels.includes(t.channelId) && !userPreferences.dislikedVideos.includes(t.id));
+      } catch (error) {
+        console.error('Error loading trailers:', error);
+        showToast('Error loading trailers', 'error');
+      }
+    }
+
+    function renderVideo() {
+      if (!currentVideo) return;
+      const channel = channels.find(c => c.id === currentVideo.channelId);
+      const embedUrl = currentVideo.gdriveLink.replace(/\/view.*/, '/preview');
+      videoIframe.src = embedUrl;
+      channelImg.src = channel ? channel.imageUrl : 'https://via.placeholder.com/50';
+      channelName.textContent = channel ? channel.channelName : 'Unknown';
+      channelLink.dataset.id = currentVideo.channelId;
+      videoTitle.textContent = currentVideo.title;
+      videoDescription.textContent = currentVideo.description || 'No description available';
+      viewCount.textContent = `${(currentVideo.views || 0).toLocaleString()} views`;
+      likeBtn.classList.toggle('liked', userPreferences.likedVideos.includes(currentVideo.id));
+      dislikeBtn.classList.toggle('disliked', userPreferences.dislikedVideos.includes(currentVideo.id));
+      prevBtn.classList.toggle('disabled', currentIndex === 0);
+      nextBtn.classList.toggle('disabled', currentIndex === trailers.length - 1);
+      window.history.replaceState({}, '', `view1.html?id=${currentVideo.id}`);
+    }
+
+    async function trackView(videoId) {
+      if (userPreferences.viewedVideos.includes(videoId)) return;
+      userPreferences.viewedVideos.push(videoId);
+      const channel = channels.find(c => c.id === currentVideo.channelId);
+      if (channel) {
+        userPreferences.preferredCategories[channel.category] = (userPreferences.preferredCategories[channel.category] || 0) + 1;
+      }
+      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
+      try {
+        const trailerRef = doc(db, 'trailers', videoId);
+        await updateDoc(trailerRef, { views: (currentVideo.views || 0) + 1 });
+        currentVideo.views = (currentVideo.views || 0) + 1;
+        viewCount.textContent = `${currentVideo.views.toLocaleString()} views`;
+      } catch (error) {
+        console.error('Error updating views:', error);
+      }
+    }
+
+    function setupAutoplayFallback() {
+      const playPromise = videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      if (!playPromise) {
+        playOverlay.classList.add('active');
+      }
+      playOverlay.addEventListener('click', () => {
+        videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        playOverlay.classList.remove('active');
+      });
+    }
+
+    likeBtn.addEventListener('click', () => {
+      const isLiked = userPreferences.likedVideos.includes(currentVideo.id);
+      if (isLiked) {
+        userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
+        userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
+      } else {
+        userPreferences.likedVideos.push(currentVideo.id);
+        userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
+        userPreferences.preferredCategories[currentVideo.category] = (userPreferences.preferredCategories[currentVideo.category] || 0) + 1;
+      }
+      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
+      likeBtn.classList.toggle('liked', !isLiked);
+      dislikeBtn.classList.toggle('disliked', false);
+      showToast(isLiked ? 'Video unliked' : 'Video liked', 'success');
+    });
+
+    dislikeBtn.addEventListener('click', () => {
+      const isDisliked = userPreferences.dislikedVideos.includes(currentVideo.id);
+      if (isDisliked) {
+        userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
+      } else {
+        userPreferences.dislikedVideos.push(currentVideo.id);
+        userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
+        userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
+      }
+      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
+      dislikeBtn.classList.toggle('disliked', !isDisliked);
+      likeBtn.classList.toggle('liked', false);
+      showToast(isDisliked ? 'Video dislike removed' : 'Video disliked', 'success');
+    });
+
+    channelLink.addEventListener('click', () => {
+      window.location.href = `channel.html?id=${channelLink.dataset.id}`;
+    });
+
+    unhideBtn.addEventListener('click', () => {
+      videoDescription.classList.add('visible');
+      unhideBtn.style.display = 'none';
+      setTimeout(() => {
+        videoDescription.classList.remove('visible');
+        unhideBtn.style.display = 'block';
+      }, 5000);
+    });
+
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'reels.html';
+    });
+
+    function setupNavigation() {
+      let lastScrollTime = 0;
+      const debounceDelay = 300;
+
+      prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          currentIndex--;
+          currentVideo = trailers[currentIndex];
+          renderVideo();
+          trackView(currentVideo.id);
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (currentIndex < trailers.length - 1) {
+          currentIndex++;
+          currentVideo = trailers[currentIndex];
+          renderVideo();
+          trackView(currentVideo.id);
+        }
+      });
+
+      const videoContainer = document.getElementById('video-container');
+      videoContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const now = Date.now();
+        if (now - lastScrollTime < debounceDelay) return;
+        lastScrollTime = now;
+        if (e.deltaY < -100 && currentIndex > 0) {
+          currentIndex--;
+          currentVideo = trailers[currentIndex];
+          renderVideo();
+          trackView(currentVideo.id);
+        } else if (e.deltaY > 100 && currentIndex < trailers.length - 1) {
+          currentIndex++;
+          currentVideo = trailers[currentIndex];
+          renderVideo();
+          trackView(currentVideo.id);
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        const now = Date.now();
+        if (now - lastScrollTime < debounceDelay) return;
+        lastScrollTime = now;
+        if (e.key === 'ArrowUp' && currentIndex > 0) {
+          e.preventDefault();
+          currentIndex--;
+          currentVideo = trailers[currentIndex];
+          renderVideo();
+          trackView(currentVideo.id);
+        } else if (e.key === 'ArrowDown' && currentIndex < trailers.length - 1) {
+          e.preventDefault();
+          currentIndex++;
+          currentVideo = trailers[currentIndex];
+          renderVideo();
+          trackView(currentVideo.id);
+        }
+      });
+    }
+
+    function checkNetwork() {
+      if (!navigator.onLine || navigator.connection?.effectiveType === 'slow-2g' || window.location.protocol === 'file:') {
+        errorMessage.style.display = 'block';
+        setTimeout(() => errorMessage.style.display = 'none', 5000);
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type, 'show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
