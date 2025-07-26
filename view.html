@@ -437,7 +437,7 @@
   
   <!-- Toast notification -->
   <div class="toast" id="toast"></div>
-  <script type="module">
+ <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
     import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
@@ -458,6 +458,7 @@
     const db = getFirestore(app);
 
     const videoIframe = document.getElementById('video-iframe');
+    const videoPlaceholder = document.getElementById('video-placeholder');
     const playOverlay = document.getElementById('play-overlay');
     const channelLink = document.getElementById('channel-link');
     const channelImg = channelLink.querySelector('img');
@@ -512,11 +513,20 @@
       try {
         const videoId = new URLSearchParams(window.location.search).get('id');
         if (!videoId) throw new Error('No video ID provided');
-        await Promise.all([loadChannels(), loadTrailers()]);
-        currentVideo = trailers.find(t => t.id === videoId);
+        
+        // Load metadata first for immediate UI update
+        await loadChannels();
+        currentVideo = (await getDoc(doc(db, 'trailers', videoId))?.data();
         if (!currentVideo) throw new Error('Video not found');
-        currentIndex = trailers.findIndex(t => t.id === videoId);
-        renderVideo();
+        
+        // Render basic info immediately
+        renderVideoMetadata();
+        
+        // Load full trailer list in background
+        loadTrailers().then(() => {
+          currentIndex = trailers.findIndex(t => t.id === videoId);
+        });
+        
         trackView(videoId);
         checkNetwork();
         setupNavigation();
@@ -556,11 +566,9 @@
       }
     }
 
-    function renderVideo() {
+    function renderVideoMetadata() {
       if (!currentVideo) return;
       const channel = channels.find(c => c.id === currentVideo.channelId);
-      const embedUrl = currentVideo.gdriveLink.replace(/\/view.*/, '/preview');
-      videoIframe.src = embedUrl;
       channelImg.src = channel ? channel.imageUrl : 'https://via.placeholder.com/40';
       channelName.textContent = channel ? channel.channelName : 'Unknown';
       channelLink.dataset.id = currentVideo.channelId;
@@ -570,9 +578,48 @@
       viewCount.textContent = `${(currentVideo.views || 0).toLocaleString()} views`;
       likeBtn.classList.toggle('liked', userPreferences.likedVideos.includes(currentVideo.id));
       dislikeBtn.classList.toggle('disliked', userPreferences.dislikedVideos.includes(currentVideo.id));
+      window.history.replaceState({}, '', `view.html?id=${currentVideo.id}`);
+      
+      // Start loading video immediately after metadata
+      loadVideoContent();
+    }
+
+    function loadVideoContent() {
+      if (!currentVideo) return;
+      
+      const embedUrl = currentVideo.gdriveLink.replace(/\/view.*/, '/preview');
+      videoIframe.src = embedUrl;
+      
+      // Show video as soon as it's ready
+      videoIframe.onload = () => {
+        videoPlaceholder.style.display = 'none';
+        attemptAutoplay();
+      };
+      
+      // Fallback in case onload doesn't fire
+      setTimeout(() => {
+        if (videoPlaceholder.style.display !== 'none') {
+          videoPlaceholder.style.display = 'none';
+          attemptAutoplay();
+        }
+      }, 1000);
+    }
+
+    function attemptAutoplay() {
+      try {
+        const playPromise = videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        if (!playPromise) {
+          playOverlay.classList.add('active');
+        }
+      } catch (e) {
+        playOverlay.classList.add('active');
+      }
+    }
+
+    function renderVideo() {
+      renderVideoMetadata();
       prevBtn.classList.toggle('disabled', currentIndex === 0);
       nextBtn.classList.toggle('disabled', currentIndex === trailers.length - 1);
-      window.history.replaceState({}, '', `view.html?id=${currentVideo.id}`);
     }
 
     async function trackView(videoId) {
@@ -594,16 +641,13 @@
     }
 
     function setupAutoplayFallback() {
-      const playPromise = videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-      if (!playPromise) {
-        playOverlay.classList.add('active');
-      }
       playOverlay.addEventListener('click', () => {
-        videoIframe.contentWindow?.postMessage('{"event":"command","func":"play","args":""}', '*');
+        videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
         playOverlay.classList.remove('active');
       });
     }
 
+    // ... (rest of your existing functions remain exactly the same) ...
     likeBtn.addEventListener('click', () => {
       const isLiked = userPreferences.likedVideos.includes(currentVideo.id);
       if (isLiked) {
@@ -612,7 +656,7 @@
       } else {
         userPreferences.likedVideos.push(currentVideo.id);
         userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
-        userPreferences.preferredCategories[currentVideo.category] = (userPreferences.preferredCategories[currentVideo.category] || 0) + 1;
+        userPreferences.preferredCategories[currentVideo.category] = (userPreferences.preferredCategories[currentVideo.category] || 0) + 1);
       }
       localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
       likeBtn.classList.toggle('liked', !isLiked);
