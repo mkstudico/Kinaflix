@@ -615,6 +615,10 @@
       <nav class="nav-menu">
         <a href="#" class="nav-item active" data-page="home"><i class="fas fa-home"></i></a>
         <hr class="nav-divider">
+        <video id="videoButton" width="40" height="40" autoplay muted loop style="border-radius: 50%; cursor: pointer;">
+  <source src="nav.mp4" type="video/mp4">
+</video>
+        <hr class="nav-divider">    
         <a href="#" class="nav-item" data-page="new-releases"><i class="fas fa-film"></i></a>
         <hr class="nav-divider">
         <a href="#" class="nav-item" data-page="searching"><i class="fas fa-search"></i></a>
@@ -639,6 +643,10 @@
   </footer>
 
   <script type="module">
+    // Redirect on video click
+  document.getElementById('videoButton').onclick = function () {
+    window.location.href = 'reels.html';
+  };
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
