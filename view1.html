@@ -504,9 +504,8 @@
       viewedVideos: [],
       preferredCategories: {}
     };
-
-    // Performance optimization: Preload next video
-    let preloadedVideo = null;
+    let currentEmbedSource = 0;
+    const embedSources = ['vidsrc', '2embed', 'wootly'];
 
     // Ensure arrays are initialized
     userPreferences.dislikedChannels = userPreferences.dislikedChannels || [];
@@ -548,8 +547,7 @@
         
         // Preload next video
         if (currentIndex < trailers.length - 1) {
-          preloadedVideo = trailers[currentIndex + 1];
-          preloadVideo(preloadedVideo.gdriveLink);
+          preloadNextVideo(trailers[currentIndex + 1]);
         }
       } catch (error) {
         showToast('Error loading video: ' + error.message, 'error');
@@ -558,13 +556,30 @@
       }
     });
 
+    // Function to get embed URL by source and IMDb ID
+    function getEmbedUrl(source, imdbID) {
+      switch(source) {
+        case "vidsrc":
+          return `https://vidsrc.me/embed/${imdbID}`;
+        case "2embed":
+          return `https://www.2embed.cc/embed/${imdbID}`;
+        case "wootly":
+          return `https://wootly.ch/embed/${imdbID}`;
+        default:
+          return null;
+      }
+    }
+
     // Video preloading function
-    function preloadVideo(url) {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'document';
-      link.href = url.replace(/\/view.*/, '/preview');
-      document.head.appendChild(link);
+    function preloadNextVideo(video) {
+      if (video.gdriveLink) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'document';
+        link.href = video.gdriveLink.replace(/\/view.*/, '/preview');
+        document.head.appendChild(link);
+      }
+      // No need to preload IMDB embeds as they're loaded on demand
     }
 
     async function loadChannels() {
@@ -603,7 +618,6 @@
       videoIframe.style.display = 'none';
       
       const channel = channels.find(c => c.id === currentVideo.channelId);
-      const embedUrl = currentVideo.gdriveLink.replace(/\/view.*/, '/preview');
       
       // Load channel info first (faster)
       channelImg.src = channel ? channel.imageUrl : 'https://via.placeholder.com/50';
@@ -620,8 +634,23 @@
       // Update URL without reload
       window.history.replaceState({}, '', `view1.html?id=${currentVideo.id}`);
       
-      // Load video after metadata is shown
-      videoIframe.src = embedUrl;
+      // Determine video source
+      if (currentVideo.gdriveLink) {
+        // Handle Google Drive link
+        const embedUrl = currentVideo.gdriveLink.replace(/\/view.*/, '/preview');
+        loadVideo(embedUrl);
+      } else if (currentVideo.imdbId) {
+        // Handle IMDB ID with fallback sources
+        currentEmbedSource = 0;
+        tryNextEmbedSource(currentVideo.imdbId);
+      } else {
+        showToast('No valid video source found', 'error');
+        videoPlaceholder.style.display = 'none';
+      }
+    }
+
+    function loadVideo(url) {
+      videoIframe.src = url;
       videoIframe.onload = () => {
         videoPlaceholder.style.display = 'none';
         videoIframe.style.display = 'block';
@@ -632,6 +661,37 @@
           playOverlay.classList.add('active');
         }
       };
+      videoIframe.onerror = () => {
+        if (currentVideo.imdbId) {
+          // Try next embed source if available
+          currentEmbedSource++;
+          if (currentEmbedSource < embedSources.length) {
+            tryNextEmbedSource(currentVideo.imdbId);
+          } else {
+            showToast('Failed to load video from all sources', 'error');
+            videoPlaceholder.style.display = 'none';
+          }
+        } else {
+          showToast('Failed to load video', 'error');
+          videoPlaceholder.style.display = 'none';
+        }
+      };
+    }
+
+    function tryNextEmbedSource(imdbID) {
+      const source = embedSources[currentEmbedSource];
+      const embedUrl = getEmbedUrl(source, imdbID);
+      if (embedUrl) {
+        loadVideo(embedUrl);
+      } else {
+        currentEmbedSource++;
+        if (currentEmbedSource < embedSources.length) {
+          tryNextEmbedSource(imdbID);
+        } else {
+          showToast('No valid embed sources available', 'error');
+          videoPlaceholder.style.display = 'none';
+        }
+      }
     }
 
     async function trackView(videoId) {
@@ -676,8 +736,7 @@
           
           // Preload next videos
           if (currentIndex > 0) {
-            preloadedVideo = trailers[currentIndex - 1];
-            preloadVideo(preloadedVideo.gdriveLink);
+            preloadNextVideo(trailers[currentIndex - 1]);
           }
         }
       });
@@ -695,8 +754,7 @@
           
           // Preload next videos
           if (currentIndex < trailers.length - 1) {
-            preloadedVideo = trailers[currentIndex + 1];
-            preloadVideo(preloadedVideo.gdriveLink);
+            preloadNextVideo(trailers[currentIndex + 1]);
           }
         }
       });
