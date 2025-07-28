@@ -300,6 +300,27 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .link-type-selector {
+      display: flex;
+      margin-bottom: 0.5rem;
+    }
+    .link-type-selector button {
+      flex: 1;
+      background: #333;
+      border: 1px solid var(--gray);
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+    .link-type-selector button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .link-type-selector button:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    .link-type-selector button:last-child {
+      border-radius: 0 4px 4px 0;
+    }
     @media (max-width: 768px) {
       .sidebar {
         width: 100%;
@@ -371,7 +392,11 @@
         <h2 class="title">Short Movie</h2>
         <form id="movie-form" class="form-section">
           <input type="text" id="movie-title" placeholder="Movie Title" required>
-          <input type="url" id="movie-gdrive" placeholder="Google Drive Link" required>
+          <div class="link-type-selector">
+            <button type="button" id="gdrive-btn" class="active">Google Drive</button>
+            <button type="button" id="imdb-btn">IMDB ID</button>
+          </div>
+          <input type="text" id="movie-link" placeholder="Google Drive Link" required>
           <input type="file" id="movie-poster" accept="image/*">
           <textarea id="movie-description" placeholder="Description (Optional)" rows="4"></textarea>
           <button type="submit" id="add-movie-btn">Add Movie</button>
@@ -437,7 +462,11 @@
       <form id="edit-movie-form" class="form-section">
         <input type="hidden" id="edit-movie-id">
         <input type="text" id="edit-movie-title" placeholder="Movie Title" required>
-        <input type="url" id="edit-movie-gdrive" placeholder="Google Drive Link" required>
+        <div class="link-type-selector">
+          <button type="button" id="edit-gdrive-btn" class="active">Google Drive</button>
+          <button type="button" id="edit-imdb-btn">IMDB ID</button>
+        </div>
+        <input type="text" id="edit-movie-link" placeholder="Google Drive Link" required>
         <input type="file" id="edit-movie-poster" accept="image/*">
         <textarea id="edit-movie-description" placeholder="Description (Optional)" rows="4"></textarea>
         <div class="search-bar">
@@ -554,16 +583,58 @@
     const editChannelSpinner = document.getElementById('edit-channel-spinner');
     const trailersSpinner = document.getElementById('trailers-spinner');
     const toast = document.getElementById('toast');
+    const gdriveBtn = document.getElementById('gdrive-btn');
+    const imdbBtn = document.getElementById('imdb-btn');
+    const movieLinkInput = document.getElementById('movie-link');
+    const editGdriveBtn = document.getElementById('edit-gdrive-btn');
+    const editImdbBtn = document.getElementById('edit-imdb-btn');
+    const editMovieLinkInput = document.getElementById('edit-movie-link');
     let channels = [];
     let trailers = [];
     let selectedChannelId = null;
     let deleteTarget = null;
     let deleteType = null;
+    let currentLinkType = 'gdrive';
+    let editCurrentLinkType = 'gdrive';
 
     document.addEventListener('DOMContentLoaded', () => {
       initialLoadingOverlay.classList.add('active');
       Promise.all([loadChannels(), loadTrailers()]).then(() => {
         initialLoadingOverlay.classList.remove('active');
+      });
+
+      // Link type selector for add movie form
+      gdriveBtn.addEventListener('click', () => {
+        currentLinkType = 'gdrive';
+        gdriveBtn.classList.add('active');
+        imdbBtn.classList.remove('active');
+        movieLinkInput.placeholder = 'Google Drive Link';
+        movieLinkInput.type = 'url';
+      });
+
+      imdbBtn.addEventListener('click', () => {
+        currentLinkType = 'imdb';
+        imdbBtn.classList.add('active');
+        gdriveBtn.classList.remove('active');
+        movieLinkInput.placeholder = 'IMDB ID (e.g. tt1234567)';
+        movieLinkInput.type = 'text';
+      });
+
+      // Link type selector for edit movie form
+      editGdriveBtn.addEventListener('click', () => {
+        editCurrentLinkType = 'gdrive';
+        editGdriveBtn.classList.add('active');
+        editImdbBtn.classList.remove('active');
+        editMovieLinkInput.placeholder = 'Google Drive Link';
+        editMovieLinkInput.type = 'url';
+      });
+
+      editImdbBtn.addEventListener('click', () => {
+        editCurrentLinkType = 'imdb';
+        editImdbBtn.classList.add('active');
+        editGdriveBtn.classList.remove('active');
+        editMovieLinkInput.placeholder = 'IMDB ID (e.g. tt1234567)';
+        editMovieLinkInput.type = 'text';
       });
 
       addTeaserLink.addEventListener('click', (e) => {
@@ -711,20 +782,29 @@
         showFormLoading('movie');
         try {
           const title = document.getElementById('movie-title').value.trim();
-          const gdriveLink = document.getElementById('movie-gdrive').value.trim();
+          const linkValue = document.getElementById('movie-link').value.trim();
           const description = document.getElementById('movie-description').value.trim();
           const posterFile = document.getElementById('movie-poster').files[0];
 
-          if (!title || !gdriveLink || !selectedChannelId) {
-            showToast('Title, Google Drive link, and channel are required', 'error');
+          if (!title || !linkValue || !selectedChannelId) {
+            showToast('Title, link, and channel are required', 'error');
             hideFormLoading('movie');
             return;
           }
 
-          if (!gdriveLink.includes('drive.google.com')) {
-            showToast('Please provide a valid Google Drive link', 'error');
-            hideFormLoading('movie');
-            return;
+          // Validate based on link type
+          if (currentLinkType === 'gdrive') {
+            if (!linkValue.includes('drive.google.com')) {
+              showToast('Please provide a valid Google Drive link', 'error');
+              hideFormLoading('movie');
+              return;
+            }
+          } else if (currentLinkType === 'imdb') {
+            if (!linkValue.startsWith('tt') || isNaN(linkValue.substring(2))) {
+              showToast('Please provide a valid IMDB ID (e.g. tt1234567)', 'error');
+              hideFormLoading('movie');
+              return;
+            }
           }
 
           let posterUrl = '';
@@ -744,14 +824,28 @@
             posterUrl = data.data.url;
           }
 
-          await addDoc(collection(db, 'trailers'), {
+          const movieData = {
             title,
-            gdriveLink,
-            posterUrl: posterUrl || 'https://via.placeholder.com/140x100?text=No+Image',
             description: description || '',
             channelId: selectedChannelId,
             createdAt: new Date()
-          });
+          };
+
+          // Add the appropriate link field based on type
+          if (currentLinkType === 'gdrive') {
+            movieData.gdriveLink = linkValue;
+          } else {
+            movieData.imdbId = linkValue;
+          }
+
+          // Add poster URL if available
+          if (posterUrl) {
+            movieData.posterUrl = posterUrl;
+          } else {
+            movieData.posterUrl = 'https://via.placeholder.com/140x100?text=No+Image';
+          }
+
+          await addDoc(collection(db, 'trailers'), movieData);
 
           showToast('Movie added successfully', 'success');
           movieForm.reset();
@@ -825,20 +919,29 @@
         try {
           const movieId = document.getElementById('edit-movie-id').value;
           const title = document.getElementById('edit-movie-title').value.trim();
-          const gdriveLink = document.getElementById('edit-movie-gdrive').value.trim();
+          const linkValue = document.getElementById('edit-movie-link').value.trim();
           const description = document.getElementById('edit-movie-description').value.trim();
           const posterFile = document.getElementById('edit-movie-poster').files[0];
 
-          if (!title || !gdriveLink || !selectedChannelId) {
-            showToast('Title, Google Drive link, and channel are required', 'error');
+          if (!title || !linkValue || !selectedChannelId) {
+            showToast('Title, link, and channel are required', 'error');
             hideFormLoading('edit-movie');
             return;
           }
 
-          if (!gdriveLink.includes('drive.google.com')) {
-            showToast('Please provide a valid Google Drive link', 'error');
-            hideFormLoading('edit-movie');
-            return;
+          // Validate based on link type
+          if (editCurrentLinkType === 'gdrive') {
+            if (!linkValue.includes('drive.google.com')) {
+              showToast('Please provide a valid Google Drive link', 'error');
+              hideFormLoading('edit-movie');
+              return;
+            }
+          } else if (editCurrentLinkType === 'imdb') {
+            if (!linkValue.startsWith('tt') || isNaN(linkValue.substring(2))) {
+              showToast('Please provide a valid IMDB ID (e.g. tt1234567)', 'error');
+              hideFormLoading('edit-movie');
+              return;
+            }
           }
 
           let posterUrl = '';
@@ -861,12 +964,25 @@
           const movieRef = doc(db, 'trailers', movieId);
           const updateData = {
             title,
-            gdriveLink,
             description: description || '',
             channelId: selectedChannelId,
             updatedAt: new Date()
           };
-          if (posterUrl) updateData.posterUrl = posterUrl;
+
+          // Update the appropriate link field based on type
+          if (editCurrentLinkType === 'gdrive') {
+            updateData.gdriveLink = linkValue;
+            updateData.imdbId = ''; // Clear IMDB ID if switching to Google Drive
+          } else {
+            updateData.imdbId = linkValue;
+            updateData.gdriveLink = ''; // Clear Google Drive link if switching to IMDB
+          }
+
+          // Add poster URL if available
+          if (posterUrl) {
+            updateData.posterUrl = posterUrl;
+          }
+
           await updateDoc(movieRef, updateData);
 
           showToast('Movie updated successfully', 'success');
@@ -984,7 +1100,24 @@
           const trailer = trailers.find(t => t.id === trailerId);
           document.getElementById('edit-movie-id').value = trailerId;
           document.getElementById('edit-movie-title').value = trailer.title;
-          document.getElementById('edit-movie-gdrive').value = trailer.gdriveLink;
+          
+          // Set the appropriate link type and value
+          if (trailer.imdbId) {
+            editCurrentLinkType = 'imdb';
+            editImdbBtn.classList.add('active');
+            editGdriveBtn.classList.remove('active');
+            editMovieLinkInput.placeholder = 'IMDB ID (e.g. tt1234567)';
+            editMovieLinkInput.type = 'text';
+            editMovieLinkInput.value = trailer.imdbId;
+          } else {
+            editCurrentLinkType = 'gdrive';
+            editGdriveBtn.classList.add('active');
+            editImdbBtn.classList.remove('active');
+            editMovieLinkInput.placeholder = 'Google Drive Link';
+            editMovieLinkInput.type = 'url';
+            editMovieLinkInput.value = trailer.gdriveLink || '';
+          }
+          
           document.getElementById('edit-movie-description').value = trailer.description || '';
           selectedChannelId = trailer.channelId;
           renderEditMovieChannels(channels);
