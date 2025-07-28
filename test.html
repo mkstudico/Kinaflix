@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinaflix Player</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+    .player-container {
+      width: 100%;
+      max-width: 900px;
+      height: 70vh;
+      border: none;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .info {
+      text-align: center;
+      padding: 10px;
+      font-size: 18px;
+      background: #111;
+      width: 100%;
+      max-width: 900px;
+      border-radius: 0 0 10px 10px;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    @media (max-width: 768px) {
+      .player-container {
+        height: 50vh;
+      }
+      .info {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="player-container">
+    <iframe id="movieFrame" allowfullscreen></iframe>
+  </div>
+  <div class="info" id="movieTitle">Loading movie...</div>
+
+  <script>
+    // Change this ID or get it dynamically from your database
+    const imdbID = "tt29899652"; // Example movie
+
+    // Set iframe source dynamically
+    document.getElementById('movieFrame').src = `https://vidsrc.me/embed/${imdbID}`;
+
+    // Optional: Fetch movie title from OMDb API (free)
+    fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=YOUR_API_KEY`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.Title) {
+          document.getElementById('movieTitle').textContent = data.Title;
+        } else {
+          document.getElementById('movieTitle').textContent = "Movie Player";
+        }
+      })
+      .catch(() => {
+        document.getElementById('movieTitle').textContent = "Movie Player";
+      });
+  </script>
+</body>
+</html>
