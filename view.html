@@ -31,10 +31,10 @@
     :root {
       --primary: #e50914;
       --primary-dark: #b2070f;
-      --dark: #000000; /* Changed to pure black */
+      --dark: #000000;
       --light: #f4f4f4;
       --gray: #999;
-      --dark-gray: #333; /* Added dark gray color */
+      --dark-gray: #333;
       --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     }
     
@@ -53,25 +53,29 @@
       touch-action: pan-y;
     }
     
-    /* Video container - full screen */
+    /* Main container */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    
+    /* Video container */
     .video-container {
       position: relative;
       width: 100%;
-      height: 100vh;
-      overflow: hidden;
-      background: #000; /* Ensure full black background */
+      height: calc(100vh - 200px); /* Adjusted for info section */
+      background: black;
     }
     
-    /* Video wrapper with aspect ratio */
+    /* Video wrapper */
     .video-wrapper {
       position: relative;
       width: 100%;
-      height: calc(100vh - 120px); /* Adjusted height */
-      background: black;
-      margin-top: 10px; /* Space from back button */
+      height: 100%;
     }
     
-    /* Video iframe - full screen */
+    /* Video iframe */
     .video-iframe {
       position: absolute;
       top: 0;
@@ -118,14 +122,10 @@
       display: flex;
     }
     
-    /* Video info overlay at bottom */
-    .video-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 0.8rem;
-      z-index: 5;
+    /* Info container below video */
+    .info-container {
+      padding: 10px;
+      margin-top: 10px; /* Gap between player and info */
     }
     
     /* Channel info styling */
@@ -194,26 +194,23 @@
       margin-top: 0.3rem;
     }
     
-    /* Action buttons on the side */
+    /* Action buttons */
     .video-actions {
-      position: absolute;
-      right: 0.8rem;
-      bottom: 5rem;
       display: flex;
-      flex-direction: row; /* Changed to horizontal */
-      gap: 0.5rem; /* Reduced gap */
+      flex-direction: row;
+      gap: 0.5rem;
       align-items: center;
-      z-index: 5;
+      margin-top: 10px;
     }
     
     .action-btn {
       background: transparent;
       border: none;
       color: var(--light);
-      width: 32px; /* Made smaller */
-      height: 32px; /* Made smaller */
+      width: 32px;
+      height: 32px;
       cursor: pointer;
-      font-size: 1rem; /* Reduced size */
+      font-size: 1rem;
       transition: all 0.3s;
       display: flex;
       align-items: center;
@@ -234,15 +231,12 @@
     
     /* View count */
     .view-count {
-      position: absolute;
-      right: 0.8rem;
-      bottom: 3.5rem;
       font-size: 0.8rem;
-      color: var(--dark-gray); /* Changed to dark gray */
-      z-index: 5;
+      color: var(--dark-gray);
+      margin-left: auto;
     }
     
-    /* Navigation buttons - centered vertically */
+    /* Navigation buttons */
     .nav-buttons {
       position: absolute;
       left: 0;
@@ -393,47 +387,51 @@
   </style>
 </head>
 <body>
-  <div class="video-container" id="video-container">
+  <div class="main-container">
     <!-- Back button -->
     <button class="back-btn" id="back-btn"><i class="fas fa-arrow-left"></i></button>
     
-    <div class="video-wrapper">
-      <!-- Video loading placeholder -->
-      <div class="video-placeholder" id="video-placeholder">
-        <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #fff;"></i>
-      </div>
-      
-      <!-- Main video iframe -->
-      <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" muted loading="eager"></iframe>
-      
-      <!-- Play overlay for autoplay fallback -->
-      <div class="play-overlay" id="play-overlay">Tap to play</div>
-      
-      <!-- Video info overlay -->
-      <div class="video-overlay">
-        <div class="channel-link" id="channel-link">
-          <img src="" alt="Channel Image" loading="lazy">
-          <span></span>
+    <!-- Video container -->
+    <div class="video-container">
+      <div class="video-wrapper">
+        <!-- Video loading placeholder -->
+        <div class="video-placeholder" id="video-placeholder">
+          <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #fff;"></i>
         </div>
-        <p class="video-category" id="video-category"></p>
-        <h2 class="video-title" id="video-title"></h2>
-        <p class="video-description" id="video-description"></p>
-        <span class="unhide-btn" id="unhide-btn">Show more</span>
+        
+        <!-- Main video iframe -->
+        <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" muted loading="eager"></iframe>
+        
+        <!-- Play overlay for autoplay fallback -->
+        <div class="play-overlay" id="play-overlay">Tap to play</div>
+        
+        <!-- Navigation buttons -->
+        <div class="nav-buttons">
+          <button id="prev-btn" class="nav-btn"><i class="fas fa-chevron-up"></i></button>
+          <button id="next-btn" class="nav-btn"><i class="fas fa-chevron-down"></i></button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Info container below video -->
+    <div class="info-container">
+      <!-- Channel info -->
+      <div class="channel-link" id="channel-link">
+        <img src="" alt="Channel Image" loading="lazy">
+        <span></span>
       </div>
       
-      <!-- Action buttons -->
+      <!-- Video info -->
+      <p class="video-category" id="video-category"></p>
+      <h2 class="video-title" id="video-title"></h2>
+      <p class="video-description" id="video-description"></p>
+      <span class="unhide-btn" id="unhide-btn">Show more</span>
+      
+      <!-- Action buttons and view count -->
       <div class="video-actions">
         <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
         <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
-      </div>
-      
-      <!-- View count -->
-      <span class="view-count" id="view-count">0 views</span>
-      
-      <!-- Navigation buttons -->
-      <div class="nav-buttons">
-        <button id="prev-btn" class="nav-btn"><i class="fas fa-chevron-up"></i></button>
-        <button id="next-btn" class="nav-btn"><i class="fas fa-chevron-down"></i></button>
+        <span class="view-count" id="view-count">0 views</span>
       </div>
     </div>
   </div>
@@ -773,7 +771,7 @@
       const swipeThreshold = 50;
       const swipeTimeThreshold = 300;
       
-      const videoContainer = document.getElementById('video-container');
+      const videoContainer = document.querySelector('.video-container');
       
       videoContainer.addEventListener('touchstart', (e) => {
         touchStartY = e.touches[0].clientY;
