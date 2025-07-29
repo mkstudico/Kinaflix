@@ -58,19 +58,17 @@
       width: 100%;
       height: 100vh;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
     }
     
-    /* Video player section */
-    .video-player {
+    /* Video wrapper with aspect ratio */
+    .video-wrapper {
       position: relative;
       width: 100%;
-      height: 70vh; /* Reduced height for controls */
+      height: 80vh; /* Reduced height for player */
       background: black;
     }
     
-    /* Video iframe - responsive */
+    /* Video iframe - full screen */
     .video-iframe {
       position: absolute;
       top: 0;
@@ -78,6 +76,7 @@
       width: 100%;
       height: 100%;
       border: none;
+      object-fit: cover;
     }
     
     /* Video loading placeholder */
@@ -116,11 +115,15 @@
       display: flex;
     }
     
-    /* Video info section below player */
-    .video-info-section {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
+    /* Video info overlay at bottom */
+    .video-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.8rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+      z-index: 5;
     }
     
     /* Channel info styling */
@@ -131,19 +134,22 @@
       cursor: pointer;
       text-decoration: none;
       color: var(--light);
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.3rem;
     }
     
     .channel-link img {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       object-fit: cover;
     }
     
     .channel-link span {
-      font-size: 1rem;
-      font-weight: bold;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
     }
     
     .channel-link:hover span {
@@ -152,27 +158,45 @@
     
     /* Video text info */
     .video-category {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--gray);
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.2rem;
     }
     
     .video-title {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     .video-description {
-      font-size: 0.9rem;
+      display: none;
+      font-size: 0.8rem;
       color: var(--gray);
+      max-height: 4.5em;
+      overflow: hidden;
       line-height: 1.4;
+    }
+    
+    .video-description.visible {
+      display: block;
+    }
+    
+    .unhide-btn {
+      font-size: 0.75rem;
+      color: var(--primary);
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 0.3rem;
     }
     
     /* Action buttons on the side */
     .video-actions {
       position: absolute;
       right: 0.8rem;
-      bottom: 1rem;
+      bottom: 5rem;
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -215,12 +239,18 @@
     
     /* View count */
     .view-count {
+      position: absolute;
+      right: 0.8rem;
+      bottom: 3.5rem;
       font-size: 0.8rem;
       color: var(--gray);
-      margin-top: 0.5rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.3rem 0.6rem;
+      border-radius: 20px;
+      z-index: 5;
     }
     
-    /* Navigation buttons */
+    /* Navigation buttons - centered vertically */
     .nav-buttons {
       position: absolute;
       left: 0;
@@ -255,6 +285,29 @@
     .nav-btn.disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+    
+    /* Back button */
+    .back-btn {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .back-btn:hover {
+      background: var(--primary);
     }
     
     /* Loading overlay */
@@ -349,18 +402,32 @@
 </head>
 <body>
   <div class="video-container" id="video-container">
-    <!-- Video player section -->
-    <div class="video-player">
+    <!-- Back button -->
+    <button class="back-btn" id="back-btn"><i class="fas fa-arrow-left"></i></button>
+    
+    <div class="video-wrapper">
       <!-- Video loading placeholder -->
       <div class="video-placeholder" id="video-placeholder">
         <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #fff;"></i>
       </div>
       
       <!-- Main video iframe -->
-      <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" allowfullscreen muted></iframe>
+      <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" muted loading="eager"></iframe>
       
       <!-- Play overlay for autoplay fallback -->
       <div class="play-overlay" id="play-overlay">Tap to play</div>
+      
+      <!-- Video info overlay -->
+      <div class="video-overlay">
+        <div class="channel-link" id="channel-link">
+          <img src="" alt="Channel Image" loading="lazy">
+          <span></span>
+        </div>
+        <p class="video-category" id="video-category"></p>
+        <h2 class="video-title" id="video-title"></h2>
+        <p class="video-description" id="video-description"></p>
+        <span class="unhide-btn" id="unhide-btn">Show more</span>
+      </div>
       
       <!-- Action buttons -->
       <div class="video-actions">
@@ -371,23 +438,14 @@
         <span class="action-label">Dislike</span>
       </div>
       
+      <!-- View count -->
+      <span class="view-count" id="view-count">0 views</span>
+      
       <!-- Navigation buttons -->
       <div class="nav-buttons">
         <button id="prev-btn" class="nav-btn"><i class="fas fa-chevron-up"></i></button>
         <button id="next-btn" class="nav-btn"><i class="fas fa-chevron-down"></i></button>
       </div>
-    </div>
-    
-    <!-- Video info section -->
-    <div class="video-info-section">
-      <div class="channel-link" id="channel-link">
-        <img src="" alt="Channel Image" loading="lazy">
-        <span></span>
-      </div>
-      <p class="video-category" id="video-category"></p>
-      <h2 class="video-title" id="video-title"></h2>
-      <p class="video-description" id="video-description"></p>
-      <span class="view-count" id="view-count">0 views</span>
     </div>
   </div>
   
@@ -436,12 +494,14 @@
     const videoCategory = document.getElementById('video-category');
     const videoTitle = document.getElementById('video-title');
     const videoDescription = document.getElementById('video-description');
+    const unhideBtn = document.getElementById('unhide-btn');
     const likeBtn = document.getElementById('like-btn');
     const dislikeBtn = document.getElementById('dislike-btn');
     const viewCount = document.getElementById('view-count');
     const likeCount = document.getElementById('like-count');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
+    const backBtn = document.getElementById('back-btn');
     const loadingOverlay = document.getElementById('loading-overlay');
     const errorMessage = document.getElementById('error-message');
     const toast = document.getElementById('toast');
@@ -602,15 +662,12 @@
         videoPlaceholder.style.display = 'none';
         videoIframe.style.display = 'block';
         
-        // Try to autoplay
+        // Try to autoplay for Google Drive
         if (videoIframe.src.includes('drive.google.com')) {
           const playPromise = videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
           if (!playPromise) {
             playOverlay.classList.add('active');
           }
-        } else {
-          // For IMDB embeds, just show the player
-          playOverlay.classList.remove('active');
         }
       };
       videoIframe.onerror = () => {
@@ -818,10 +875,27 @@
       showToast(isDisliked ? 'Video dislike removed' : 'Video disliked', 'success');
     });
 
+    // Channel link handler
     channelLink.addEventListener('click', () => {
       window.location.href = `channel.html?id=${channelLink.dataset.id}`;
     });
 
+    // Show more description handler
+    unhideBtn.addEventListener('click', () => {
+      videoDescription.classList.add('visible');
+      unhideBtn.style.display = 'none';
+      setTimeout(() => {
+        videoDescription.classList.remove('visible');
+        unhideBtn.style.display = 'inline-block';
+      }, 5000);
+    });
+
+    // Back button handler
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'reels.html';
+    });
+
+    // Network check
     function checkNetwork() {
       if (!navigator.onLine || navigator.connection?.effectiveType === 'slow-2g' || window.location.protocol === 'file:') {
         errorMessage.style.display = 'block';
@@ -829,6 +903,7 @@
       }
     }
 
+    // Toast notification
     function showToast(message, type = 'info') {
       toast.textContent = message;
       toast.className = 'toast';
