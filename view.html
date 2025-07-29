@@ -31,9 +31,10 @@
     :root {
       --primary: #e50914;
       --primary-dark: #b2070f;
-      --dark: #141414;
+      --dark: #000000; /* Changed to pure black */
       --light: #f4f4f4;
       --gray: #999;
+      --dark-gray: #333; /* Added dark gray color */
       --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     }
     
@@ -58,14 +59,16 @@
       width: 100%;
       height: 100vh;
       overflow: hidden;
+      background: #000; /* Ensure full black background */
     }
     
     /* Video wrapper with aspect ratio */
     .video-wrapper {
       position: relative;
       width: 100%;
-      height: 80vh; /* Reduced height for player */
+      height: calc(100vh - 120px); /* Adjusted height */
       background: black;
+      margin-top: 10px; /* Space from back button */
     }
     
     /* Video iframe - full screen */
@@ -86,7 +89,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: #222;
+      background: #000;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -122,7 +125,6 @@
       left: 0;
       right: 0;
       padding: 0.8rem;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
       z-index: 5;
     }
     
@@ -198,20 +200,20 @@
       right: 0.8rem;
       bottom: 5rem;
       display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      flex-direction: row; /* Changed to horizontal */
+      gap: 0.5rem; /* Reduced gap */
+      align-items: center;
       z-index: 5;
     }
     
     .action-btn {
-      background: rgba(0, 0, 0, 0.5);
+      background: transparent;
       border: none;
       color: var(--light);
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
+      width: 32px; /* Made smaller */
+      height: 32px; /* Made smaller */
       cursor: pointer;
-      font-size: 1.4rem;
+      font-size: 1rem; /* Reduced size */
       transition: all 0.3s;
       display: flex;
       align-items: center;
@@ -227,14 +229,7 @@
     }
     
     .action-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
       transform: scale(1.1);
-    }
-    
-    .action-label {
-      font-size: 0.7rem;
-      text-align: center;
-      margin-top: 0.2rem;
     }
     
     /* View count */
@@ -243,10 +238,7 @@
       right: 0.8rem;
       bottom: 3.5rem;
       font-size: 0.8rem;
-      color: var(--gray);
-      background: rgba(0, 0, 0, 0.5);
-      padding: 0.3rem 0.6rem;
-      border-radius: 20px;
+      color: var(--dark-gray); /* Changed to dark gray */
       z-index: 5;
     }
     
@@ -432,10 +424,7 @@
       <!-- Action buttons -->
       <div class="video-actions">
         <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
-        <span class="action-label" id="like-count">0</span>
-        
         <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
-        <span class="action-label">Dislike</span>
       </div>
       
       <!-- View count -->
@@ -498,7 +487,6 @@
     const likeBtn = document.getElementById('like-btn');
     const dislikeBtn = document.getElementById('dislike-btn');
     const viewCount = document.getElementById('view-count');
-    const likeCount = document.getElementById('like-count');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const backBtn = document.getElementById('back-btn');
@@ -633,7 +621,6 @@
       videoTitle.textContent = currentVideo.title;
       videoDescription.textContent = currentVideo.description || 'No description available';
       viewCount.textContent = `${(currentVideo.views || 0).toLocaleString()} views`;
-      likeCount.textContent = (currentVideo.likes || 0).toLocaleString();
       likeBtn.classList.toggle('liked', userPreferences.likedVideos.includes(currentVideo.id));
       dislikeBtn.classList.toggle('disliked', userPreferences.dislikedVideos.includes(currentVideo.id));
       updateNavButtons();
@@ -850,7 +837,6 @@
         localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
         likeBtn.classList.toggle('liked', !isLiked);
         dislikeBtn.classList.toggle('disliked', false);
-        likeCount.textContent = currentVideo.likes.toLocaleString();
         showToast(isLiked ? 'Video unliked' : 'Video liked', 'success');
       } catch (error) {
         console.error('Error updating likes:', error);
