@@ -58,13 +58,14 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      position: relative;
     }
     
     /* Video container */
     .video-container {
       position: relative;
       width: 100%;
-      height: calc(100vh - 200px); /* Adjusted for info section */
+      height: 100%;
       background: black;
     }
     
@@ -122,10 +123,17 @@
       display: flex;
     }
     
-    /* Info container below video */
+    /* Info container at bottom */
     .info-container {
-      padding: 10px;
-      margin-top: 10px; /* Gap between player and info */
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      gap: 3px; /* Reduced gap */
     }
     
     /* Channel info styling */
@@ -136,38 +144,31 @@
       cursor: pointer;
       text-decoration: none;
       color: var(--light);
-      margin-bottom: 0.3rem;
     }
     
     .channel-link img {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       object-fit: cover;
     }
     
     .channel-link span {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 70vw;
     }
     
-    .channel-link:hover span {
-      color: var(--primary);
-    }
-    
     /* Video text info */
     .video-category {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--gray);
-      margin-bottom: 0.2rem;
     }
     
     .video-title {
-      font-size: 0.95rem;
-      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -187,31 +188,35 @@
     }
     
     .unhide-btn {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--primary);
       cursor: pointer;
       display: inline-block;
-      margin-top: 0.3rem;
+      margin-top: 2px;
+    }
+    
+    /* Action buttons container */
+    .actions-container {
+      position: absolute;
+      right: 8px;
+      bottom: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      z-index: 6;
     }
     
     /* Action buttons */
-    .video-actions {
-      display: flex;
-      flex-direction: row;
-      gap: 0.5rem;
-      align-items: center;
-      margin-top: 10px;
-    }
-    
     .action-btn {
       background: transparent;
       border: none;
       color: var(--light);
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.3s;
+      font-size: 0.9rem;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -231,9 +236,9 @@
     
     /* View count */
     .view-count {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--dark-gray);
-      margin-left: auto;
+      margin-top: 5px;
     }
     
     /* Navigation buttons */
@@ -253,11 +258,11 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       border: none;
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       transition: background 0.3s;
       display: flex;
       align-items: center;
@@ -281,11 +286,11 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       border: none;
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       z-index: 10;
       display: flex;
       align-items: center;
@@ -315,9 +320,9 @@
     }
     
     .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.2);
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
       border-radius: 50%;
       border-top-color: var(--primary);
       animation: spin 1s ease-in-out infinite;
@@ -400,7 +405,7 @@
         </div>
         
         <!-- Main video iframe -->
-        <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" muted loading="eager"></iframe>
+        <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" allowfullscreen muted loading="eager"></iframe>
         
         <!-- Play overlay for autoplay fallback -->
         <div class="play-overlay" id="play-overlay">Tap to play</div>
@@ -413,7 +418,7 @@
       </div>
     </div>
     
-    <!-- Info container below video -->
+    <!-- Info container at bottom -->
     <div class="info-container">
       <!-- Channel info -->
       <div class="channel-link" id="channel-link">
@@ -426,13 +431,13 @@
       <h2 class="video-title" id="video-title"></h2>
       <p class="video-description" id="video-description"></p>
       <span class="unhide-btn" id="unhide-btn">Show more</span>
-      
-      <!-- Action buttons and view count -->
-      <div class="video-actions">
-        <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
-        <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
-        <span class="view-count" id="view-count">0 views</span>
-      </div>
+    </div>
+    
+    <!-- Action buttons and view count -->
+    <div class="actions-container">
+      <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
+      <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+      <span class="view-count" id="view-count">0 views</span>
     </div>
   </div>
   
@@ -654,6 +659,14 @@
             playOverlay.classList.add('active');
           }
         }
+        
+        // For IMDB embeds, ensure controls work properly
+        if (videoIframe.src.includes('vidsrc.me') || 
+            videoIframe.src.includes('2embed.cc') || 
+            videoIframe.src.includes('wootly.ch')) {
+          // Add event listeners to handle player controls
+          window.addEventListener('message', handlePlayerMessages);
+        }
       };
       videoIframe.onerror = () => {
         if (currentVideo.imdbId) {
@@ -670,6 +683,18 @@
           videoPlaceholder.style.display = 'none';
         }
       };
+    }
+
+    function handlePlayerMessages(event) {
+      // Handle messages from embedded players if needed
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === 'playbackStatus') {
+          // Handle playback status updates
+        }
+      } catch (e) {
+        // Not a JSON message
+      }
     }
 
     function tryNextEmbedSource(imdbID) {
