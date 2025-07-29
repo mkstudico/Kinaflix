@@ -131,9 +131,7 @@
       right: 0;
       padding: 8px;
       z-index: 5;
-      display: flex;
-      flex-direction: column;
-      gap: 3px; /* Reduced gap */
+      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
     }
     
     /* Channel info styling */
@@ -144,6 +142,7 @@
       cursor: pointer;
       text-decoration: none;
       color: var(--light);
+      margin-bottom: 3px;
     }
     
     .channel-link img {
@@ -159,6 +158,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 70vw;
+    }
+    
+    .channel-link:hover span {
+      color: var(--primary);
     }
     
     /* Video text info */
@@ -181,6 +184,7 @@
       max-height: 4.5em;
       overflow: hidden;
       line-height: 1.4;
+      margin-top: 3px;
     }
     
     .video-description.visible {
@@ -196,14 +200,12 @@
     }
     
     /* Action buttons container */
-    .actions-container {
+    .action-buttons {
       position: absolute;
       right: 8px;
       bottom: 60px;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
+      gap: 8px;
       z-index: 6;
     }
     
@@ -236,9 +238,12 @@
     
     /* View count */
     .view-count {
+      position: absolute;
+      right: 8px;
+      bottom: 40px;
       font-size: 0.75rem;
       color: var(--dark-gray);
-      margin-top: 5px;
+      z-index: 6;
     }
     
     /* Navigation buttons */
@@ -410,6 +415,15 @@
         <!-- Play overlay for autoplay fallback -->
         <div class="play-overlay" id="play-overlay">Tap to play</div>
         
+        <!-- Like/Dislike buttons -->
+        <div class="action-buttons">
+          <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
+          <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+        </div>
+        
+        <!-- View count -->
+        <span class="view-count" id="view-count">0 views</span>
+        
         <!-- Navigation buttons -->
         <div class="nav-buttons">
           <button id="prev-btn" class="nav-btn"><i class="fas fa-chevron-up"></i></button>
@@ -431,13 +445,6 @@
       <h2 class="video-title" id="video-title"></h2>
       <p class="video-description" id="video-description"></p>
       <span class="unhide-btn" id="unhide-btn">Show more</span>
-    </div>
-    
-    <!-- Action buttons and view count -->
-    <div class="actions-container">
-      <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
-      <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
-      <span class="view-count" id="view-count">0 views</span>
     </div>
   </div>
   
