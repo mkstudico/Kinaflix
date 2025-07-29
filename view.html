@@ -58,14 +58,13 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      position: relative;
     }
     
     /* Video container */
     .video-container {
       position: relative;
       width: 100%;
-      height: 100%;
+      height: calc(100vh - 200px); /* Adjusted for info section */
       background: black;
     }
     
@@ -123,15 +122,10 @@
       display: flex;
     }
     
-    /* Info container at bottom */
+    /* Info container below video */
     .info-container {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 8px;
-      z-index: 5;
-      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+      padding: 10px;
+      margin-top: 10px; /* Gap between player and info */
     }
     
     /* Channel info styling */
@@ -142,18 +136,18 @@
       cursor: pointer;
       text-decoration: none;
       color: var(--light);
-      margin-bottom: 3px;
+      margin-bottom: 0.3rem;
     }
     
     .channel-link img {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       object-fit: cover;
     }
     
     .channel-link span {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -166,12 +160,14 @@
     
     /* Video text info */
     .video-category {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: var(--gray);
+      margin-bottom: 0.2rem;
     }
     
     .video-title {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -184,7 +180,6 @@
       max-height: 4.5em;
       overflow: hidden;
       line-height: 1.4;
-      margin-top: 3px;
     }
     
     .video-description.visible {
@@ -192,33 +187,31 @@
     }
     
     .unhide-btn {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: var(--primary);
       cursor: pointer;
       display: inline-block;
-      margin-top: 2px;
-    }
-    
-    /* Action buttons container */
-    .action-buttons {
-      position: absolute;
-      right: 8px;
-      bottom: 60px;
-      display: flex;
-      gap: 8px;
-      z-index: 6;
+      margin-top: 0.3rem;
     }
     
     /* Action buttons */
+    .video-actions {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 10px;
+    }
+    
     .action-btn {
       background: transparent;
       border: none;
       color: var(--light);
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s;
+      font-size: 1rem;
+      transition: all 0.3s;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -238,12 +231,9 @@
     
     /* View count */
     .view-count {
-      position: absolute;
-      right: 8px;
-      bottom: 40px;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--dark-gray);
-      z-index: 6;
+      margin-left: auto;
     }
     
     /* Navigation buttons */
@@ -263,11 +253,11 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       border: none;
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       transition: background 0.3s;
       display: flex;
       align-items: center;
@@ -291,11 +281,11 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       border: none;
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       z-index: 10;
       display: flex;
       align-items: center;
@@ -325,9 +315,9 @@
     }
     
     .loading-spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid rgba(255, 255, 255, 0.2);
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
       border-radius: 50%;
       border-top-color: var(--primary);
       animation: spin 1s ease-in-out infinite;
@@ -410,19 +400,10 @@
         </div>
         
         <!-- Main video iframe -->
-        <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" allowfullscreen muted loading="eager"></iframe>
+        <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" muted loading="eager"></iframe>
         
         <!-- Play overlay for autoplay fallback -->
         <div class="play-overlay" id="play-overlay">Tap to play</div>
-        
-        <!-- Like/Dislike buttons -->
-        <div class="action-buttons">
-          <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
-          <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
-        </div>
-        
-        <!-- View count -->
-        <span class="view-count" id="view-count">0 views</span>
         
         <!-- Navigation buttons -->
         <div class="nav-buttons">
@@ -432,7 +413,7 @@
       </div>
     </div>
     
-    <!-- Info container at bottom -->
+    <!-- Info container below video -->
     <div class="info-container">
       <!-- Channel info -->
       <div class="channel-link" id="channel-link">
@@ -445,6 +426,13 @@
       <h2 class="video-title" id="video-title"></h2>
       <p class="video-description" id="video-description"></p>
       <span class="unhide-btn" id="unhide-btn">Show more</span>
+      
+      <!-- Action buttons and view count -->
+      <div class="video-actions">
+        <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
+        <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+        <span class="view-count" id="view-count">0 views</span>
+      </div>
     </div>
   </div>
   
@@ -666,14 +654,6 @@
             playOverlay.classList.add('active');
           }
         }
-        
-        // For IMDB embeds, ensure controls work properly
-        if (videoIframe.src.includes('vidsrc.me') || 
-            videoIframe.src.includes('2embed.cc') || 
-            videoIframe.src.includes('wootly.ch')) {
-          // Add event listeners to handle player controls
-          window.addEventListener('message', handlePlayerMessages);
-        }
       };
       videoIframe.onerror = () => {
         if (currentVideo.imdbId) {
@@ -690,18 +670,6 @@
           videoPlaceholder.style.display = 'none';
         }
       };
-    }
-
-    function handlePlayerMessages(event) {
-      // Handle messages from embedded players if needed
-      try {
-        const data = JSON.parse(event.data);
-        if (data.event === 'playbackStatus') {
-          // Handle playback status updates
-        }
-      } catch (e) {
-        // Not a JSON message
-      }
     }
 
     function tryNextEmbedSource(imdbID) {
