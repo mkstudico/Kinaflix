@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>View Reel | KINAFLIX</title>
   <meta name="description" content="Watch short movie reels on KINAFLIX, YouTube Shorts style.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -109,54 +109,13 @@
       display: flex;
     }
     
-    /* Side panel overlay */
-    .side-panel {
-      position: absolute;
-      right: 0;
-      bottom: 80px;
-      width: 300px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      z-index: 5;
-    }
-    
-    /* Video info overlay */
-    .video-info {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      max-width: 100%;
-    }
-    
-    .video-title {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .video-description {
-      font-size: 0.9rem;
-      color: var(--gray);
-      line-height: 1.4;
-      max-height: 60px;
-      overflow-y: auto;
-    }
-    
-    .view-count {
-      font-size: 0.8rem;
-      color: var(--gray);
-      margin-bottom: 1rem;
-    }
-    
     /* Corner navigation with hover effect */
     .corner-nav {
       position: fixed;
       top: 0;
       right: 0;
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       cursor: pointer;
       z-index: 10;
       overflow: hidden;
@@ -164,41 +123,37 @@
     
     .corner-highlight {
       position: absolute;
-      top: -50px;
-      right: -50px;
-      width: 100px;
-      height: 100px;
-      background: radial-gradient(circle at top right, rgba(229, 9, 20, 0.3), transparent 70%);
+      top: -60px;
+      right: -60px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle at top right, rgba(229, 9, 20, 0.7), transparent 70%);
       opacity: 0;
       transition: opacity 0.3s ease;
       pointer-events: none;
     }
     
-    .corner-nav:hover .corner-highlight {
+    .corner-text {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 1rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+      pointer-events: none;
+    }
+    
+    .corner-nav:hover .corner-highlight,
+    .corner-nav.active .corner-highlight {
       opacity: 1;
     }
     
-    /* Back button */
-    .back-btn {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.2rem;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .back-btn:hover {
-      background: var(--primary);
+    .corner-nav:hover .corner-text,
+    .corner-nav.active .corner-text {
+      opacity: 1;
     }
     
     /* Shortcut indicator */
@@ -307,30 +262,84 @@
       background: #f44336;
     }
     
+    /* Mobile touch area for corner navigation */
+    .mobile-touch-area {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 80px;
+      height: 80px;
+      z-index: 10;
+      cursor: pointer;
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      .side-panel {
-        width: 100%;
-        padding: 1rem;
-        bottom: 0;
-        align-items: flex-start;
+      .corner-nav {
+        width: 100px;
+        height: 100px;
       }
       
-      .video-info {
-        max-width: 90%;
+      .corner-highlight {
+        top: -50px;
+        right: -50px;
+        width: 100px;
+        height: 100px;
+      }
+      
+      .corner-text {
+        top: 12px;
+        right: 12px;
+        font-size: 0.9rem;
+      }
+      
+      .mobile-touch-area {
+        width: 70px;
+        height: 70px;
+      }
+      
+      .shortcut-indicator {
+        font-size: 0.7rem;
+        padding: 6px 12px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .corner-nav {
+        width: 80px;
+        height: 80px;
+      }
+      
+      .corner-highlight {
+        top: -40px;
+        right: -40px;
+        width: 80px;
+        height: 80px;
+      }
+      
+      .corner-text {
+        top: 10px;
+        right: 10px;
+        font-size: 0.8rem;
+      }
+      
+      .mobile-touch-area {
+        width: 60px;
+        height: 60px;
       }
     }
   </style>
 </head>
 <body>
   <div class="reel-container">
-    <!-- Back button floating in top left -->
-    <button class="back-btn" id="back-btn"><i class="fas fa-arrow-left"></i></button>
-    
     <!-- Corner navigation with hover effect -->
     <div class="corner-nav" id="corner-nav">
       <div class="corner-highlight"></div>
+      <div class="corner-text">BACK</div>
     </div>
+    
+    <!-- Mobile touch area for corner navigation -->
+    <div class="mobile-touch-area" id="mobile-touch-area"></div>
     
     <!-- Shortcut indicator -->
     <div class="shortcut-indicator" id="shortcut-indicator">
@@ -343,19 +352,10 @@
         <div class="video-placeholder" id="video-placeholder">
           <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #fff;"></i>
         </div>
-        <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" muted loading="eager"></iframe>
+        <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen; allowfullscreen" muted loading="eager"></iframe>
         <div class="play-overlay" id="play-overlay">Click to play</div>
       </div>
     </section>
-    
-    <!-- Side panel with info only -->
-    <aside class="side-panel">
-      <div class="video-info">
-        <h2 class="video-title" id="video-title"></h2>
-        <p class="video-description" id="video-description"></p>
-        <span class="view-count" id="view-count"></span>
-      </div>
-    </aside>
   </div>
   
   <!-- Loading and error states -->
@@ -394,11 +394,8 @@
     const videoIframe = document.getElementById('video-iframe');
     const videoPlaceholder = document.getElementById('video-placeholder');
     const playOverlay = document.getElementById('play-overlay');
-    const videoTitle = document.getElementById('video-title');
-    const videoDescription = document.getElementById('video-description');
-    const viewCount = document.getElementById('view-count');
-    const backBtn = document.getElementById('back-btn');
     const cornerNav = document.getElementById('corner-nav');
+    const mobileTouchArea = document.getElementById('mobile-touch-area');
     const shortcutIndicator = document.getElementById('shortcut-indicator');
     const loadingOverlay = document.getElementById('loading-overlay');
     const errorMessage = document.getElementById('error-message');
@@ -412,15 +409,11 @@
     // Mouse movement tracking for shortcut indicator
     let mouseMoveTimer;
     let mouseLastMoved = Date.now();
+    
+    // Touch detection for mobile
+    let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Redirect to view.html if screen width <= 576px
-      if (window.innerWidth <= 576) {
-        const videoId = new URLSearchParams(window.location.search).get('id');
-        window.location.replace(`view.html${videoId ? `?id=${videoId}` : ''}`);
-        return;
-      }
-
       // Check if running on file://
       if (window.location.protocol === 'file:') {
         errorMessage.style.display = 'block';
@@ -445,6 +438,7 @@
         setupAutoplayFallback();
         setupKeyboardShortcuts();
         setupMouseTracking();
+        setupCornerNavigation();
         
         // Preload next video
         if (currentIndex < trailers.length - 1) {
@@ -508,11 +502,6 @@
       
       // Update page title with movie name
       document.title = `${currentVideo.title} | KINAFLIX`;
-      
-      // Load video info
-      videoTitle.textContent = currentVideo.title;
-      videoDescription.textContent = currentVideo.description || 'No description available';
-      viewCount.textContent = `${(currentVideo.views || 0).toLocaleString()} views`;
       
       // Update URL without reload
       window.history.replaceState({}, '', `view1.html?id=${currentVideo.id}`);
@@ -582,7 +571,6 @@
         const trailerRef = doc(db, 'trailers', videoId);
         await updateDoc(trailerRef, { views: (currentVideo.views || 0) + 1 });
         currentVideo.views = (currentVideo.views || 0) + 1;
-        viewCount.textContent = `${currentVideo.views.toLocaleString()} views`;
       } catch (error) {
         console.error('Error updating views:', error);
       }
@@ -626,13 +614,45 @@
       });
     }
 
-    backBtn.addEventListener('click', () => {
-      window.location.href = 'reels.html';
-    });
-
-    cornerNav.addEventListener('click', () => {
-      window.location.href = 'reels.html';
-    });
+    function setupCornerNavigation() {
+      // Desktop hover behavior
+      cornerNav.addEventListener('mouseenter', () => {
+        cornerNav.classList.add('active');
+      });
+      
+      cornerNav.addEventListener('mouseleave', () => {
+        cornerNav.classList.remove('active');
+      });
+      
+      cornerNav.addEventListener('click', () => {
+        window.location.href = 'reels.html';
+      });
+      
+      // Mobile touch behavior
+      if (isTouchDevice) {
+        mobileTouchArea.addEventListener('touchstart', () => {
+          cornerNav.classList.add('active');
+        });
+        
+        mobileTouchArea.addEventListener('touchend', () => {
+          setTimeout(() => {
+            cornerNav.classList.remove('active');
+          }, 300);
+        });
+        
+        mobileTouchArea.addEventListener('click', () => {
+          window.location.href = 'reels.html';
+        });
+        
+        // Show corner nav briefly on mobile to indicate it's interactive
+        setTimeout(() => {
+          cornerNav.classList.add('active');
+          setTimeout(() => {
+            cornerNav.classList.remove('active');
+          }, 2000);
+        }, 1000);
+      }
+    }
 
     function checkNetwork() {
       if (!navigator.onLine || navigator.connection?.effectiveType === 'slow-2g' || window.location.protocol === 'file:') {
