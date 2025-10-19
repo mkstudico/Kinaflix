@@ -150,48 +150,6 @@
       margin-bottom: 1rem;
     }
     
-    /* Action buttons on the side */
-    .video-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-    
-    .action-btn {
-      background: rgba(0, 0, 0, 0.5);
-      border: none;
-      color: var(--light);
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.5rem;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .action-btn.liked {
-      color: #4CAF50;
-    }
-    
-    .action-btn.disliked {
-      color: #f44336;
-    }
-    
-    .action-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: scale(1.1);
-    }
-    
-    .action-label {
-      font-size: 0.7rem;
-      margin-top: 0.2rem;
-    }
-    
     /* Corner navigation with hover effect */
     .corner-nav {
       position: fixed;
@@ -241,42 +199,6 @@
     
     .back-btn:hover {
       background: var(--primary);
-    }
-    
-    /* Navigation controls - moved to left side */
-    .nav-controls {
-      position: fixed;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      z-index: 5;
-    }
-    
-    .nav-btn {
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .nav-btn:hover {
-      background: var(--primary);
-    }
-    
-    .nav-btn.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
     
     /* Shortcut indicator */
@@ -397,24 +319,6 @@
       .video-info {
         max-width: 90%;
       }
-      
-      .video-actions {
-        flex-direction: row;
-        position: fixed;
-        bottom: 80px;
-        right: 1rem;
-      }
-      
-      .nav-controls {
-        left: 0.5rem;
-        gap: 0.5rem;
-      }
-      
-      .nav-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 0.9rem;
-      }
     }
   </style>
 </head>
@@ -433,12 +337,6 @@
       Back shortcut: Ctrl+Q
     </div>
     
-    <!-- Navigation controls on left side -->
-    <div class="nav-controls">
-      <button id="prev-btn" class="nav-btn"><i class="fas fa-chevron-up"></i></button>
-      <button id="next-btn" class="nav-btn"><i class="fas fa-chevron-down"></i></button>
-    </div>
-    
     <!-- Main video section -->
     <section class="video-section">
       <div class="video-container" id="video-container">
@@ -450,20 +348,12 @@
       </div>
     </section>
     
-    <!-- Side panel with actions and info -->
+    <!-- Side panel with info only -->
     <aside class="side-panel">
       <div class="video-info">
         <h2 class="video-title" id="video-title"></h2>
         <p class="video-description" id="video-description"></p>
         <span class="view-count" id="view-count"></span>
-      </div>
-      
-      <div class="video-actions">
-        <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
-        <span class="action-label">Like</span>
-        
-        <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
-        <span class="action-label">Dislike</span>
       </div>
     </aside>
   </div>
@@ -507,10 +397,6 @@
     const videoTitle = document.getElementById('video-title');
     const videoDescription = document.getElementById('video-description');
     const viewCount = document.getElementById('view-count');
-    const likeBtn = document.getElementById('like-btn');
-    const dislikeBtn = document.getElementById('dislike-btn');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
     const backBtn = document.getElementById('back-btn');
     const cornerNav = document.getElementById('corner-nav');
     const shortcutIndicator = document.getElementById('shortcut-indicator');
@@ -520,23 +406,12 @@
     let currentVideo = null;
     let trailers = [];
     let currentIndex = 0;
-    let userPreferences = JSON.parse(localStorage.getItem('kinaflix'))?.userPreferences || {
-      likedVideos: [],
-      preferredVideos: [],
-      dislikedVideos: [],
-      viewedVideos: [],
-      preferredCategories: {}
-    };
     let currentEmbedSource = 0;
     const embedSources = ['vidsrc', '2embed', 'wootly'];
     
     // Mouse movement tracking for shortcut indicator
     let mouseMoveTimer;
     let mouseLastMoved = Date.now();
-
-    // Ensure arrays are initialized
-    userPreferences.dislikedVideos = userPreferences.dislikedVideos || [];
-    localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
 
     document.addEventListener('DOMContentLoaded', async () => {
       // Redirect to view.html if screen width <= 576px
@@ -567,7 +442,6 @@
         renderVideo();
         trackView(videoId);
         checkNetwork();
-        setupNavigation();
         setupAutoplayFallback();
         setupKeyboardShortcuts();
         setupMouseTracking();
@@ -618,8 +492,7 @@
             id: doc.id,
             views: 0,
             ...doc.data()
-          }))
-          .filter(t => !userPreferences.dislikedVideos.includes(t.id));
+          }));
       } catch (error) {
         console.error('Error loading trailers:', error);
         showToast('Error loading trailers', 'error');
@@ -640,10 +513,6 @@
       videoTitle.textContent = currentVideo.title;
       videoDescription.textContent = currentVideo.description || 'No description available';
       viewCount.textContent = `${(currentVideo.views || 0).toLocaleString()} views`;
-      likeBtn.classList.toggle('liked', userPreferences.likedVideos.includes(currentVideo.id));
-      dislikeBtn.classList.toggle('disliked', userPreferences.dislikedVideos.includes(currentVideo.id));
-      prevBtn.classList.toggle('disabled', currentIndex === 0);
-      nextBtn.classList.toggle('disabled', currentIndex === trailers.length - 1);
       
       // Update URL without reload
       window.history.replaceState({}, '', `view1.html?id=${currentVideo.id}`);
@@ -709,12 +578,6 @@
     }
 
     async function trackView(videoId) {
-      if (userPreferences.viewedVideos.includes(videoId)) return;
-      userPreferences.viewedVideos.push(videoId);
-      if (currentVideo.category) {
-        userPreferences.preferredCategories[currentVideo.category] = (userPreferences.preferredCategories[currentVideo.category] || 0) + 1;
-      }
-      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
       try {
         const trailerRef = doc(db, 'trailers', videoId);
         await updateDoc(trailerRef, { views: (currentVideo.views || 0) + 1 });
@@ -729,99 +592,6 @@
       playOverlay.addEventListener('click', () => {
         videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
         playOverlay.classList.remove('active');
-      });
-    }
-
-    function setupNavigation() {
-      let lastNavTime = 0;
-      const debounceDelay = 300;
-
-      prevBtn.addEventListener('click', () => {
-        const now = Date.now();
-        if (now - lastNavTime < debounceDelay) return;
-        lastNavTime = now;
-        
-        if (currentIndex > 0) {
-          currentIndex--;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-          
-          // Preload next videos
-          if (currentIndex > 0) {
-            preloadNextVideo(trailers[currentIndex - 1]);
-          }
-        }
-      });
-
-      nextBtn.addEventListener('click', () => {
-        const now = Date.now();
-        if (now - lastNavTime < debounceDelay) return;
-        lastNavTime = now;
-        
-        if (currentIndex < trailers.length - 1) {
-          currentIndex++;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-          
-          // Preload next videos
-          if (currentIndex < trailers.length - 1) {
-            preloadNextVideo(trailers[currentIndex + 1]);
-          }
-        }
-      });
-
-      // Swipe/touch support
-      let touchStartY = 0;
-      const videoContainer = document.getElementById('video-container');
-      
-      videoContainer.addEventListener('touchstart', (e) => {
-        touchStartY = e.touches[0].clientY;
-      }, { passive: true });
-
-      videoContainer.addEventListener('touchend', (e) => {
-        const touchEndY = e.changedTouches[0].clientY;
-        const diff = touchStartY - touchEndY;
-        const now = Date.now();
-        
-        if (now - lastNavTime < debounceDelay) return;
-        
-        if (diff > 50 && currentIndex < trailers.length - 1) { // Swipe up
-          lastNavTime = now;
-          currentIndex++;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        } else if (diff < -50 && currentIndex > 0) { // Swipe down
-          lastNavTime = now;
-          currentIndex--;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        }
-      }, { passive: true });
-
-      // Keyboard navigation
-      document.addEventListener('keydown', (e) => {
-        const now = Date.now();
-        if (now - lastNavTime < debounceDelay) return;
-        
-        if (e.key === 'ArrowUp' && currentIndex > 0) {
-          e.preventDefault();
-          lastNavTime = now;
-          currentIndex--;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        } else if (e.key === 'ArrowDown' && currentIndex < trailers.length - 1) {
-          e.preventDefault();
-          lastNavTime = now;
-          currentIndex++;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        }
       });
     }
 
@@ -855,43 +625,6 @@
         }, 10000);
       });
     }
-
-    likeBtn.addEventListener('click', () => {
-      const isLiked = userPreferences.likedVideos.includes(currentVideo.id);
-      if (isLiked) {
-        userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
-        if (currentVideo.category) {
-          userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
-        }
-      } else {
-        userPreferences.likedVideos.push(currentVideo.id);
-        userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
-        if (currentVideo.category) {
-          userPreferences.preferredCategories[currentVideo.category] = (userPreferences.preferredCategories[currentVideo.category] || 0) + 1;
-        }
-      }
-      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
-      likeBtn.classList.toggle('liked', !isLiked);
-      dislikeBtn.classList.toggle('disliked', false);
-      showToast(isLiked ? 'Video unliked' : 'Video liked', 'success');
-    });
-
-    dislikeBtn.addEventListener('click', () => {
-      const isDisliked = userPreferences.dislikedVideos.includes(currentVideo.id);
-      if (isDisliked) {
-        userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
-      } else {
-        userPreferences.dislikedVideos.push(currentVideo.id);
-        userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
-        if (currentVideo.category) {
-          userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
-        }
-      }
-      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
-      dislikeBtn.classList.toggle('disliked', !isDisliked);
-      likeBtn.classList.toggle('liked', false);
-      showToast(isDisliked ? 'Video dislike removed' : 'Video disliked', 'success');
-    });
 
     backBtn.addEventListener('click', () => {
       window.location.href = 'reels.html';
