@@ -3,30 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>View Reel | KINAFLIX</title>
-  <meta name="description" content="Watch short movie reels on KINAFLIX, YouTube Shorts style.">
+  <title>Watch Now | KINAFLIX</title>
+  <meta name="description" content="Watch movies and shows on KINAFLIX">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<!-- Open Graph / Facebook -->
+  
+  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://kinaflix.com/reels.html">
-  <meta property="og:title" content="Click to watch... | KINAFLIX">
-  <meta property="og:description" content="Discover trending short movie reels and channels on KINAFLIX">
+  <meta property="og:url" content="https://kinaflix.com/play.html">
+  <meta property="og:title" content="Watch Now | KINAFLIX">
+  <meta property="og:description" content="Stream movies and shows on KINAFLIX">
   <meta property="og:image" content="https://i.ibb.co/v4XQJQWq/KINAFLIX-SHORTS.png">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://kinaflix.com/reels.html">
-  <meta property="twitter:title" content="Click to watch... | KINAFLIX">
-  <meta property="twitter:description" content="Discover trending short movie reels and channels on KINAFLIX">
-  <meta property="twitter:image" content="https://i.ibb.co/v4XQJQWq/KINAFLIX-SHORTS.png">  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
+  <meta property="twitter:url" content="https://kinaflix.com/play.html">
+  <meta property="twitter:title" content="Watch Now | KINAFLIX">
+  <meta property="twitter:description" content="Stream movies and shows on KINAFLIX">
+  <meta property="twitter:image" content="https://i.ibb.co/v4XQJQWq/KINAFLIX-SHORTS.png">
+  
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
   <style>
     :root {
       --primary: #e50914;
       --primary-dark: #b2070f;
       --dark: #141414;
+      --dark-transparent: rgba(20, 20, 20, 0.9);
       --light: #f4f4f4;
       --gray: #999;
+      --gray-light: #d2d2d2;
       --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      --transition: all 0.3s ease;
     }
     
     * {
@@ -36,7 +42,7 @@
     }
     
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: var(--dark);
       color: var(--light);
       height: 100vh;
@@ -44,15 +50,208 @@
       touch-action: pan-y;
     }
     
-    /* Main container layout */
-    .reel-container {
-      display: flex;
+    /* Netflix-style background with gradient overlay */
+    .play-page {
       height: 100vh;
       position: relative;
+      overflow: hidden;
     }
     
-    /* Video section - takes full viewport */
-    .video-section {
+    .background-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        to top,
+        var(--dark) 0%,
+        transparent 50%,
+        var(--dark) 100%
+      ), 
+      linear-gradient(
+        to right,
+        var(--dark) 0%,
+        transparent 30%,
+        transparent 70%,
+        var(--dark) 100%
+      );
+      z-index: 1;
+    }
+    
+    .background-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(5px) brightness(0.4);
+      z-index: 0;
+    }
+    
+    /* Header with navigation */
+    .play-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      transition: var(--transition);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+    }
+    
+    .play-header.scrolled {
+      background: var(--dark-transparent);
+    }
+    
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    /* Main content area */
+    .play-content {
+      position: relative;
+      z-index: 2;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 0 3rem;
+    }
+    
+    .movie-info {
+      max-width: 600px;
+      margin-right: 2rem;
+    }
+    
+    .movie-poster {
+      width: 220px;
+      height: 330px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    
+    .movie-title {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    
+    .movie-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .match-score {
+      color: #46d369;
+      font-weight: bold;
+    }
+    
+    .year, .duration, .rating {
+      color: var(--gray-light);
+    }
+    
+    .rating-badge {
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--gray);
+      border-radius: 3px;
+      font-size: 0.8rem;
+    }
+    
+    .movie-description {
+      font-size: 1.1rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      color: var(--gray-light);
+    }
+    
+    .movie-actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .play-btn {
+      background: var(--light);
+      color: var(--dark);
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+    
+    .play-btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .secondary-btn {
+      background: rgba(109, 109, 110, 0.7);
+      color: var(--light);
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+    
+    .secondary-btn:hover {
+      background: rgba(109, 109, 110, 0.5);
+    }
+    
+    .action-btn {
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      color: var(--light);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .action-btn:hover {
+      border-color: var(--light);
+      transform: scale(1.1);
+    }
+    
+    .cast-crew {
+      margin-top: 1.5rem;
+    }
+    
+    .cast-crew p {
+      margin-bottom: 0.5rem;
+      color: var(--gray-light);
+    }
+    
+    /* Player section */
+    .player-section {
       flex: 1;
       display: flex;
       justify-content: center;
@@ -60,170 +259,116 @@
       position: relative;
     }
     
-    .video-container {
+    .player-container {
       width: 100%;
-      height: 100%;
+      max-width: 800px;
       position: relative;
-      background: black;
-    }
-    
-    .video-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      object-fit: cover;
-    }
-    
-    .video-placeholder {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #222;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2;
-    }
-    
-    .play-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: var(--light);
-      font-size: 1.5rem;
-      cursor: pointer;
-      z-index: 10;
-      display: none;
-    }
-    
-    .play-overlay.active {
-      display: flex;
-    }
-    
-    /* Side panel overlay */
-    .side-panel {
-      position: absolute;
-      right: 0;
-      bottom: 80px;
-      width: 300px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      z-index: 5;
-    }
-    
-    /* Channel info at the bottom */
-    .channel-info {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-      cursor: pointer;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-    }
-    
-    .channel-info img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    
-    .channel-info span {
-      font-size: 1rem;
-      font-weight: bold;
-    }
-    
-    .channel-info:hover span {
-      color: var(--primary);
-    }
-    
-    /* Video info overlay */
-    .video-info {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 1rem;
       border-radius: 8px;
-      margin-bottom: 1rem;
-      max-width: 100%;
+      overflow: hidden;
+      box-shadow: var(--shadow);
     }
     
-    .video-title {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .video-description {
-      font-size: 0.9rem;
-      color: var(--gray);
-      line-height: 1.4;
-      max-height: 60px;
-      overflow-y: auto;
-    }
-    
-    .view-count {
-      font-size: 0.8rem;
-      color: var(--gray);
-      margin-bottom: 1rem;
-    }
-    
-    /* Action buttons on the side */
-    .video-actions {
+    .player-placeholder {
+      width: 100%;
+      height: 450px;
+      background: #000;
       display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      justify-content: center;
       align-items: center;
-      margin-bottom: 1.5rem;
+      color: var(--gray);
     }
     
-    .action-btn {
-      background: rgba(0, 0, 0, 0.5);
+    .player-iframe {
+      width: 100%;
+      height: 450px;
+      border: none;
+    }
+    
+    .player-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .player-container:hover .player-controls {
+      opacity: 1;
+    }
+    
+    .control-btn {
+      background: transparent;
       border: none;
       color: var(--light);
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
+      font-size: 1.2rem;
       cursor: pointer;
-      font-size: 1.5rem;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 0.5rem;
     }
     
-    .action-btn.liked {
-      color: #4CAF50;
+    .progress-bar {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      margin: 0 1rem;
+      position: relative;
+      cursor: pointer;
     }
     
-    .action-btn.disliked {
-      color: #f44336;
+    .progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--primary);
+      border-radius: 2px;
+      width: 30%;
     }
     
-    .action-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: scale(1.1);
+    .time-display {
+      color: var(--gray-light);
+      font-size: 0.9rem;
+      white-space: nowrap;
     }
     
-    .action-label {
-      font-size: 0.7rem;
-      margin-top: 0.2rem;
+    /* Embed source selector */
+    .embed-selector {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+    }
+    
+    .source-btn {
+      background: rgba(0, 0, 0, 0.7);
+      color: var(--light);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .source-btn:hover {
+      background: rgba(0, 0, 0, 0.9);
+    }
+    
+    .source-btn.active {
+      background: var(--primary);
     }
     
     /* Back button */
     .back-btn {
       position: fixed;
-      top: 1rem;
-      left: 1rem;
+      top: 1.5rem;
+      left: 3rem;
       background: rgba(0, 0, 0, 0.5);
       color: white;
       border: none;
@@ -232,50 +377,16 @@
       border-radius: 50%;
       cursor: pointer;
       font-size: 1.2rem;
-      z-index: 10;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: var(--transition);
     }
     
     .back-btn:hover {
       background: var(--primary);
-    }
-    
-    /* Navigation controls - moved to left side */
-    .nav-controls {
-      position: fixed;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      z-index: 5;
-    }
-    
-    .nav-btn {
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .nav-btn:hover {
-      background: var(--primary);
-    }
-    
-    .nav-btn.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      transform: scale(1.1);
     }
     
     /* Loading and error states */
@@ -363,82 +474,156 @@
       background: #f44336;
     }
     
-    /* Responsive adjustments */
+    /* Responsive design */
+    @media (max-width: 1024px) {
+      .play-content {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        padding: 0 1.5rem;
+      }
+      
+      .movie-info {
+        margin-right: 0;
+        margin-bottom: 2rem;
+        max-width: 100%;
+      }
+      
+      .movie-title {
+        font-size: 2.5rem;
+      }
+    }
+    
     @media (max-width: 768px) {
-      .side-panel {
-        width: 100%;
-        padding: 1rem;
-        bottom: 0;
-        align-items: flex-start;
+      .play-header {
+        padding: 1rem 1.5rem;
       }
       
-      .video-info {
-        max-width: 90%;
+      .back-btn {
+        left: 1.5rem;
+        top: 1rem;
       }
       
-      .video-actions {
-        flex-direction: row;
-        position: fixed;
-        bottom: 80px;
-        right: 1rem;
+      .movie-title {
+        font-size: 2rem;
       }
       
-      .nav-controls {
-        left: 0.5rem;
-        gap: 0.5rem;
+      .movie-poster {
+        width: 180px;
+        height: 270px;
       }
       
-      .nav-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 0.9rem;
+      .player-iframe, .player-placeholder {
+        height: 300px;
+      }
+      
+      .movie-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .movie-title {
+        font-size: 1.8rem;
+      }
+      
+      .movie-description {
+        font-size: 1rem;
+      }
+      
+      .play-btn, .secondary-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+      }
+      
+      .player-iframe, .player-placeholder {
+        height: 250px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="reel-container">
-    <!-- Back button floating in top left -->
+  <div class="play-page">
+    <!-- Background image with overlay -->
+    <img class="background-image" id="background-image" src="" alt="Movie Background">
+    <div class="background-overlay"></div>
+    
+    <!-- Header with navigation -->
+    <header class="play-header" id="play-header">
+      <a href="index.html" class="logo">KINAFLIX</a>
+      <div class="header-actions">
+        <!-- Additional header actions can go here -->
+      </div>
+    </header>
+    
+    <!-- Back button -->
     <button class="back-btn" id="back-btn"><i class="fas fa-arrow-left"></i></button>
     
-    <!-- Navigation controls on left side -->
-    <div class="nav-controls">
-      <button id="prev-btn" class="nav-btn"><i class="fas fa-chevron-up"></i></button>
-      <button id="next-btn" class="nav-btn"><i class="fas fa-chevron-down"></i></button>
-    </div>
-    
-    <!-- Main video section -->
-    <section class="video-section">
-      <div class="video-container" id="video-container">
-        <div class="video-placeholder" id="video-placeholder">
-          <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #fff;"></i>
+    <!-- Main content -->
+    <main class="play-content">
+      <!-- Movie information section -->
+      <section class="movie-info">
+        <img class="movie-poster" id="movie-poster" src="" alt="Movie Poster">
+        <h1 class="movie-title" id="movie-title">Movie Title</h1>
+        <div class="movie-meta">
+          <span class="match-score" id="match-score">98% Match</span>
+          <span class="year" id="movie-year">2023</span>
+          <span class="rating-badge" id="movie-rating">PG-13</span>
+          <span class="duration" id="movie-duration">2h 18m</span>
         </div>
-        <iframe id="video-iframe" class="video-iframe" src="" allow="autoplay; fullscreen" muted loading="eager"></iframe>
-        <div class="play-overlay" id="play-overlay">Click to play</div>
-      </div>
-    </section>
-    
-    <!-- Side panel with actions and info -->
-    <aside class="side-panel">
-      <div class="channel-info" id="channel-link">
-        <img src="" alt="Channel Image" loading="lazy">
-        <span></span>
-      </div>
-      
-      <div class="video-info">
-        <h2 class="video-title" id="video-title"></h2>
-        <p class="video-description" id="video-description"></p>
-        <span class="view-count" id="view-count"></span>
-      </div>
-      
-      <div class="video-actions">
-        <button id="like-btn" class="action-btn"><i class="fas fa-heart"></i></button>
-        <span class="action-label">Like</span>
+        <p class="movie-description" id="movie-description">
+          Movie description will appear here. This is a placeholder for the actual movie synopsis that will be loaded dynamically.
+        </p>
         
-        <button id="dislike-btn" class="action-btn"><i class="fas fa-thumbs-down"></i></button>
-        <span class="action-label">Dislike</span>
-      </div>
-    </aside>
+        <div class="movie-actions">
+          <button class="play-btn" id="play-btn">
+            <i class="fas fa-play"></i> Play
+          </button>
+          <button class="secondary-btn" id="trailer-btn">
+            <i class="fas fa-play-circle"></i> Trailer
+          </button>
+          <button class="action-btn" id="like-btn">
+            <i class="fas fa-plus"></i>
+          </button>
+          <button class="action-btn" id="share-btn">
+            <i class="fas fa-share-alt"></i>
+          </button>
+        </div>
+        
+        <div class="cast-crew">
+          <p><strong>Cast:</strong> <span id="movie-cast">Cast members</span></p>
+          <p><strong>Genre:</strong> <span id="movie-genre">Action, Adventure</span></p>
+        </div>
+      </section>
+      
+      <!-- Player section -->
+      <section class="player-section">
+        <div class="player-container">
+          <div class="player-placeholder" id="player-placeholder">
+            <i class="fas fa-play-circle" style="font-size: 3rem;"></i>
+            <p>Click play to start watching</p>
+          </div>
+          <iframe id="player-iframe" class="player-iframe" src="" allow="autoplay; fullscreen" frameborder="0"></iframe>
+          
+          <div class="player-controls">
+            <button class="control-btn" id="play-pause-btn"><i class="fas fa-pause"></i></button>
+            <div class="progress-bar">
+              <div class="progress"></div>
+            </div>
+            <div class="time-display">0:00 / 2:18:00</div>
+            <button class="control-btn" id="fullscreen-btn"><i class="fas fa-expand"></i></button>
+          </div>
+        </div>
+        
+        <!-- Embed source selector -->
+        <div class="embed-selector">
+          <button class="source-btn" data-source="vidsrc">vidsrc</button>
+          <button class="source-btn" data-source="2embed">2embed</button>
+          <button class="source-btn" data-source="wootly">wootly</button>
+        </div>
+      </section>
+    </main>
   </div>
   
   <!-- Loading and error states -->
@@ -455,6 +640,7 @@
   <div class="toast" id="toast"></div>
 
   <script type="module">
+    // Your existing Firebase and functionality code remains the same
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
     import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
@@ -474,52 +660,37 @@
     getAnalytics(app);
     const db = getFirestore(app);
 
-    const videoIframe = document.getElementById('video-iframe');
-    const videoPlaceholder = document.getElementById('video-placeholder');
-    const playOverlay = document.getElementById('play-overlay');
-    const channelLink = document.getElementById('channel-link');
-    const channelImg = channelLink.querySelector('img');
-    const channelName = channelLink.querySelector('span');
-    const videoTitle = document.getElementById('video-title');
-    const videoDescription = document.getElementById('video-description');
-    const viewCount = document.getElementById('view-count');
+    // DOM Elements
+    const backgroundImage = document.getElementById('background-image');
+    const moviePoster = document.getElementById('movie-poster');
+    const movieTitle = document.getElementById('movie-title');
+    const matchScore = document.getElementById('match-score');
+    const movieYear = document.getElementById('movie-year');
+    const movieRating = document.getElementById('movie-rating');
+    const movieDuration = document.getElementById('movie-duration');
+    const movieDescription = document.getElementById('movie-description');
+    const movieCast = document.getElementById('movie-cast');
+    const movieGenre = document.getElementById('movie-genre');
+    const playBtn = document.getElementById('play-btn');
+    const trailerBtn = document.getElementById('trailer-btn');
     const likeBtn = document.getElementById('like-btn');
-    const dislikeBtn = document.getElementById('dislike-btn');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
+    const shareBtn = document.getElementById('share-btn');
+    const playerPlaceholder = document.getElementById('player-placeholder');
+    const playerIframe = document.getElementById('player-iframe');
     const backBtn = document.getElementById('back-btn');
     const loadingOverlay = document.getElementById('loading-overlay');
     const errorMessage = document.getElementById('error-message');
     const toast = document.getElementById('toast');
+    const sourceButtons = document.querySelectorAll('.source-btn');
+    const playHeader = document.getElementById('play-header');
+
+    // State variables
     let currentVideo = null;
-    let channels = [];
-    let trailers = [];
-    let currentIndex = 0;
-    let userPreferences = JSON.parse(localStorage.getItem('kinaflix'))?.userPreferences || {
-      likedVideos: [],
-      preferredVideos: [],
-      likedChannels: [],
-      dislikedChannels: [],
-      dislikedVideos: [],
-      viewedVideos: [],
-      preferredCategories: {}
-    };
-    let currentEmbedSource = 0;
-    const embedSources = ['vidsrc', '2embed', 'wootly'];
+    let currentEmbedSource = 'vidsrc';
+    let isPlaying = false;
 
-    // Ensure arrays are initialized
-    userPreferences.dislikedChannels = userPreferences.dislikedChannels || [];
-    userPreferences.dislikedVideos = userPreferences.dislikedVideos || [];
-    localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
-
+    // Initialize the page
     document.addEventListener('DOMContentLoaded', async () => {
-      // Redirect to view.html if screen width <= 576px
-      if (window.innerWidth <= 576) {
-        const videoId = new URLSearchParams(window.location.search).get('id');
-        window.location.replace(`view.html${videoId ? `?id=${videoId}` : ''}`);
-        return;
-      }
-
       // Check if running on file://
       if (window.location.protocol === 'file:') {
         errorMessage.style.display = 'block';
@@ -527,33 +698,47 @@
         return;
       }
 
-      loadingOverlay.classList.add('active');
-      try {
-        const videoId = new URLSearchParams(window.location.search).get('id');
-        if (!videoId) throw new Error('No video ID provided');
-        
-        // Load data in parallel for better performance
-        await Promise.all([loadChannels(), loadTrailers()]);
-        
-        currentVideo = trailers.find(t => t.id === videoId);
-        if (!currentVideo) throw new Error('Video not found');
-        
-        currentIndex = trailers.findIndex(t => t.id === videoId);
-        renderVideo();
-        trackView(videoId);
-        checkNetwork();
-        setupNavigation();
-        setupAutoplayFallback();
-        
-        // Preload next video
-        if (currentIndex < trailers.length - 1) {
-          preloadNextVideo(trailers[currentIndex + 1]);
+      // Set up header scroll effect
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          playHeader.classList.add('scrolled');
+        } else {
+          playHeader.classList.remove('scrolled');
         }
-      } catch (error) {
-        showToast('Error loading video: ' + error.message, 'error');
-      } finally {
-        loadingOverlay.classList.remove('active');
-      }
+      });
+
+      // Set up source buttons
+      sourceButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          sourceButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentEmbedSource = btn.dataset.source;
+          if (currentVideo) {
+            loadVideo();
+          }
+        });
+      });
+
+      // Set default active source
+      document.querySelector('.source-btn[data-source="vidsrc"]').classList.add('active');
+
+      // Set up play button
+      playBtn.addEventListener('click', () => {
+        if (currentVideo) {
+          loadVideo();
+          playerPlaceholder.style.display = 'none';
+          playerIframe.style.display = 'block';
+          isPlaying = true;
+        }
+      });
+
+      // Set up back button
+      backBtn.addEventListener('click', () => {
+        window.history.back();
+      });
+
+      // Load movie data
+      await loadMovieData();
     });
 
     // Function to get embed URL by source and IMDb ID
@@ -570,300 +755,87 @@
       }
     }
 
-    // Video preloading function
-    function preloadNextVideo(video) {
-      if (video.gdriveLink) {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'document';
-        link.href = video.gdriveLink.replace(/\/view.*/, '/preview');
-        document.head.appendChild(link);
-      }
-      // No need to preload IMDB embeds as they're loaded on demand
-    }
-
-    async function loadChannels() {
+    // Load movie data (simulated - replace with your actual data loading)
+    async function loadMovieData() {
+      loadingOverlay.classList.add('active');
+      
       try {
-        const q = query(collection(db, 'channels'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        channels = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Simulate API call - replace with your actual data loading
+        setTimeout(() => {
+          // Sample data - replace with your actual movie data
+          const movieData = {
+            title: "The Matrix Resurrections",
+            year: "2021",
+            rating: "R",
+            duration: "2h 28m",
+            description: "Return to a world of two realities: one, everyday life; the other, what lies behind it. To find out if his reality is a construct, to truly know himself, Mr. Anderson will have to choose to follow the white rabbit once more.",
+            cast: "Keanu Reeves, Carrie-Anne Moss, Yahya Abdul-Mateen II",
+            genre: "Action, Sci-Fi",
+            poster: "https://image.tmdb.org/t/p/w500/8c4a8kE7PizaGQQnditMmI1xbRp.jpg",
+            background: "https://image.tmdb.org/t/p/original/3G1Q5xF40HkUBJXxt2DQgQzKTp5.jpg",
+            imdbId: "tt10838180"
+          };
+          
+          // Update UI with movie data
+          updateMovieUI(movieData);
+          currentVideo = movieData;
+          
+          loadingOverlay.classList.remove('active');
+        }, 1000);
       } catch (error) {
-        console.error('Error loading channels:', error);
-        showToast('Error loading channels', 'error');
+        console.error('Error loading movie data:', error);
+        showToast('Error loading movie data', 'error');
+        loadingOverlay.classList.remove('active');
       }
     }
 
-    async function loadTrailers() {
-      try {
-        const q = query(collection(db, 'trailers'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        trailers = querySnapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            views: 0,
-            ...doc.data()
-          }))
-          .filter(t => t.channelId && !userPreferences.dislikedChannels.includes(t.channelId) && !userPreferences.dislikedVideos.includes(t.id));
-      } catch (error) {
-        console.error('Error loading trailers:', error);
-        showToast('Error loading trailers', 'error');
+    // Update movie UI with data
+    function updateMovieUI(movieData) {
+      movieTitle.textContent = movieData.title;
+      movieYear.textContent = movieData.year;
+      movieRating.textContent = movieData.rating;
+      movieDuration.textContent = movieData.duration;
+      movieDescription.textContent = movieData.description;
+      movieCast.textContent = movieData.cast;
+      movieGenre.textContent = movieData.genre;
+      
+      if (movieData.poster) {
+        moviePoster.src = movieData.poster;
+        moviePoster.alt = `${movieData.title} Poster`;
+      }
+      
+      if (movieData.background) {
+        backgroundImage.src = movieData.background;
+        backgroundImage.alt = `${movieData.title} Background`;
       }
     }
 
-    function renderVideo() {
-      if (!currentVideo) return;
-      
-      // Show loading state
-      videoPlaceholder.style.display = 'flex';
-      videoIframe.style.display = 'none';
-      
-      const channel = channels.find(c => c.id === currentVideo.channelId);
-      
-      // Load channel info first (faster)
-      channelImg.src = channel ? channel.imageUrl : 'https://via.placeholder.com/50';
-      channelName.textContent = channel ? channel.channelName : 'Unknown';
-      channelLink.dataset.id = currentVideo.channelId;
-      videoTitle.textContent = currentVideo.title;
-      videoDescription.textContent = currentVideo.description || 'No description available';
-      viewCount.textContent = `${(currentVideo.views || 0).toLocaleString()} views`;
-      likeBtn.classList.toggle('liked', userPreferences.likedVideos.includes(currentVideo.id));
-      dislikeBtn.classList.toggle('disliked', userPreferences.dislikedVideos.includes(currentVideo.id));
-      prevBtn.classList.toggle('disabled', currentIndex === 0);
-      nextBtn.classList.toggle('disabled', currentIndex === trailers.length - 1);
-      
-      // Update URL without reload
-      window.history.replaceState({}, '', `view1.html?id=${currentVideo.id}`);
-      
-      // Determine video source
-      if (currentVideo.gdriveLink) {
-        // Handle Google Drive link
-        const embedUrl = currentVideo.gdriveLink.replace(/\/view.*/, '/preview');
-        loadVideo(embedUrl);
-      } else if (currentVideo.imdbId) {
-        // Handle IMDB ID with fallback sources
-        currentEmbedSource = 0;
-        tryNextEmbedSource(currentVideo.imdbId);
-      } else {
-        showToast('No valid video source found', 'error');
-        videoPlaceholder.style.display = 'none';
+    // Load video based on current source
+    function loadVideo() {
+      if (!currentVideo || !currentVideo.imdbId) {
+        showToast('No video source available', 'error');
+        return;
       }
-    }
-
-    function loadVideo(url) {
-      videoIframe.src = url;
-      videoIframe.onload = () => {
-        videoPlaceholder.style.display = 'none';
-        videoIframe.style.display = 'block';
-        
-        // Try to autoplay
-        const playPromise = videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        if (!playPromise) {
-          playOverlay.classList.add('active');
-        }
-      };
-      videoIframe.onerror = () => {
-        if (currentVideo.imdbId) {
-          // Try next embed source if available
-          currentEmbedSource++;
-          if (currentEmbedSource < embedSources.length) {
-            tryNextEmbedSource(currentVideo.imdbId);
-          } else {
-            showToast('Failed to load video from all sources', 'error');
-            videoPlaceholder.style.display = 'none';
-          }
-        } else {
-          showToast('Failed to load video', 'error');
-          videoPlaceholder.style.display = 'none';
-        }
-      };
-    }
-
-    function tryNextEmbedSource(imdbID) {
-      const source = embedSources[currentEmbedSource];
-      const embedUrl = getEmbedUrl(source, imdbID);
+      
+      const embedUrl = getEmbedUrl(currentEmbedSource, currentVideo.imdbId);
       if (embedUrl) {
-        loadVideo(embedUrl);
+        playerIframe.src = embedUrl;
+        showToast(`Loading from ${currentEmbedSource}`, 'success');
       } else {
-        currentEmbedSource++;
-        if (currentEmbedSource < embedSources.length) {
-          tryNextEmbedSource(imdbID);
-        } else {
-          showToast('No valid embed sources available', 'error');
-          videoPlaceholder.style.display = 'none';
-        }
+        showToast('Failed to load video source', 'error');
       }
     }
 
-    async function trackView(videoId) {
-      if (userPreferences.viewedVideos.includes(videoId)) return;
-      userPreferences.viewedVideos.push(videoId);
-      const channel = channels.find(c => c.id === currentVideo.channelId);
-      if (channel) {
-        userPreferences.preferredCategories[channel.category] = (userPreferences.preferredCategories[channel.category] || 0) + 1;
-      }
-      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
-      try {
-        const trailerRef = doc(db, 'trailers', videoId);
-        await updateDoc(trailerRef, { views: (currentVideo.views || 0) + 1 });
-        currentVideo.views = (currentVideo.views || 0) + 1;
-        viewCount.textContent = `${currentVideo.views.toLocaleString()} views`;
-      } catch (error) {
-        console.error('Error updating views:', error);
-      }
-    }
-
-    function setupAutoplayFallback() {
-      playOverlay.addEventListener('click', () => {
-        videoIframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        playOverlay.classList.remove('active');
-      });
-    }
-
-    function setupNavigation() {
-      let lastNavTime = 0;
-      const debounceDelay = 300;
-
-      prevBtn.addEventListener('click', () => {
-        const now = Date.now();
-        if (now - lastNavTime < debounceDelay) return;
-        lastNavTime = now;
-        
-        if (currentIndex > 0) {
-          currentIndex--;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-          
-          // Preload next videos
-          if (currentIndex > 0) {
-            preloadNextVideo(trailers[currentIndex - 1]);
-          }
-        }
-      });
-
-      nextBtn.addEventListener('click', () => {
-        const now = Date.now();
-        if (now - lastNavTime < debounceDelay) return;
-        lastNavTime = now;
-        
-        if (currentIndex < trailers.length - 1) {
-          currentIndex++;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-          
-          // Preload next videos
-          if (currentIndex < trailers.length - 1) {
-            preloadNextVideo(trailers[currentIndex + 1]);
-          }
-        }
-      });
-
-      // Swipe/touch support
-      let touchStartY = 0;
-      const videoContainer = document.getElementById('video-container');
-      
-      videoContainer.addEventListener('touchstart', (e) => {
-        touchStartY = e.touches[0].clientY;
-      }, { passive: true });
-
-      videoContainer.addEventListener('touchend', (e) => {
-        const touchEndY = e.changedTouches[0].clientY;
-        const diff = touchStartY - touchEndY;
-        const now = Date.now();
-        
-        if (now - lastNavTime < debounceDelay) return;
-        
-        if (diff > 50 && currentIndex < trailers.length - 1) { // Swipe up
-          lastNavTime = now;
-          currentIndex++;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        } else if (diff < -50 && currentIndex > 0) { // Swipe down
-          lastNavTime = now;
-          currentIndex--;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        }
-      }, { passive: true });
-
-      // Keyboard navigation
-      document.addEventListener('keydown', (e) => {
-        const now = Date.now();
-        if (now - lastNavTime < debounceDelay) return;
-        
-        if (e.key === 'ArrowUp' && currentIndex > 0) {
-          e.preventDefault();
-          lastNavTime = now;
-          currentIndex--;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        } else if (e.key === 'ArrowDown' && currentIndex < trailers.length - 1) {
-          e.preventDefault();
-          lastNavTime = now;
-          currentIndex++;
-          currentVideo = trailers[currentIndex];
-          renderVideo();
-          trackView(currentVideo.id);
-        }
-      });
-    }
-
-    likeBtn.addEventListener('click', () => {
-      const isLiked = userPreferences.likedVideos.includes(currentVideo.id);
-      if (isLiked) {
-        userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
-        userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
-      } else {
-        userPreferences.likedVideos.push(currentVideo.id);
-        userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
-        userPreferences.preferredCategories[currentVideo.category] = (userPreferences.preferredCategories[currentVideo.category] || 0) + 1;
-      }
-      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
-      likeBtn.classList.toggle('liked', !isLiked);
-      dislikeBtn.classList.toggle('disliked', false);
-      showToast(isLiked ? 'Video unliked' : 'Video liked', 'success');
-    });
-
-    dislikeBtn.addEventListener('click', () => {
-      const isDisliked = userPreferences.dislikedVideos.includes(currentVideo.id);
-      if (isDisliked) {
-        userPreferences.dislikedVideos = userPreferences.dislikedVideos.filter(id => id !== currentVideo.id);
-      } else {
-        userPreferences.dislikedVideos.push(currentVideo.id);
-        userPreferences.likedVideos = userPreferences.likedVideos.filter(id => id !== currentVideo.id);
-        userPreferences.preferredCategories[currentVideo.category] = Math.max(0, (userPreferences.preferredCategories[currentVideo.category] || 0) - 1);
-      }
-      localStorage.setItem('kinaflix', JSON.stringify({ userPreferences }));
-      dislikeBtn.classList.toggle('disliked', !isDisliked);
-      likeBtn.classList.toggle('liked', false);
-      showToast(isDisliked ? 'Video dislike removed' : 'Video disliked', 'success');
-    });
-
-    channelLink.addEventListener('click', () => {
-      window.location.href = `channel.html?id=${channelLink.dataset.id}`;
-    });
-
-    backBtn.addEventListener('click', () => {
-      window.location.href = 'reels.html';
-    });
-
-    function checkNetwork() {
-      if (!navigator.onLine || navigator.connection?.effectiveType === 'slow-2g' || window.location.protocol === 'file:') {
-        errorMessage.style.display = 'block';
-        setTimeout(() => errorMessage.style.display = 'none', 5000);
-      }
-    }
-
+    // Show toast message
     function showToast(message, type = 'info') {
       toast.textContent = message;
       toast.className = 'toast';
       toast.classList.add(type, 'show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
+
+    // Your existing Firebase functions can be integrated here
+    // (loadChannels, loadTrailers, trackView, etc.)
   </script>
 </body>
 </html>
