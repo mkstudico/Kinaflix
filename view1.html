@@ -109,50 +109,32 @@
       display: flex;
     }
     
-    /* Corner navigation with hover effect */
-    .corner-nav {
+    /* Transparent back button */
+    .transparent-back-btn {
       position: fixed;
-      top: 0;
-      right: 0;
-      width: 120px;
-      height: 120px;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      color: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
       cursor: pointer;
+      font-size: 1.2rem;
       z-index: 10;
-      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
     }
     
-    .corner-highlight {
-      position: absolute;
-      top: -60px;
-      right: -60px;
-      width: 120px;
-      height: 120px;
-      background: radial-gradient(circle at top right, rgba(229, 9, 20, 0.7), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-    
-    .corner-text {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      color: var(--primary);
-      font-weight: bold;
-      font-size: 1rem;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-      pointer-events: none;
-    }
-    
-    .corner-nav:hover .corner-highlight,
-    .corner-nav.active .corner-highlight {
-      opacity: 1;
-    }
-    
-    .corner-nav:hover .corner-text,
-    .corner-nav.active .corner-text {
+    .transparent-back-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: scale(1.1);
       opacity: 1;
     }
     
@@ -262,40 +244,13 @@
       background: #f44336;
     }
     
-    /* Mobile touch area for corner navigation */
-    .mobile-touch-area {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 80px;
-      height: 80px;
-      z-index: 10;
-      cursor: pointer;
-    }
-    
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      .corner-nav {
-        width: 100px;
-        height: 100px;
-      }
-      
-      .corner-highlight {
-        top: -50px;
-        right: -50px;
-        width: 100px;
-        height: 100px;
-      }
-      
-      .corner-text {
-        top: 12px;
-        right: 12px;
-        font-size: 0.9rem;
-      }
-      
-      .mobile-touch-area {
-        width: 70px;
-        height: 70px;
+      .transparent-back-btn {
+        width: 45px;
+        height: 45px;
+        top: 15px;
+        right: 15px;
       }
       
       .shortcut-indicator {
@@ -305,41 +260,20 @@
     }
     
     @media (max-width: 480px) {
-      .corner-nav {
-        width: 80px;
-        height: 80px;
-      }
-      
-      .corner-highlight {
-        top: -40px;
-        right: -40px;
-        width: 80px;
-        height: 80px;
-      }
-      
-      .corner-text {
-        top: 10px;
-        right: 10px;
-        font-size: 0.8rem;
-      }
-      
-      .mobile-touch-area {
-        width: 60px;
-        height: 60px;
+      .transparent-back-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="reel-container">
-    <!-- Corner navigation with hover effect -->
-    <div class="corner-nav" id="corner-nav">
-      <div class="corner-highlight"></div>
-      <div class="corner-text">BACK</div>
-    </div>
-    
-    <!-- Mobile touch area for corner navigation -->
-    <div class="mobile-touch-area" id="mobile-touch-area"></div>
+    <!-- Transparent back button -->
+    <button class="transparent-back-btn" id="back-btn" title="Back to Reels">
+      <i class="fas fa-arrow-left"></i>
+    </button>
     
     <!-- Shortcut indicator -->
     <div class="shortcut-indicator" id="shortcut-indicator">
@@ -391,15 +325,17 @@
     getAnalytics(app);
     const db = getFirestore(app);
 
+    // DOM Elements
     const videoIframe = document.getElementById('video-iframe');
     const videoPlaceholder = document.getElementById('video-placeholder');
     const playOverlay = document.getElementById('play-overlay');
-    const cornerNav = document.getElementById('corner-nav');
-    const mobileTouchArea = document.getElementById('mobile-touch-area');
+    const backBtn = document.getElementById('back-btn');
     const shortcutIndicator = document.getElementById('shortcut-indicator');
     const loadingOverlay = document.getElementById('loading-overlay');
     const errorMessage = document.getElementById('error-message');
     const toast = document.getElementById('toast');
+    
+    // Global variables
     let currentVideo = null;
     let trailers = [];
     let currentIndex = 0;
@@ -409,10 +345,8 @@
     // Mouse movement tracking for shortcut indicator
     let mouseMoveTimer;
     let mouseLastMoved = Date.now();
-    
-    // Touch detection for mobile
-    let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
+    // Initialize the page
     document.addEventListener('DOMContentLoaded', async () => {
       // Check if running on file://
       if (window.location.protocol === 'file:') {
@@ -438,7 +372,6 @@
         setupAutoplayFallback();
         setupKeyboardShortcuts();
         setupMouseTracking();
-        setupCornerNavigation();
         
         // Preload next video
         if (currentIndex < trailers.length - 1) {
@@ -584,13 +517,18 @@
     }
 
     function setupKeyboardShortcuts() {
-      document.addEventListener('keydown', (e) => {
-        // Ctrl+Q to go back to reels.html
-        if (e.ctrlKey && e.key === 'q') {
-          e.preventDefault();
-          window.location.href = 'reels.html';
-        }
-      });
+      // Use a single event listener with proper event handling
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    function handleKeyDown(e) {
+      // Ctrl+Q to go back to reels.html
+      if (e.ctrlKey && e.key === 'q') {
+        e.preventDefault();
+        e.stopPropagation();
+        redirectToReels();
+        return false;
+      }
     }
 
     function setupMouseTracking() {
@@ -614,45 +552,13 @@
       });
     }
 
-    function setupCornerNavigation() {
-      // Desktop hover behavior
-      cornerNav.addEventListener('mouseenter', () => {
-        cornerNav.classList.add('active');
-      });
-      
-      cornerNav.addEventListener('mouseleave', () => {
-        cornerNav.classList.remove('active');
-      });
-      
-      cornerNav.addEventListener('click', () => {
-        window.location.href = 'reels.html';
-      });
-      
-      // Mobile touch behavior
-      if (isTouchDevice) {
-        mobileTouchArea.addEventListener('touchstart', () => {
-          cornerNav.classList.add('active');
-        });
-        
-        mobileTouchArea.addEventListener('touchend', () => {
-          setTimeout(() => {
-            cornerNav.classList.remove('active');
-          }, 300);
-        });
-        
-        mobileTouchArea.addEventListener('click', () => {
-          window.location.href = 'reels.html';
-        });
-        
-        // Show corner nav briefly on mobile to indicate it's interactive
-        setTimeout(() => {
-          cornerNav.classList.add('active');
-          setTimeout(() => {
-            cornerNav.classList.remove('active');
-          }, 2000);
-        }, 1000);
-      }
+    // Redirect function
+    function redirectToReels() {
+      window.location.href = 'reels.html';
     }
+
+    // Back button click handler
+    backBtn.addEventListener('click', redirectToReels);
 
     function checkNetwork() {
       if (!navigator.onLine || navigator.connection?.effectiveType === 'slow-2g' || window.location.protocol === 'file:') {
@@ -667,6 +573,11 @@
       toast.classList.add(type, 'show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
+
+    // Clean up event listeners when page unloads
+    window.addEventListener('beforeunload', () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    });
   </script>
 </body>
 </html>
