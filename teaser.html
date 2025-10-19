@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Teasers | KINAFLIX</title>
-  <meta name="description" content="Manage channels and short movies on KINAFLIX.">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+  <title>Manage Teasers | KINAFLIX</title>
+  <meta name="description" content="Manage short movies on KINAFLIX.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
       --primary: #e50914;
@@ -110,59 +110,6 @@
       background: var(--gray);
       cursor: not-allowed;
     }
-    .button-group {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .button-group button {
-      flex: 1;
-    }
-    .channels-list {
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid var(--gray);
-      border-radius: 4px;
-      padding: 0.5rem;
-    }
-    .channel-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem;
-      background: #222;
-      margin-bottom: 0.5rem;
-      border-radius: 4px;
-    }
-    .channel-item img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .channel-item span {
-      flex: 1;
-      font-size: 0.9rem;
-    }
-    .channel-item.selected {
-      border: 1px solid var(--primary);
-    }
-    .search-bar {
-      position: relative;
-      margin-bottom: 1rem;
-    }
-    .search-bar input {
-      width: 100%;
-      padding: 0.5rem 2rem 0.5rem 1rem;
-    }
-    .search-bar i {
-      position: absolute;
-      right: 0.8rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gray);
-      font-size: 0.9rem;
-    }
     .modal {
       display: none;
       position: fixed;
@@ -196,14 +143,6 @@
     }
     .modal-close:hover {
       color: var(--primary);
-    }
-    .modal-preview {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin: 0 auto 1rem;
-      display: block;
     }
     .confirmation-modal {
       text-align: center;
@@ -321,6 +260,26 @@
     .link-type-selector button:last-child {
       border-radius: 0 4px 4px 0;
     }
+    .search-bar {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 0.5rem 2rem 0.5rem 1rem;
+      background: #222;
+      color: var(--light);
+      border: 1px solid var(--gray);
+      border-radius: 4px;
+    }
+    .search-bar i {
+      position: absolute;
+      right: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
     @media (max-width: 768px) {
       .sidebar {
         width: 100%;
@@ -375,20 +334,6 @@
     <div class="container add-teaser-section">
       <h1 class="title">Add Teaser</h1>
       <div class="container">
-        <h2 class="title">Channel</h2>
-        <div class="form-section">
-          <div class="button-group">
-            <button id="add-channel-btn">Add New Channel</button>
-            <button id="edit-channel-btn">Edit Channels</button>
-          </div>
-          <div class="search-bar">
-            <input type="text" id="channel-search" placeholder="Search channels...">
-            <i class="fas fa-search"></i>
-          </div>
-          <div class="channels-list" id="channels-list"></div>
-        </div>
-      </div>
-      <div class="container">
         <h2 class="title">Short Movie</h2>
         <form id="movie-form" class="form-section">
           <input type="text" id="movie-title" placeholder="Movie Title" required>
@@ -414,47 +359,6 @@
       <div class="form-spinner" id="trailers-spinner"></div>
     </div>
   </div>
-  <div class="modal" id="add-channel-modal">
-    <div class="modal-content">
-      <button class="modal-close"><i class="fas fa-times"></i></button>
-      <h2 class="title">Add Channel</h2>
-      <form id="add-channel-form" class="form-section">
-        <input type="text" id="channel-name" placeholder="Channel Name" required>
-        <input type="file" id="channel-image" accept="image/*" required>
-        <img id="channel-preview" class="modal-preview" src="" alt="Preview" style="display: none;">
-        <textarea id="channel-description" placeholder="Description" rows="4" required></textarea>
-        <select id="channel-category" required>
-          <option value="" disabled selected>Select Category</option>
-          <option value="K-Drama Movies">K-Drama Movies</option>
-          <option value="Horror Movies">Horror Movies</option>
-          <option value="Fun-Comedy">Fun & Comedy</option>
-          <option value="Adult">Adult</option>
-          <option value="Sport">Sport</option>
-          <option value="Education">Education</option>
-          <option value="Movies">Movies</option>
-          <option value="General knowledge">General knowledge</option>
-          <option value="Trailers">Trailers</option>
-          <option value="Gaming">Gaming</option>
-          <option value="Trivia">Trivia</option>
-          <option value="Songs">Songs</option>
-          <option value="Advertisement">Advertisement</option>
-        </select>
-        <button type="submit">Submit</button>
-      </form>
-      <div class="form-spinner" id="add-channel-spinner"></div>
-    </div>
-  </div>
-  <div class="modal" id="edit-channel-modal">
-    <div class="modal-content">
-      <button class="modal-close"><i class="fas fa-times"></i></button>
-      <h2 class="title">Edit Channels</h2>
-      <div class="search-bar">
-        <input type="text" id="edit-channel-search" placeholder="Search channels...">
-        <i class="fas fa-search"></i>
-      </div>
-      <div class="channels-list" id="edit-channels-list"></div>
-    </div>
-  </div>
   <div class="modal" id="edit-movie-modal">
     <div class="modal-content">
       <button class="modal-close"><i class="fas fa-times"></i></button>
@@ -469,47 +373,10 @@
         <input type="text" id="edit-movie-link" placeholder="Google Drive Link" required>
         <input type="file" id="edit-movie-poster" accept="image/*">
         <textarea id="edit-movie-description" placeholder="Description (Optional)" rows="4"></textarea>
-        <div class="search-bar">
-          <input type="text" id="edit-movie-channel-search" placeholder="Search channels...">
-          <i class="fas fa-search"></i>
-        </div>
-        <div class="channels-list" id="edit-movie-channels-list"></div>
         <button type="submit" id="edit-movie-btn">Update Movie</button>
         <button type="button" id="delete-movie-btn" style="background: #f44336;">Delete Movie</button>
       </form>
       <div class="form-spinner" id="edit-movie-spinner"></div>
-    </div>
-  </div>
-  <div class="modal" id="edit-channel-details-modal">
-    <div class="modal-content">
-      <button class="modal-close"><i class="fas fa-times"></i></button>
-      <h2 class="title">Edit Channel</h2>
-      <form id="edit-channel-details-form" class="form-section">
-        <input type="hidden" id="edit-channel-id">
-        <input type="text" id="edit-channel-name" placeholder="Channel Name" required>
-        <input type="file" id="edit-channel-image" accept="image/*">
-        <img id="edit-channel-preview" class="modal-preview" src="" alt="Preview">
-        <textarea id="edit-channel-description" placeholder="Description" rows="4" required></textarea>
-        <select id="edit-channel-category" required>
-          <option value="" disabled selected>Select Category</option>
-          <option value="K-Drama Movies">K-Drama Movies</option>
-          <option value="Horror Movies">Horror Movies</option>
-          <option value="Fun-Comedy">Fun & Comedy</option>
-          <option value="Adult">Adult</option>
-          <option value="Sport">Sport</option>
-          <option value="Education">Education</option>
-          <option value="Movies">Movies</option>
-          <option value="General knowledge">General knowledge</option>
-          <option value="Trailers">Trailers</option>
-          <option value="Gaming">Gaming</option>
-          <option value="Trivia">Trivia</option>
-          <option value="Songs">Songs</option>
-          <option value="Advertisement">Advertisement</option>
-        </select>
-        <button type="submit">Update Channel</button>
-        <button type="button" id="delete-channel-btn" style="background: #f44336;">Delete Channel</button>
-      </form>
-      <div class="form-spinner" id="edit-channel-spinner"></div>
     </div>
   </div>
   <div class="modal" id="confirm-delete-modal">
@@ -535,7 +402,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
@@ -552,35 +419,21 @@
     getAnalytics(app);
     const db = getFirestore(app);
 
+    // DOM Elements
     const addTeaserSection = document.querySelector('.add-teaser-section');
     const viewTeasersSection = document.querySelector('.view-teasers-section');
     const addTeaserLink = document.querySelector('.add-teaser');
     const viewTeasersLink = document.querySelector('.view-teasers');
     const movieForm = document.getElementById('movie-form');
     const editMovieForm = document.getElementById('edit-movie-form');
-    const addChannelForm = document.getElementById('add-channel-form');
-    const editChannelDetailsForm = document.getElementById('edit-channel-details-form');
-    const channelsList = document.getElementById('channels-list');
-    const editChannelsList = document.getElementById('edit-channels-list');
-    const editMovieChannelsList = document.getElementById('edit-movie-channels-list');
     const trailersGrid = document.getElementById('trailers-grid');
-    const addChannelBtn = document.getElementById('add-channel-btn');
-    const editChannelBtn = document.getElementById('edit-channel-btn');
-    const channelSearch = document.getElementById('channel-search');
-    const editChannelSearch = document.getElementById('edit-channel-search');
     const movieSearch = document.getElementById('movie-search');
-    const editMovieChannelSearch = document.getElementById('edit-movie-channel-search');
-    const addChannelModal = document.getElementById('add-channel-modal');
-    const editChannelModal = document.getElementById('edit-channel-modal');
     const editMovieModal = document.getElementById('edit-movie-modal');
-    const editChannelDetailsModal = document.getElementById('edit-channel-details-modal');
     const confirmDeleteModal = document.getElementById('confirm-delete-modal');
     const confirmDeleteAgainModal = document.getElementById('confirm-delete-again-modal');
     const initialLoadingOverlay = document.getElementById('initial-loading-overlay');
     const movieSpinner = document.getElementById('movie-spinner');
     const editMovieSpinner = document.getElementById('edit-movie-spinner');
-    const addChannelSpinner = document.getElementById('add-channel-spinner');
-    const editChannelSpinner = document.getElementById('edit-channel-spinner');
     const trailersSpinner = document.getElementById('trailers-spinner');
     const toast = document.getElementById('toast');
     const gdriveBtn = document.getElementById('gdrive-btn');
@@ -589,17 +442,18 @@
     const editGdriveBtn = document.getElementById('edit-gdrive-btn');
     const editImdbBtn = document.getElementById('edit-imdb-btn');
     const editMovieLinkInput = document.getElementById('edit-movie-link');
-    let channels = [];
+
+    // Global Variables
     let trailers = [];
-    let selectedChannelId = null;
     let deleteTarget = null;
     let deleteType = null;
     let currentLinkType = 'gdrive';
     let editCurrentLinkType = 'gdrive';
 
+    // Initialize the application
     document.addEventListener('DOMContentLoaded', () => {
       initialLoadingOverlay.classList.add('active');
-      Promise.all([loadChannels(), loadTrailers()]).then(() => {
+      loadTrailers().then(() => {
         initialLoadingOverlay.classList.remove('active');
       });
 
@@ -637,6 +491,7 @@
         editMovieLinkInput.type = 'text';
       });
 
+      // Navigation
       addTeaserLink.addEventListener('click', (e) => {
         e.preventDefault();
         addTeaserSection.style.display = 'block';
@@ -654,15 +509,7 @@
         loadTrailers();
       });
 
-      addChannelBtn.addEventListener('click', () => {
-        addChannelModal.style.display = 'flex';
-      });
-
-      editChannelBtn.addEventListener('click', () => {
-        editChannelModal.style.display = 'flex';
-        renderEditChannels(channels);
-      });
-
+      // Modal controls
       document.querySelectorAll('.modal-close').forEach(btn => {
         btn.addEventListener('click', () => {
           btn.closest('.modal').style.display = 'none';
@@ -675,41 +522,7 @@
         });
       });
 
-      document.getElementById('channel-image').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const preview = document.getElementById('channel-preview');
-          preview.src = URL.createObjectURL(file);
-          preview.style.display = 'block';
-        }
-      });
-
-      document.getElementById('edit-channel-image').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const preview = document.getElementById('edit-channel-preview');
-          preview.src = URL.createObjectURL(file);
-        }
-      });
-
-      let channelSearchTimeout;
-      channelSearch.addEventListener('input', () => {
-        clearTimeout(channelSearchTimeout);
-        channelSearchTimeout = setTimeout(() => {
-          const query = channelSearch.value.trim().toLowerCase();
-          renderChannels(filterChannels(query));
-        }, 300);
-      });
-
-      let editChannelSearchTimeout;
-      editChannelSearch.addEventListener('input', () => {
-        clearTimeout(editChannelSearchTimeout);
-        editChannelSearchTimeout = setTimeout(() => {
-          const query = editChannelSearch.value.trim().toLowerCase();
-          renderEditChannels(filterChannels(query));
-        }, 300);
-      });
-
+      // Search functionality
       let movieSearchTimeout;
       movieSearch.addEventListener('input', () => {
         clearTimeout(movieSearchTimeout);
@@ -719,64 +532,7 @@
         }, 300);
       });
 
-      let editMovieChannelSearchTimeout;
-      editMovieChannelSearch.addEventListener('input', () => {
-        clearTimeout(editMovieChannelSearchTimeout);
-        editMovieChannelSearchTimeout = setTimeout(() => {
-          const query = editMovieChannelSearch.value.trim().toLowerCase();
-          renderEditMovieChannels(filterChannels(query));
-        }, 300);
-      });
-
-      addChannelForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        showFormLoading('add-channel');
-        try {
-          const channelName = document.getElementById('channel-name').value.trim();
-          const imageFile = document.getElementById('channel-image').files[0];
-          const description = document.getElementById('channel-description').value.trim();
-          const category = document.getElementById('channel-category').value;
-
-          if (!channelName || !imageFile || !description || !category) {
-            showToast('All fields are required', 'error');
-            hideFormLoading('add-channel');
-            return;
-          }
-
-          const formData = new FormData();
-          formData.append('image', imageFile);
-          const response = await fetch('https://api.imgbb.com/1/upload?key=82d2010a938dfd0a780ff9e6c71e68a7', {
-            method: 'POST',
-            body: formData
-          });
-          const data = await response.json();
-          if (!data.success) {
-            showToast('Failed to upload channel image', 'error');
-            hideFormLoading('add-channel');
-            return;
-          }
-
-          await addDoc(collection(db, 'channels'), {
-            channelName,
-            imageUrl: data.data.url,
-            description,
-            category,
-            createdAt: new Date()
-          });
-
-          showToast('Channel added successfully', 'success');
-          addChannelForm.reset();
-          document.getElementById('channel-preview').style.display = 'none';
-          addChannelModal.style.display = 'none';
-          await loadChannels();
-        } catch (error) {
-          console.error('Error adding channel:', error);
-          showToast('Error adding channel: ' + error.message, 'error');
-        } finally {
-          hideFormLoading('add-channel');
-        }
-      });
-
+      // Form submissions
       movieForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         showFormLoading('movie');
@@ -786,8 +542,8 @@
           const description = document.getElementById('movie-description').value.trim();
           const posterFile = document.getElementById('movie-poster').files[0];
 
-          if (!title || !linkValue || !selectedChannelId) {
-            showToast('Title, link, and channel are required', 'error');
+          if (!title || !linkValue) {
+            showToast('Title and link are required', 'error');
             hideFormLoading('movie');
             return;
           }
@@ -827,7 +583,6 @@
           const movieData = {
             title,
             description: description || '',
-            channelId: selectedChannelId,
             createdAt: new Date()
           };
 
@@ -849,67 +604,12 @@
 
           showToast('Movie added successfully', 'success');
           movieForm.reset();
-          selectedChannelId = null;
-          channelsList.querySelectorAll('.channel-item').forEach(item => item.classList.remove('selected'));
           await loadTrailers();
         } catch (error) {
           console.error('Error adding movie:', error);
           showToast('Error adding movie: ' + error.message, 'error');
         } finally {
           hideFormLoading('movie');
-        }
-      });
-
-      editChannelDetailsForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        showFormLoading('edit-channel');
-        try {
-          const channelId = document.getElementById('edit-channel-id').value;
-          const channelName = document.getElementById('edit-channel-name').value.trim();
-          const description = document.getElementById('edit-channel-description').value.trim();
-          const category = document.getElementById('edit-channel-category').value;
-          const imageFile = document.getElementById('edit-channel-image').files[0];
-
-          if (!channelName || !description || !category) {
-            showToast('All fields are required', 'error');
-            hideFormLoading('edit-channel');
-            return;
-          }
-
-          let imageUrl = document.getElementById('edit-channel-preview').src;
-          if (imageFile) {
-            const formData = new FormData();
-            formData.append('image', imageFile);
-            const response = await fetch('https://api.imgbb.com/1/upload?key=82d2010a938dfd0a780ff9e6c71e68a7', {
-              method: 'POST',
-              body: formData
-            });
-            const data = await response.json();
-            if (!data.success) {
-              showToast('Failed to upload channel image', 'error');
-              hideFormLoading('edit-channel');
-              return;
-            }
-            imageUrl = data.data.url;
-          }
-
-          const channelRef = doc(db, 'channels', channelId);
-          await updateDoc(channelRef, {
-            channelName,
-            imageUrl,
-            description,
-            category,
-            updatedAt: new Date()
-          });
-
-          showToast('Channel updated successfully', 'success');
-          editChannelDetailsModal.style.display = 'none';
-          await loadChannels();
-        } catch (error) {
-          console.error('Error updating channel:', error);
-          showToast('Error updating channel: ' + error.message, 'error');
-        } finally {
-          hideFormLoading('edit-channel');
         }
       });
 
@@ -923,8 +623,8 @@
           const description = document.getElementById('edit-movie-description').value.trim();
           const posterFile = document.getElementById('edit-movie-poster').files[0];
 
-          if (!title || !linkValue || !selectedChannelId) {
-            showToast('Title, link, and channel are required', 'error');
+          if (!title || !linkValue) {
+            showToast('Title and link are required', 'error');
             hideFormLoading('edit-movie');
             return;
           }
@@ -965,7 +665,6 @@
           const updateData = {
             title,
             description: description || '',
-            channelId: selectedChannelId,
             updatedAt: new Date()
           };
 
@@ -996,13 +695,7 @@
         }
       });
 
-      document.getElementById('delete-channel-btn').addEventListener('click', () => {
-        const channelId = document.getElementById('edit-channel-id').value;
-        deleteTarget = channelId;
-        deleteType = 'channel';
-        showConfirmDeleteModal('Delete Channel', 'Are you sure you want to delete this channel? All associated movies will also be deleted.');
-      });
-
+      // Delete functionality
       document.getElementById('delete-movie-btn').addEventListener('click', () => {
         const movieId = document.getElementById('edit-movie-id').value;
         deleteTarget = movieId;
@@ -1023,21 +716,9 @@
 
       document.getElementById('confirm-again-yes-btn').addEventListener('click', async () => {
         confirmDeleteAgainModal.style.display = 'none';
-        showFormLoading('edit-channel');
+        showFormLoading('edit-movie');
         try {
-          if (deleteType === 'channel') {
-            const channelRef = doc(db, 'channels', deleteTarget);
-            const moviesQuery = query(collection(db, 'trailers'), where('channelId', '==', deleteTarget));
-            const moviesSnapshot = await getDocs(moviesQuery);
-            for (const movieDoc of moviesSnapshot.docs) {
-              await deleteDoc(doc(db, 'trailers', movieDoc.id));
-            }
-            await deleteDoc(channelRef);
-            showToast('Channel and associated movies deleted', 'success');
-            editChannelDetailsModal.style.display = 'none';
-            await loadChannels();
-            await loadTrailers();
-          } else if (deleteType === 'movie') {
+          if (deleteType === 'movie') {
             const movieRef = doc(db, 'trailers', deleteTarget);
             await deleteDoc(movieRef);
             showToast('Movie deleted', 'success');
@@ -1048,7 +729,7 @@
           console.error('Error deleting:', error);
           showToast('Error deleting: ' + error.message, 'error');
         } finally {
-          hideFormLoading('edit-channel');
+          hideFormLoading('edit-movie');
           deleteTarget = null;
           deleteType = null;
         }
@@ -1060,39 +741,7 @@
         deleteType = null;
       });
 
-      channelsList.addEventListener('click', (e) => {
-        const channelItem = e.target.closest('.channel-item');
-        if (channelItem) {
-          selectedChannelId = channelItem.dataset.id;
-          channelsList.querySelectorAll('.channel-item').forEach(item => item.classList.remove('selected'));
-          channelItem.classList.add('selected');
-        }
-      });
-
-      editMovieChannelsList.addEventListener('click', (e) => {
-        const channelItem = e.target.closest('.channel-item');
-        if (channelItem) {
-          selectedChannelId = channelItem.dataset.id;
-          editMovieChannelsList.querySelectorAll('.channel-item').forEach(item => item.classList.remove('selected'));
-          channelItem.classList.add('selected');
-        }
-      });
-
-      editChannelsList.addEventListener('click', (e) => {
-        const editBtn = e.target.closest('.edit-channel');
-        if (editBtn) {
-          const channelId = editBtn.dataset.id;
-          const channel = channels.find(c => c.id === channelId);
-          document.getElementById('edit-channel-id').value = channelId;
-          document.getElementById('edit-channel-name').value = channel.channelName;
-          document.getElementById('edit-channel-description').value = channel.description;
-          document.getElementById('edit-channel-category').value = channel.category;
-          document.getElementById('edit-channel-preview').src = channel.imageUrl;
-          editChannelModal.style.display = 'none';
-          editChannelDetailsModal.style.display = 'flex';
-        }
-      });
-
+      // Edit movie modal
       trailersGrid.addEventListener('click', (e) => {
         const trailerCard = e.target.closest('.trailer-card');
         if (trailerCard) {
@@ -1119,30 +768,12 @@
           }
           
           document.getElementById('edit-movie-description').value = trailer.description || '';
-          selectedChannelId = trailer.channelId;
-          renderEditMovieChannels(channels);
-          editMovieChannelsList.querySelector(`[data-id="${trailer.channelId}"]`)?.classList.add('selected');
           editMovieModal.style.display = 'flex';
         }
       });
     });
 
-    async function loadChannels() {
-      try {
-        const q = query(collection(db, 'channels'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        channels = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        renderChannels(channels.slice(0, 5));
-        renderEditChannels(channels);
-      } catch (error) {
-        console.error('Error loading channels:', error);
-        showToast('Error loading channels: ' + error.message, 'error');
-      }
-    }
-
+    // Data functions
     async function loadTrailers() {
       showFormLoading('trailers');
       try {
@@ -1161,34 +792,6 @@
       }
     }
 
-    function renderChannels(channelsToRender) {
-      channelsList.innerHTML = channelsToRender.length > 0 ? channelsToRender.map(channel => `
-        <div class="channel-item ${selectedChannelId === channel.id ? 'selected' : ''}" data-id="${channel.id}">
-          <img src="${channel.imageUrl}" alt="${channel.channelName}">
-          <span>${channel.channelName} (${channel.category})</span>
-        </div>
-      `).join('') : '<p>No channels found.</p>';
-    }
-
-    function renderEditChannels(channelsToRender) {
-      editChannelsList.innerHTML = channelsToRender.length > 0 ? channelsToRender.map(channel => `
-        <div class="channel-item">
-          <img src="${channel.imageUrl}" alt="${channel.channelName}">
-          <span>${channel.channelName} (${channel.category})</span>
-          <button class="edit-channel" data-id="${channel.id}"><i class="fas fa-edit"></i></button>
-        </div>
-      `).join('') : '<p>No channels found.</p>';
-    }
-
-    function renderEditMovieChannels(channelsToRender) {
-      editMovieChannelsList.innerHTML = channelsToRender.length > 0 ? channelsToRender.map(channel => `
-        <div class="channel-item ${selectedChannelId === channel.id ? 'selected' : ''}" data-id="${channel.id}">
-          <img src="${channel.imageUrl}" alt="${channel.channelName}">
-          <span>${channel.channelName} (${channel.category})</span>
-        </div>
-      `).join('') : '<p>No channels found.</p>';
-    }
-
     function renderTrailers(trailersToRender) {
       trailersGrid.innerHTML = trailersToRender.length > 0 ? trailersToRender.map(trailer => `
         <div class="trailer-card" data-id="${trailer.id}">
@@ -1196,15 +799,6 @@
           <h3 class="trailer-title">${trailer.title}</h3>
         </div>
       `).join('') : '<p>No movies found.</p>';
-    }
-
-    function filterChannels(query) {
-      if (!query) return channels;
-      return channels.filter(channel => 
-        channel.channelName.toLowerCase().includes(query) || 
-        channel.category.toLowerCase().includes(query) || 
-        channel.description.toLowerCase().includes(query)
-      );
     }
 
     function filterTrailers(query) {
@@ -1220,6 +814,7 @@
       });
     }
 
+    // UI helper functions
     function showConfirmDeleteModal(title, message) {
       document.getElementById('confirm-title').textContent = title;
       document.getElementById('confirm-message').textContent = message;
@@ -1242,14 +837,6 @@
         editMovieSpinner.classList.add('active');
         document.getElementById('edit-movie-btn').disabled = true;
         editMovieForm.style.opacity = '0.6';
-      } else if (formType === 'add-channel') {
-        addChannelSpinner.classList.add('active');
-        addChannelForm.querySelector('button').disabled = true;
-        addChannelForm.style.opacity = '0.6';
-      } else if (formType === 'edit-channel') {
-        editChannelSpinner.classList.add('active');
-        editChannelDetailsForm.querySelector('button').disabled = true;
-        editChannelDetailsForm.style.opacity = '0.6';
       } else if (formType === 'trailers') {
         trailersSpinner.classList.add('active');
         trailersGrid.style.opacity = '0.6';
@@ -1265,14 +852,6 @@
         editMovieSpinner.classList.remove('active');
         document.getElementById('edit-movie-btn').disabled = false;
         editMovieForm.style.opacity = '1';
-      } else if (formType === 'add-channel') {
-        addChannelSpinner.classList.remove('active');
-        addChannelForm.querySelector('button').disabled = false;
-        addChannelForm.style.opacity = '1';
-      } else if (formType === 'edit-channel') {
-        editChannelSpinner.classList.remove('active');
-        editChannelDetailsForm.querySelector('button').disabled = false;
-        editChannelDetailsForm.style.opacity = '1';
       } else if (formType === 'trailers') {
         trailersSpinner.classList.remove('active');
         trailersGrid.style.opacity = '1';
