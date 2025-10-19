@@ -338,10 +338,10 @@
         <form id="movie-form" class="form-section">
           <input type="text" id="movie-title" placeholder="Movie Title" required>
           <div class="link-type-selector">
-            <button type="button" id="gdrive-btn" class="active">Google Drive</button>
-            <button type="button" id="imdb-btn">IMDB ID</button>
+            <button type="button" id="gdrive-btn">Google Drive</button>
+            <button type="button" id="imdb-btn" class="active">IMDB ID</button>
           </div>
-          <input type="text" id="movie-link" placeholder="Google Drive Link" required>
+          <input type="text" id="movie-link" placeholder="IMDB ID (e.g. tt1234567)" required>
           <input type="file" id="movie-poster" accept="image/*">
           <textarea id="movie-description" placeholder="Description (Optional)" rows="4"></textarea>
           <button type="submit" id="add-movie-btn">Add Movie</button>
@@ -367,10 +367,10 @@
         <input type="hidden" id="edit-movie-id">
         <input type="text" id="edit-movie-title" placeholder="Movie Title" required>
         <div class="link-type-selector">
-          <button type="button" id="edit-gdrive-btn" class="active">Google Drive</button>
-          <button type="button" id="edit-imdb-btn">IMDB ID</button>
+          <button type="button" id="edit-gdrive-btn">Google Drive</button>
+          <button type="button" id="edit-imdb-btn" class="active">IMDB ID</button>
         </div>
-        <input type="text" id="edit-movie-link" placeholder="Google Drive Link" required>
+        <input type="text" id="edit-movie-link" placeholder="IMDB ID (e.g. tt1234567)" required>
         <input type="file" id="edit-movie-poster" accept="image/*">
         <textarea id="edit-movie-description" placeholder="Description (Optional)" rows="4"></textarea>
         <button type="submit" id="edit-movie-btn">Update Movie</button>
@@ -447,8 +447,8 @@
     let trailers = [];
     let deleteTarget = null;
     let deleteType = null;
-    let currentLinkType = 'gdrive';
-    let editCurrentLinkType = 'gdrive';
+    let currentLinkType = 'imdb'; // Set IMDB as default
+    let editCurrentLinkType = 'imdb'; // Set IMDB as default
 
     // Initialize the application
     document.addEventListener('DOMContentLoaded', () => {
@@ -604,6 +604,12 @@
 
           showToast('Movie added successfully', 'success');
           movieForm.reset();
+          // Reset to IMDB as default after form submission
+          currentLinkType = 'imdb';
+          imdbBtn.classList.add('active');
+          gdriveBtn.classList.remove('active');
+          movieLinkInput.placeholder = 'IMDB ID (e.g. tt1234567)';
+          movieLinkInput.type = 'text';
           await loadTrailers();
         } catch (error) {
           console.error('Error adding movie:', error);
