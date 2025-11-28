@@ -1,1 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Details - KINAFLIX</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e50914;
+            --primary-dark: #b2070f;
+            --primary-light: #ff3a2d;
+            --dark: #141414;
+            --light: #f4f4f4;
+            --gray: #999;
+            --dark-gray: #222;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            --content-box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            transition: background 0.3s;
+        }
+
+        header.scrolled {
+            background: var(--dark);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .site-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--light);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .login-btn {
+            background: transparent;
+            border: 1px solid var(--light);
+            color: var(--light);
+        }
+
+        .login-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .register-btn {
+            background: var(--primary);
+            color: white;
+        }
+
+        .register-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .profile-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--light);
+            color: var(--light);
+        }
+
+        .logout-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Movie Details Section */
+        .movie-details-page {
+            padding: 2rem 0;
+            margin-top: 80px;
+            flex: 1;
+        }
+
+        .movie-details-container {
+            background: var(--dark-gray);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--content-box-shadow);
+        }
+
+        .movie-details-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .movie-details-content {
+                flex-direction: row;
+            }
+        }
+
+        .movie-details-poster {
+            flex: 0 0 300px;
+        }
+
+        .movie-details-poster img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .movie-details-info {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .movie-details-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .movie-details-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            color: var(--gray);
+            flex-wrap: wrap;
+        }
+
+        .movie-rating {
+            color: gold;
+        }
+
+        .movie-details-genres {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .genre-tag {
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .movie-details-description {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .trailer-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .trailer-section h3 {
+            margin-bottom: 0.5rem;
+            color: var(--light);
+        }
+
+        .trailer-placeholder {
+            width: 100%;
+            height: 300px;
+            background: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            color: var(--gray);
+            border: 2px dashed var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .trailer-placeholder:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .download-message {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .download-message.error {
+            background: rgba(229, 9, 20, 0.2);
+            color: var(--primary);
+        }
+
+        .download-message.info {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        .premium-badge {
+            background: #ff9800;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .download-section {
+            padding: 1.5rem;
+            background: var(--dark);
+            border-radius: 4px;
+            margin-top: 2rem;
+        }
+
+        .download-info {
+            margin-bottom: 1rem;
+        }
+
+        .download-info h3 {
+            margin-bottom: 0.5rem;
+            color: var(--light);
+        }
+
+        .download-btn {
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .download-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .download-btn.disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Similar Movies Section */
+        .similar-movies {
+            margin-top: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .movie-card {
+            background: var(--dark-gray);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--content-box-shadow);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .movie-info {
+            padding: 1rem;
+        }
+
+        .movie-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Footer Styles */
+        footer {
+            background: var(--dark-gray);
+            padding: 3rem 0 1rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-column h3 {
+            color: var(--light);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-column a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: var(--primary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: var(--gray);
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--dark);
+            color: var(--gray);
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Auth Modal */
+        .auth-modal {
+            background: var(--dark);
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            padding: 2rem;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .auth-modal {
+            transform: scale(1);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--dark-gray);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.8rem;
+            background: transparent;
+            border: none;
+            color: var(--light);
+            cursor: pointer;
+            transition: color 0.3s;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--light);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--dark-gray);
+            border-radius: 4px;
+            background: var(--dark);
+            color: var(--light);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .auth-error {
+            color: var(--primary);
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark);
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #4CAF50;
+        }
+
+        .toast.error {
+            background: #f44336;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 2rem auto;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner.active {
+            display: block;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .movie-details-content {
+                flex-direction: column;
+            }
+
+            .movie-details-poster {
+                flex: none;
+            }
+
+            .movie-details-poster img {
+                border-radius: 8px 8px 0 0;
+            }
+
+            .movie-details-title {
+                font-size: 2rem;
+            }
+
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .movie-poster {
+                height: 220px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .movie-details-title {
+                font-size: 1.8rem;
+            }
+
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+
+            .movie-poster {
+                height: 200px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="logo.png" alt="KINAFLIX" class="logo">
+                    <div class="site-title">Kinaflix Load</div>
+                </div>
+                <nav class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="index.html#movies">Movies</a>
+                    <a href="index.html#series">Series</a>
+                    <a href="index.html#new">New Releases</a>
+                </nav>
+                <div class="auth-buttons" id="auth-buttons">
+                    <button class="btn login-btn">Login</button>
+                    <button class="btn register-btn">Register</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Movie Details -->
+    <main class="movie-details-page">
+        <div class="container">
+            <div class="movie-details-container" id="movie-details-container">
+                <div class="spinner active" id="loading-spinner"></div>
+            </div>
+
+            <!-- Similar Movies Section -->
+            <div class="similar-movies">
+                <h2 class="section-title">Similar Movies</h2>
+                <div class="movies-grid" id="similar-movies-grid">
+                    <div class="spinner" id="similar-movies-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Navigation</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#movies">Movies</a></li>
+                        <li><a href="index.html#series">Series</a></li>
+                        <li><a href="index.html#new">New Releases</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Copyright</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Account</h3>
+                    <ul>
+                        <li><a href="#" id="profile-link">My Profile</a></li>
+                        <li><a href="#" id="watchlist-link">Watchlist</a></li>
+                        <li><a href="admin.html" id="admin-link" style="display:none;">Admin Panel</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Connect With Us</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 KINAFLIX | Made by btem@fficial | All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="auth-modal">
+            <button class="close-modal" id="close-auth-modal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Register</button>
+            </div>
+            <form class="auth-form active" id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="login-email">Email</label>
+                    <input type="email" class="form-input" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="login-password">Password</label>
+                    <input type="password" class="form-input" id="login-password" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+                <div class="auth-error" id="login-error"></div>
+            </form>
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label class="form-label" for="register-name">Full Name</label>
+                    <input type="text" class="form-input" id="register-name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="register-email">Email</label>
+                    <input type="email" class="form-input" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="register-password">Password</label>
+                    <input type="password" class="form-input" id="register-password" required>
+                </div>
+                <button type="submit" class="submit-btn">Register</button>
+                <div class="auth-error" id="register-error"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDoc, 
+            getDocs, 
+            query, 
+            where, 
+            orderBy,
+            updateDoc,
+            arrayUnion,
+            increment
+        } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+            authDomain: "kinaflix.firebaseapp.com",
+            databaseURL: "https://kinaflix-default-rtdb.firebaseio.com",
+            projectId: "kinaflix",
+            storageBucket: "kinaflix.firebasestorage.app",
+            messagingSenderId: "318239806217",
+            appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
+            measurementId: "G-DC1T9B6B9W"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global variables
+        let currentUser = null;
+        let userPremiumStatus = 'Free';
+        let currentMovie = null;
+        let allMovies = [];
+
+        // DOM Elements
+        const authButtons = document.getElementById('auth-buttons');
+        const movieDetailsContainer = document.getElementById('movie-details-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const similarMoviesGrid = document.getElementById('similar-movies-grid');
+        const similarMoviesSpinner = document.getElementById('similar-movies-spinner');
+        const authModal = document.getElementById('auth-modal');
+        const closeAuthModal = document.getElementById('close-auth-modal');
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const authForms = document.querySelectorAll('.auth-form');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginError = document.getElementById('login-error');
+        const registerError = document.getElementById('register-error');
+        const toast = document.getElementById('toast');
+        const profileLink = document.getElementById('profile-link');
+        const watchlistLink = document.getElementById('watchlist-link');
+        const adminLink = document.getElementById('admin-link');
+        const mainHeader = document.getElementById('main-header');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            initAuth();
+            setupEventListeners();
+            setupScrollEffect();
+            loadMovieDetails();
+            loadAllMovies();
+        });
+
+        // Authentication functions
+        function initAuth() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await loadUserData(user.uid);
+                    updateAuthUI(user);
+                    
+                    // Check if user is admin
+                    if (user.email === 'admin@kinaflix.com' || user.uid === 'admin') {
+                        if (adminLink) adminLink.style.display = 'block';
+                    }
+                } else {
+                    currentUser = null;
+                    userPremiumStatus = 'Free';
+                    updateAuthUI(null);
+                    if (adminLink) adminLink.style.display = 'none';
+                }
+            });
+        }
+
+        async function loadUserData(userId) {
+            try {
+                const userRef = doc(db, 'users', userId);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    userPremiumStatus = userData.Premium_Download || 'Free';
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showToast('Error loading user data', 'error');
+            }
+        }
+
+        function updateAuthUI(user) {
+            if (!authButtons) return;
+            
+            if (user) {
+                authButtons.innerHTML = `
+                    <button class="btn profile-btn">
+                        <i class="fas fa-user"></i> ${user.displayName || 'Profile'}
+                    </button>
+                    <button class="btn logout-btn">Logout</button>
+                `;
+                
+                document.querySelector('.logout-btn').addEventListener('click', () => {
+                    signOut(auth)
+                        .then(() => showToast('Logged out successfully', 'success'))
+                        .catch(error => showToast(error.message, 'error'));
+                });
+                
+                document.querySelector('.profile-btn').addEventListener('click', () => {
+                    window.location.href = 'profile.html';
+                });
+                
+                if (profileLink) {
+                    profileLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showToast(`Premium Status: ${userPremiumStatus}`, 'info');
+                    });
+                }
+            } else {
+                authButtons.innerHTML = `
+                    <button class="btn login-btn">Login</button>
+                    <button class="btn register-btn">Register</button>
+                `;
+                
+                document.querySelector('.login-btn').addEventListener('click', () => {
+                    authModal.classList.add('active');
+                });
+                
+                document.querySelector('.register-btn').addEventListener('click', () => {
+                    authModal.classList.add('active');
+                    switchAuthTab('register');
+                });
+            }
+        }
+
+        // Movie details functions
+        async function loadMovieDetails() {
+            if (!movieDetailsContainer) return;
+            
+            showLoading();
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const movieId = urlParams.get('id');
+                
+                if (!movieId) {
+                    movieDetailsContainer.innerHTML = '<p>Movie not found.</p>';
+                    hideLoading();
+                    return;
+                }
+                
+                const movieRef = doc(db, 'Download', movieId);
+                const movieSnap = await getDoc(movieRef);
+                
+                if (movieSnap.exists()) {
+                    currentMovie = {
+                        id: movieSnap.id,
+                        ...movieSnap.data()
+                    };
+                    
+                    renderMovieDetails(currentMovie);
+                    // Update movie views
+                    await updateDoc(movieRef, {
+                        views: increment(1)
+                    });
+                } else {
+                    movieDetailsContainer.innerHTML = '<p>Movie not found.</p>';
+                }
+                hideLoading();
+            } catch (error) {
+                console.error('Error loading movie details:', error);
+                showToast('Error loading movie details', 'error');
+                hideLoading();
+            }
+        }
+
+        function renderMovieDetails(movie) {
+            if (!movieDetailsContainer) return;
+            
+            const canDownload = !movie.premium || (movie.premium && userPremiumStatus === 'Paid');
+            const downloadMessage = getDownloadMessage(movie);
+            
+            movieDetailsContainer.innerHTML = `
+                <div class="movie-details-content">
+                    <div class="movie-details-poster">
+                        <img src="${movie.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
+                             alt="${movie.title}">
+                    </div>
+                    <div class="movie-details-info">
+                        <h1 class="movie-details-title">${movie.title}</h1>
+                        <div class="movie-details-meta">
+                            <span>${movie.releaseYear || 'N/A'}</span>
+                            ${movie.rating ? `<span class="movie-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
+                            ${movie.duration ? `<span>${movie.duration} min</span>` : ''}
+                            <span><i class="fas fa-eye"></i> ${movie.views || 0} views</span>
+                        </div>
+                        ${movie.genres && movie.genres.length ? `
+                            <div class="movie-details-genres">
+                                ${movie.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="movie-details-description">
+                            <p>${movie.description || 'No description available.'}</p>
+                        </div>
+                        
+                        <div class="trailer-section">
+                            <h3>Trailer</h3>
+                            <div class="trailer-placeholder" id="trailer-placeholder">
+                                <i class="fas fa-play-circle"></i> Click to watch trailer
+                            </div>
+                        </div>
+                        
+                        ${downloadMessage ? `
+                            <div class="download-message ${!canDownload ? 'error' : 'info'}">
+                                ${downloadMessage}
+                            </div>
+                        ` : ''}
+                        
+                        ${movie.premium ? '<div class="premium-badge">Premium Content</div>' : ''}
+                        
+                        <div class="download-section">
+                            <div class="download-info">
+                                <h3>Download</h3>
+                                <p>${movie.premium ? 'Premium content - requires subscription' : 'Free to download'}</p>
+                            </div>
+                            <button class="download-btn ${canDownload ? '' : 'disabled'}" 
+                                    ${canDownload ? '' : 'disabled'}
+                                    id="download-btn">
+                                <i class="fas fa-download"></i> 
+                                ${movie.premium ? 'Download (Premium)' : 'Download'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listener to download button
+            const downloadBtn = document.getElementById('download-btn');
+            if (downloadBtn && !downloadBtn.disabled) {
+                downloadBtn.addEventListener('click', () => {
+                    downloadMovie(movie);
+                });
+            }
+            
+            // Add event listener to trailer placeholder
+            const trailerPlaceholder = document.getElementById('trailer-placeholder');
+            if (trailerPlaceholder) {
+                trailerPlaceholder.addEventListener('click', () => {
+                    showToast('Trailer feature coming soon!', 'info');
+                });
+            }
+        }
+
+        function getDownloadMessage(movie) {
+            if (!currentUser) {
+                return 'Please login to download this movie';
+            }
+            
+            if (movie.premium && userPremiumStatus !== 'Paid') {
+                return 'Premium subscription required to download this movie';
+            }
+            
+            return null;
+        }
+
+        function downloadMovie(movie) {
+            if (movie.premium && userPremiumStatus !== 'Paid') {
+                showToast('Premium download requires subscription', 'error');
+                return;
+            }
+            
+            if (movie.downloadLink) {
+                // Create a temporary link to trigger download
+                const link = document.createElement('a');
+                link.href = movie.downloadLink;
+                link.download = `${movie.title}.mp4`;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast(`Downloading ${movie.title}`, 'success');
+                
+                // Log download in user history if logged in
+                if (currentUser) {
+                    logDownload(movie.id);
+                }
+            } else {
+                showToast('Download link not available', 'error');
+            }
+        }
+
+        async function logDownload(movieId) {
+            try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                await updateDoc(userRef, {
+                    history: arrayUnion(movieId)
+                });
+            } catch (error) {
+                console.error('Error logging download:', error);
+            }
+        }
+
+        // Load all movies for similar movies section
+        async function loadAllMovies() {
+            try {
+                const q = query(collection(db, 'Download'), orderBy('dateAdded', 'desc'));
+                const querySnapshot = await getDocs(q);
+                allMovies = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                // Load similar movies after all movies are loaded
+                loadSimilarMovies();
+            } catch (error) {
+                console.error('Error loading movies:', error);
+            }
+        }
+
+        // Load similar movies based on current movie
+        async function loadSimilarMovies() {
+            if (!currentMovie || !similarMoviesGrid) return;
+            
+            showSimilarMoviesLoading();
+            try {
+                // Find movies with similar genres
+                let similarMovies = [];
+                if (currentMovie.genres && currentMovie.genres.length > 0) {
+                    similarMovies = allMovies.filter(movie => 
+                        movie.id !== currentMovie.id && 
+                        movie.genres && 
+                        movie.genres.some(genre => 
+                            currentMovie.genres.includes(genre)
+                        )
+                    );
+                }
+                
+                // If not enough similar movies, add some popular ones
+                if (similarMovies.length < 4) {
+                    const popularMovies = allMovies
+                        .filter(movie => movie.id !== currentMovie.id)
+                        .sort((a, b) => (b.views || 0) - (a.views || 0))
+                        .slice(0, 6 - similarMovies.length);
+                    
+                    similarMovies = [...similarMovies, ...popularMovies];
+                }
+                
+                // Remove duplicates and limit to 6 movies
+                const uniqueMovies = [];
+                const seenIds = new Set();
+                
+                for (const movie of similarMovies) {
+                    if (!seenIds.has(movie.id) && uniqueMovies.length < 6) {
+                        uniqueMovies.push(movie);
+                        seenIds.add(movie.id);
+                    }
+                }
+                
+                renderSimilarMovies(uniqueMovies);
+                hideSimilarMoviesLoading();
+            } catch (error) {
+                console.error('Error loading similar movies:', error);
+                hideSimilarMoviesLoading();
+            }
+        }
+
+        function renderSimilarMovies(movies) {
+            if (!similarMoviesGrid) return;
+            
+            if (movies.length === 0) {
+                similarMoviesGrid.innerHTML = '<p>No similar movies found.</p>';
+                return;
+            }
+            
+            similarMoviesGrid.innerHTML = movies.map(movie => `
+                <div class="movie-card" data-movie-id="${movie.id}">
+                    <img src="${movie.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
+                         alt="${movie.title}" class="movie-poster">
+                    <div class="movie-info">
+                        <h3 class="movie-title">${movie.title}</h3>
+                        <div class="movie-meta">
+                            <span>${movie.releaseYear || 'N/A'}</span>
+                            ${movie.rating ? `<span class="movie-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add event listeners to similar movie cards
+            document.querySelectorAll('.movie-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const movieId = card.getAttribute('data-movie-id');
+                    window.location.href = `details.html?id=${movieId}`;
+                });
+            });
+        }
+
+        // UI functions
+        function showLoading() {
+            if (loadingSpinner) loadingSpinner.classList.add('active');
+        }
+
+        function hideLoading() {
+            if (loadingSpinner) loadingSpinner.classList.remove('active');
+        }
+
+        function showSimilarMoviesLoading() {
+            if (similarMoviesSpinner) similarMoviesSpinner.classList.add('active');
+        }
+
+        function hideSimilarMoviesLoading() {
+            if (similarMoviesSpinner) similarMoviesSpinner.classList.remove('active');
+        }
+
+        function showToast(message, type = 'info') {
+            if (!toast) return;
+            
+            toast.textContent = message;
+            toast.className = 'toast';
+            toast.classList.add(type, 'show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function switchAuthTab(tab) {
+            authTabs.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+            });
+            
+            authForms.forEach(form => {
+                form.classList.toggle('active', form.id === `${tab}-form`);
+            });
+            
+            // Clear errors
+            if (loginError) loginError.textContent = '';
+            if (registerError) registerError.textContent = '';
+        }
+
+        // Scroll effect for header
+        function setupScrollEffect() {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 100) {
+                    mainHeader.classList.add('scrolled');
+                } else {
+                    mainHeader.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Auth modal
+            if (closeAuthModal) {
+                closeAuthModal.addEventListener('click', () => {
+                    authModal.classList.remove('active');
+                });
+            }
+            
+            if (authModal) {
+                authModal.addEventListener('click', (e) => {
+                    if (e.target === authModal) {
+                        authModal.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Auth tab switching
+            if (authTabs.length > 0) {
+                authTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        switchAuthTab(tab.getAttribute('data-tab'));
+                    });
+                });
+            }
+            
+            // Login form submission
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const password = document.getElementById('login-password').value;
+                    
+                    try {
+                        await signInWithEmailAndPassword(auth, email, password);
+                        authModal.classList.remove('active');
+                        showToast('Login successful', 'success');
+                    } catch (error) {
+                        if (loginError) loginError.textContent = error.message;
+                    }
+                });
+            }
+            
+            // Register form submission
+            if (registerForm) {
+                registerForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('register-name').value;
+                    const email = document.getElementById('register-email').value;
+                    const password = document.getElementById('register-password').value;
+                    
+                    try {
+                        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                        
+                        // Update user profile with name
+                        await updateProfile(userCredential.user, {
+                            displayName: name
+                        });
+                        
+                        // Create user document in Firestore
+                        await setDoc(doc(db, 'users', userCredential.user.uid), {
+                            name: name,
+                            email: email,
+                            Premium_Download: 'Free',
+                            createdAt: new Date(),
+                            displayPreferences: {
+                                sortField: 'dateAdded',
+                                sortOrder: 'desc'
+                            },
+                            history: [],
+                            watchlist: []
+                        });
+                        
+                        authModal.classList.remove('active');
+                        showToast('Registration successful', 'success');
+                    } catch (error) {
+                        if (registerError) registerError.textContent = error.message;
+                    }
+                });
+            }
+            
+            // Watchlist link
+            if (watchlistLink) {
+                watchlistLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentUser) {
+                        showToast('Watchlist feature coming soon!', 'info');
+                    } else {
+                        showToast('Please login to use watchlist', 'error');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
