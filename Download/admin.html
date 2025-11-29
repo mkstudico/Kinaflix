@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -754,13 +753,25 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="movie-year" class="required">Release Year</label>
-                                <input type="number" id="movie-year" min="1900" max="2030" required>
+                                <label for="movie-rating" class="required">Rating</label>
+                                <select id="movie-rating" required>
+                                    <option value="">-- Select Rating --</option>
+                                    <option value="G">G - General Audiences</option>
+                                    <option value="PG">PG - Parental Guidance Suggested</option>
+                                    <option value="PG-13">PG-13 - Parents Strongly Cautioned</option>
+                                    <option value="R">R - Restricted</option>
+                                    <option value="NC-17">NC-17 - Adults Only</option>
+                                </select>
                             </div>
                             
                             <div class="form-group full-width">
                                 <label for="movie-description">Description</label>
                                 <textarea id="movie-description"></textarea>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="movie-trailer-link">YouTube Trailer Link</label>
+                                <input type="url" id="movie-trailer-link" placeholder="https://www.youtube.com/watch?v=...">
                             </div>
                             
                             <div class="form-group full-width">
@@ -846,13 +857,25 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="edit-movie-year" class="required">Release Year</label>
-                        <input type="number" id="edit-movie-year" min="1900" max="2030" required>
+                        <label for="edit-movie-rating" class="required">Rating</label>
+                        <select id="edit-movie-rating" required>
+                            <option value="">-- Select Rating --</option>
+                            <option value="G">G - General Audiences</option>
+                            <option value="PG">PG - Parental Guidance Suggested</option>
+                            <option value="PG-13">PG-13 - Parents Strongly Cautioned</option>
+                            <option value="R">R - Restricted</option>
+                            <option value="NC-17">NC-17 - Adults Only</option>
+                        </select>
                     </div>
                     
                     <div class="form-group full-width">
                         <label for="edit-movie-description">Description</label>
                         <textarea id="edit-movie-description"></textarea>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="edit-movie-trailer-link">YouTube Trailer Link</label>
+                        <input type="url" id="edit-movie-trailer-link" placeholder="https://www.youtube.com/watch?v=...">
                     </div>
                     
                     <div class="form-group full-width">
@@ -1303,8 +1326,9 @@
                 const movieData = {
                     title: document.getElementById('movie-title').value,
                     series: seriesSelect.value || null,
-                    releaseYear: parseInt(document.getElementById('movie-year').value),
+                    rating: document.getElementById('movie-rating').value,
                     description: document.getElementById('movie-description').value,
+                    trailerLink: document.getElementById('movie-trailer-link').value,
                     coverImageUrl: imageUrl,
                     downloadLink: document.getElementById('movie-download').value,
                     dateAdded: new Date(),
@@ -1382,7 +1406,7 @@
                     <div class="movie-item-info">
                         <h3 class="movie-item-title">${movie.title}</h3>
                         <div class="movie-item-meta">
-                            <span>${movie.releaseYear || 'N/A'}</span>
+                            <span>Rating: ${movie.rating || 'N/A'}</span>
                             ${movie.series ? `<span>Series: ${movie.series}</span>` : ''}
                         </div>
                         <p>${movie.description?.substring(0, 100) || 'No description'}...</p>
@@ -1427,8 +1451,9 @@
                     // Populate edit form with movie data
                     document.getElementById('edit-movie-title').value = movie.title || '';
                     document.getElementById('edit-series-select').value = movie.series || '';
-                    document.getElementById('edit-movie-year').value = movie.releaseYear || '';
+                    document.getElementById('edit-movie-rating').value = movie.rating || '';
                     document.getElementById('edit-movie-description').value = movie.description || '';
+                    document.getElementById('edit-movie-trailer-link').value = movie.trailerLink || '';
                     document.getElementById('edit-movie-download').value = movie.downloadLink || '';
                     document.getElementById('edit-movie-id').value = movieId;
                     
@@ -1473,8 +1498,9 @@
                 const movieData = {
                     title: document.getElementById('edit-movie-title').value,
                     series: document.getElementById('edit-series-select').value || null,
-                    releaseYear: parseInt(document.getElementById('edit-movie-year').value),
+                    rating: document.getElementById('edit-movie-rating').value,
                     description: document.getElementById('edit-movie-description').value,
+                    trailerLink: document.getElementById('edit-movie-trailer-link').value,
                     downloadLink: document.getElementById('edit-movie-download').value,
                 };
 
