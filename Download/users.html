@@ -900,7 +900,8 @@
             updateDoc,
             deleteDoc,
             setDoc,
-            serverTimestamp
+            serverTimestamp,
+            addDoc
         } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
         // Firebase configuration
@@ -965,8 +966,8 @@
                 } else {
                     currentUser = null;
                     updateAuthUI(null);
-                    // Redirect to login if not authenticated
-                    window.location.href = 'index.html';
+                    // Show access denied message but don't redirect
+                    showToast('Please log in to access admin features', 'error');
                 }
             });
         }
@@ -978,22 +979,16 @@
                 
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
-                    // Check if user is admin
+                    // Check if user is admin but don't redirect if not
                     if (user.email !== 'admin@kinaflix.com' && !userData.isAdmin) {
-                        showToast('Access denied. Admin privileges required.', 'error');
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 2000);
+                        showToast('Limited access. Some features may not be available.', 'error');
                     }
                 } else {
-                    showToast('User data not found.', 'error');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 2000);
+                    showToast('User data not found. Some features may be limited.', 'error');
                 }
             } catch (error) {
                 console.error('Error checking admin status:', error);
-                showToast('Error verifying admin access', 'error');
+                showToast('Error verifying access permissions', 'error');
             }
         }
 
@@ -1003,7 +998,7 @@
             if (user) {
                 authButtons.innerHTML = `
                     <button class="btn profile-btn" id="profile-btn">
-                        <i class="fas fa-user"></i> ${user.displayName || 'Admin'}
+                        <i class="fas fa-user"></i> ${user.displayName || 'User'}
                     </button>
                     <button class="btn logout-btn">Logout</button>
                 `;
