@@ -624,6 +624,10 @@
                 <i class="fas fa-question-circle"></i> Need Help?
             </a>
             <div class="terms">
+                <div style="background: rgba(255, 255, 0, 0.1); padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>TEST MODE:</strong> This is a mock payment system for testing.
+                </div>
                 By proceeding, you authorize a 1,000 RWF charge to your mobile money account.
                 Transaction fee may apply. Ads will be removed immediately upon successful payment.
             </div>
@@ -670,23 +674,112 @@
         let subscriptionData = null;
         let isProcessing = false;
 
+        // ==================== MOCK APIs for Testing ====================
+        async function mockPaypackCashin(token, phoneNumber) {
+            console.log('💰 Using MOCK payment API (real API not deployed)');
+            console.log('Phone:', phoneNumber, 'Token:', token ? 'Present' : 'Missing');
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Simulate random success/failure for testing
+            const random = Math.random();
+            
+            if (random < 0.7) {
+                // 70% success rate
+                return {
+                    success: true,
+                    message: 'Payment successful! Ads removed for 21 days.',
+                    transactionId: 'MOCK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    subscriptionEnd: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
+                    adsFree: true
+                };
+            } else if (random < 0.85) {
+                // 15% pending
+                return {
+                    success: true,
+                    pending: true,
+                    message: 'Payment pending. Please confirm the transaction on your phone.',
+                    transactionId: 'PENDING_' + Date.now(),
+                    instructions: 'You will receive a payment request on your phone. Please enter your PIN to confirm.'
+                };
+            } else {
+                // 15% failure
+                const errors = [
+                    'Insufficient balance. Please top up your mobile money account.',
+                    'Phone number not approved for mobile money.',
+                    'Network error. Please check your connection and try again.',
+                    'Transaction timeout. Please try again.'
+                ];
+                const error = errors[Math.floor(Math.random() * errors.length)];
+                throw new Error(error);
+            }
+        }
+
+        async function mockCheckPayment(token) {
+            console.log('🔍 Using MOCK check payment API');
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Check if we have subscription in localStorage (for testing persistence)
+            const storedSubscription = localStorage.getItem('kinaflix_mock_subscription');
+            
+            if (storedSubscription) {
+                const sub = JSON.parse(storedSubscription);
+                const expiryDate = new Date(sub.expiryDate);
+                const now = new Date();
+                
+                if (expiryDate > now) {
+                    // Active subscription
+                    const daysRemaining = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+                    return {
+                        success: true,
+                        hasSubscription: true,
+                        adsFree: true,
+                        subscriptionActive: true,
+                        subscriptionEnd: expiryDate.toISOString(),
+                        daysRemaining: daysRemaining,
+                        lastPayment: sub.lastPayment
+                    };
+                }
+            }
+            
+            // No active subscription
+            return {
+                success: true,
+                hasSubscription: false,
+                adsFree: false,
+                subscriptionActive: false,
+                message: 'No active subscription found'
+            };
+        }
+        // ==================== END MOCK APIs ====================
+
         /**
          * Initialize checkout page
          */
         async function init() {
+            console.log('🚀 Initializing subscription page...');
+            
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentUser = user;
+                    console.log('✅ User logged in:', user.email);
                     await checkSubscriptionStatus();
                     updateUI();
                 } else {
+                    console.log('⚠️ No user logged in');
                     // Redirect to login
-                    window.location.href = `/login?redirect=${encodeURIComponent('/subscribe')}`;
+                    const redirectUrl = encodeURIComponent(window.location.href);
+                    window.location.href = `/login?redirect=${redirectUrl}`;
                 }
             });
 
             paymentForm.addEventListener('submit', handlePayment);
             phoneInput.addEventListener('input', formatPhoneInput);
+            
+            console.log('✅ Page initialized successfully');
         }
 
         /**
@@ -705,24 +798,16 @@
             try {
                 if (!currentUser) return;
                 
-                const userRef = doc(db, 'users', currentUser.uid);
-                const userDoc = await getDoc(userRef);
+                // Use MOCK API for testing
+                const data = await mockCheckPayment();
                 
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    const now = new Date();
-                    
-                    if (userData.adsFree && userData.subscriptionEnd) {
-                        const expiryDate = userData.subscriptionEnd.toDate();
-                        subscriptionData = {
-                            active: expiryDate > now,
-                            expiryDate: expiryDate,
-                            daysRemaining: Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24))
-                        };
-                    }
+                if (data.success) {
+                    subscriptionData = data;
+                    console.log('📊 Subscription status:', data.subscriptionActive ? 'Active' : 'Inactive');
                 }
             } catch (error) {
-                console.error('Error checking subscription:', error);
+                console.error('❌ Error checking subscription:', error);
+                subscriptionData = null;
             }
         }
 
@@ -741,14 +826,15 @@
                 buttonText.textContent = 'Remove Ads – 1,000 RWF';
                 payButton.disabled = false;
                 
-            } else if (subscriptionData.active) {
+            } else if (subscriptionData.subscriptionActive) {
                 // Active subscription
                 subscriptionStatus.className = 'subscription-status active';
                 statusIcon.className = 'status-icon active';
                 statusIconI.className = 'fas fa-crown';
                 statusTitle.textContent = 'Ad-Free Active';
                 
-                const formattedDate = subscriptionData.expiryDate.toLocaleDateString('en-RW', {
+                const expiryDate = new Date(subscriptionData.subscriptionEnd);
+                const formattedDate = expiryDate.toLocaleDateString('en-RW', {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
@@ -763,14 +849,14 @@
                 payButton.disabled = true;
                 
             } else {
-                // Expired subscription
-                subscriptionStatus.className = 'subscription-status expired';
-                statusIcon.className = 'status-icon expired';
-                statusIconI.className = 'fas fa-clock';
-                statusTitle.textContent = 'Subscription Expired';
-                statusDetails.textContent = 'Your ad-free period has ended. Renew to remove ads again.';
+                // Expired or no subscription
+                subscriptionStatus.className = 'subscription-status';
+                statusIcon.className = 'status-icon inactive';
+                statusIconI.className = 'fas fa-ad';
+                statusTitle.textContent = 'Ads Enabled';
+                statusDetails.textContent = subscriptionData.message || 'Subscribe to remove ads.';
                 subscriptionStatus.style.display = 'block';
-                buttonText.textContent = 'Renew Ads Removal – 1,000 RWF';
+                buttonText.textContent = 'Remove Ads – 1,000 RWF';
                 payButton.disabled = false;
             }
         }
@@ -799,44 +885,48 @@
             try {
                 const token = await currentUser.getIdToken();
                 
-                // Call backend payment endpoint
-                const response = await fetch('/api/paypack-cashin', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        phoneNumber: fullPhoneNumber,
-                        userId: currentUser.uid
-                    })
-                });
+                console.log('🔄 Processing payment for:', fullPhoneNumber);
                 
-                const data = await response.json();
+                // ========== USE MOCK API (Real API not deployed yet) ==========
+                const data = await mockPaypackCashin(token, fullPhoneNumber);
                 
-                if (response.ok && data.success) {
+                if (data.success) {
                     if (data.pending) {
                         showResult('pending', 'Payment Pending', 
-                            'Please check your phone and confirm the payment request. This page will update automatically.');
+                            data.message + ' ' + (data.instructions || ''));
                         
                         // Poll for payment confirmation
                         pollPaymentStatus();
+                        
                     } else {
                         showResult('success', 'Payment Successful!', 
-                            'Ads have been removed for 21 days. You will be redirected to home page.');
+                            data.message + ' (This is a mock payment for testing)');
                         
                         phoneInput.value = '';
+                        
+                        // Store mock subscription in localStorage
+                        localStorage.setItem('kinaflix_mock_subscription', JSON.stringify({
+                            expiryDate: data.subscriptionEnd,
+                            lastPayment: {
+                                amount: 1000,
+                                currency: 'RWF',
+                                phoneNumber: fullPhoneNumber,
+                                transactionId: data.transactionId,
+                                timestamp: new Date().toISOString()
+                            }
+                        }));
                         
                         // Refresh subscription status
                         setTimeout(async () => {
                             await checkSubscriptionStatus();
                             updateUI();
                             
-                            // Redirect to home after 3 seconds
+                            // Show success message for longer
                             setTimeout(() => {
-                                window.location.href = '/';
-                            }, 3000);
-                        }, 2000);
+                                showResult('success', '✅ Ready to Watch!', 
+                                    'You can now enjoy ad-free streaming. Return to movies to see the difference.');
+                            }, 2000);
+                        }, 1500);
                     }
                 } else {
                     showResult('error', 'Payment Failed', 
@@ -844,9 +934,9 @@
                 }
                 
             } catch (error) {
-                console.error('Payment error:', error);
-                showResult('error', 'Network Error', 
-                    'Unable to process payment. Please check your connection and try again.');
+                console.error('❌ Payment error:', error);
+                showResult('error', 'Payment Failed', 
+                    error.message || 'Unable to process payment. Please try again.');
             } finally {
                 isProcessing = false;
                 payButton.classList.remove('processing');
@@ -854,14 +944,17 @@
         }
 
         /**
-         * Poll for payment confirmation
+         * Poll for payment confirmation (for pending payments)
          */
         async function pollPaymentStatus() {
+            console.log('⏳ Starting payment status polling...');
+            
             let attempts = 0;
-            const maxAttempts = 30; // 5 minutes (10-second intervals)
+            const maxAttempts = 6; // 1 minute (10-second intervals)
             
             const pollInterval = setInterval(async () => {
                 attempts++;
+                console.log(`Polling attempt ${attempts}/${maxAttempts}`);
                 
                 if (attempts > maxAttempts) {
                     clearInterval(pollInterval);
@@ -873,17 +966,12 @@
                 try {
                     await checkSubscriptionStatus();
                     
-                    if (subscriptionData?.active) {
+                    if (subscriptionData?.subscriptionActive) {
                         clearInterval(pollInterval);
                         showResult('success', 'Payment Confirmed!', 
-                            'Your payment has been confirmed. Ads are now removed for 21 days. Redirecting...');
+                            'Your payment has been confirmed. Ads are now removed for 21 days.');
                         
                         updateUI();
-                        
-                        // Redirect to home
-                        setTimeout(() => {
-                            window.location.href = '/';
-                        }, 3000);
                     }
                 } catch (error) {
                     console.error('Polling error:', error);
@@ -895,6 +983,8 @@
          * Show result message
          */
         function showResult(type, title, details) {
+            console.log(`📝 Result: ${type} - ${title}`);
+            
             resultMessage.className = `result-message ${type}`;
             
             switch(type) {
@@ -916,8 +1006,20 @@
             // Auto-hide success messages after 8 seconds
             if (type === 'success') {
                 setTimeout(() => {
-                    resultMessage.style.display = 'none';
+                    if (resultMessage.style.display === 'flex') {
+                        resultMessage.style.display = 'none';
+                    }
                 }, 8000);
+            }
+            
+            // Auto-hide pending messages after 15 seconds
+            if (type === 'pending') {
+                setTimeout(() => {
+                    if (resultMessage.style.display === 'flex' && 
+                        resultTitle.textContent.includes('Pending')) {
+                        resultMessage.style.display = 'none';
+                    }
+                }, 15000);
             }
         }
 
@@ -941,11 +1043,48 @@
          */
         function showHelp(event) {
             event.preventDefault();
-            alert('For assistance with payments:\n\n1. Ensure your phone number is registered with mobile money\n2. Make sure you have sufficient balance\n3. Check your phone for payment requests\n4. Contact support: support@kinaflix.com');
+            alert('💰 KINAFLIX Payment Help:\n\n' +
+                  '1. This is a TEST/MOCK payment system\n' +
+                  '2. No real money is charged\n' +
+                  '3. Enter any 8-digit number after "07"\n' +
+                  '4. The system simulates:\n' +
+                  '   - 70% chance of success\n' +
+                  '   - 15% chance of pending\n' +
+                  '   - 15% chance of failure\n\n' +
+                  '📞 Real support: support@kinaflix.com');
+        }
+
+        /**
+         * Switch to real API when ready
+         */
+        function switchToRealAPI() {
+            console.log('🔗 Switching to real API...');
+            // Replace mockPaypackCashin and mockCheckPayment with real fetch calls
+            // when your backend API is deployed
         }
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', init);
+        
+        // For debugging
+        window.debugKinaflix = {
+            getUser: () => currentUser,
+            getSubscription: () => subscriptionData,
+            resetSubscription: () => {
+                localStorage.removeItem('kinaflix_mock_subscription');
+                subscriptionData = null;
+                updateUI();
+                console.log('✅ Subscription reset');
+            },
+            simulatePayment: (type = 'success') => {
+                const events = {
+                    success: () => showResult('success', 'Test Success', 'Mock payment successful!'),
+                    pending: () => showResult('pending', 'Test Pending', 'Mock payment pending...'),
+                    error: () => showResult('error', 'Test Error', 'Mock payment failed for testing')
+                };
+                if (events[type]) events[type]();
+            }
+        };
     </script>
 </body>
 </html>
