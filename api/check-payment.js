@@ -1,66 +1,68 @@
 // /api/check-payment.js
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 
-// Initialize Firebase Admin SDK
-let firebaseApp, db, auth;
-
-try {
-  if (!global.firebaseApp) {
-    firebaseApp = initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
-    global.firebaseApp = firebaseApp;
-  } else {
-    firebaseApp = global.firebaseApp;
-  }
-  
-  db = getFirestore(firebaseApp);
-  auth = getAuth(firebaseApp);
-} catch (error) {
-  console.error('Firebase Admin initialization error:', error);
+// Initialize Firebase Admin if not already initialized
+if (!getApps().length) {
+  initializeApp({
+    credential: cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    }),
+  });
 }
+
+const db = getFirestore();
+const auth = getAuth();
 
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-
-  // Handle preflight
+  
+  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
+  
   // Only accept GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
       success: false,
-      error: 'Method not allowed. Use GET.'
+      error: 'Method not allowed. Use GET.',
     });
   }
-
+  
   try {
-    // 1. Validate Firebase Authorization header
+    // Verify Authorization header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
-        error: 'Unauthorized: Missing or invalid token'
+        error: 'Unauthorized. Valid Firebase token required.',
       });
     }
-
-    const firebaseToken = authHeader.split('Bearer ')[1];
-    const decodedToken = await auth.verifyIdToken(firebaseToken);
+    
+    const token = authHeader.split('Bearer ')[1];
+    
+    // Verify Firebase token
+    let decodedToken;
+    try {
+      decodedToken = await auth.verifyIdToken(token);
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid or expired token.',
+      });
+    }
+    
     const userId = decodedToken.uid;
-
-    // 2. Get user subscription status
+    
+    // Get user data from Firestore
     const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
     
@@ -70,80 +72,56 @@ export default async function handler(req, res) {
         hasSubscription: false,
         adsFree: false,
         subscriptionActive: false,
-        message: 'No subscription found'
+        message: 'No subscription found.',
       });
     }
-
-    const userData = userDoc.data();
-    const now = Timestamp.now();
     
-    // 3. Check subscription validity
-    let adsFree = false;
-    let subscriptionActive = false;
-    let subscriptionEnd = null;
-    let daysRemaining = 0;
-
-    if (userData.adsFree === true && userData.subscriptionEnd) {
-      subscriptionEnd = userData.subscriptionEnd.toDate();
-      subscriptionActive = userData.subscriptionEnd > now;
-      adsFree = subscriptionActive;
+    const userData = userDoc.data();
+    
+    // Check subscription status
+    if (userData.subscriptionEnd) {
+      const subscriptionEnd = new Date(userData.subscriptionEnd);
+      const now = new Date();
+      const isActive = subscriptionEnd > now;
+      const daysRemaining = isActive 
+        ? Math.ceil((subscriptionEnd - now) / (1000 * 60 * 60 * 24))
+        : 0;
       
-      if (subscriptionActive) {
-        const remainingTime = subscriptionEnd - now.toDate();
-        daysRemaining = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
-      } else {
-        // Subscription expired, update status
+      // If subscription expired, update adsFree status
+      if (!isActive && userData.adsFree) {
         await userRef.update({
           adsFree: false,
-          updatedAt: now
-        });
-        
-        // Log expiration
-        await db.collection('subscription_logs').add({
-          userId: userId,
-          event: 'expired',
-          timestamp: now
+          updatedAt: new Date().toISOString(),
         });
       }
+      
+      return res.status(200).json({
+        success: true,
+        hasSubscription: true,
+        adsFree: isActive,
+        subscriptionActive: isActive,
+        subscriptionEnd: userData.subscriptionEnd,
+        daysRemaining: daysRemaining,
+        lastPayment: userData.lastPayment || null,
+        phoneNumber: userData.phoneNumber || null,
+      });
     }
-
-    // 4. Check for pending payments
-    const pendingQuery = await db.collection('pending_payments')
-      .where('userId', '==', userId)
-      .where('status', '==', 'pending')
-      .get();
     
-    const pendingPayments = [];
-    pendingQuery.forEach(doc => {
-      const data = doc.data();
-      if (data.expiresAt && data.expiresAt > now) {
-        pendingPayments.push({
-          transactionId: doc.id,
-          phoneNumber: data.phoneNumber,
-          amount: data.amount,
-          createdAt: data.createdAt.toDate().toISOString()
-        });
-      }
-    });
-
-    // 5. Return subscription status
+    // No subscription found
     return res.status(200).json({
       success: true,
-      hasSubscription: subscriptionActive,
-      adsFree: adsFree,
-      subscriptionActive: subscriptionActive,
-      subscriptionEnd: subscriptionEnd ? subscriptionEnd.toISOString() : null,
-      daysRemaining: daysRemaining,
-      lastPayment: userData.lastPayment || null,
-      pendingPayments: pendingPayments,
-      userEmail: userData.email || decodedToken.email || ''
+      hasSubscription: false,
+      adsFree: false,
+      subscriptionActive: false,
+      message: 'No active subscription found.',
     });
-
+    
   } catch (error) {
-    console.error('Error checking payment:', error);
+    console.error('Check payment error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Error checking subscription status'
+      error: 'Internal server error.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 }
