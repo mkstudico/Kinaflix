@@ -157,6 +157,9 @@
     <span>BACK</span>
   </a>
 
+  <!-- Ad Container for Google Ads -->
+  <div class="ad-container" id="ad-top" style="text-align: center; margin: 10px 0;"></div>
+
   <div class="video-container" id="video-container">
     <div class="loading-overlay" id="loading-overlay">
       <div class="loading-spinner"></div>
@@ -264,8 +267,7 @@
           };
         }
         
-        // Initialize ad system after video starts loading
-        initAdSystem();
+        // Removed initAdSystem() call as requested
         
       } catch (error) {
         showError(error.message);
@@ -294,66 +296,6 @@
       }
       
       return docSnap.data();
-    };
-
-    // Ad management system
-    const initAdSystem = async () => {
-      try {
-        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js');
-        const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js');
-        
-        const app = initializeApp({
-          apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
-          authDomain: "kinaflix.firebaseapp.com",
-          projectId: "kinaflix",
-          storageBucket: "kinaflix.appspot.com",
-          messagingSenderId: "318239806217",
-          appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
-        });
-        
-        const db = getFirestore(app);
-        const adsSnapshot = await getDocs(collection(db, 'ads'));
-        const ads = adsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(ad => !ad.category || ad.category === 'Movie');
-        
-        if (ads.length > 0) {
-          setTimeout(() => showRandomAd(ads), INITIAL_AD_DELAY);
-          setInterval(() => showRandomAd(ads), AD_INTERVAL);
-        }
-      } catch (error) {
-        console.error('Ad system error:', error);
-      }
-    };
-
-    const showRandomAd = (ads) => {
-      const ad = ads[Math.floor(Math.random() * ads.length)];
-      const adElement = document.createElement('div');
-      adElement.className = 'ad-notification';
-      adElement.innerHTML = `
-        <img src="${ad.imageUrl}" alt="${ad.name}" loading="lazy">
-        <div class="ad-notification-content">
-          <div class="ad-notification-title">${ad.name}</div>
-          <div class="ad-notification-description">${ad.description}</div>
-        </div>
-        <button class="ad-notification-close"><i class="fas fa-times"></i></button>
-      `;
-      
-      adElement.addEventListener('click', (e) => {
-        if (!e.target.closest('.ad-notification-close')) {
-          window.open(ad.link, '_blank');
-        }
-      });
-      
-      document.body.appendChild(adElement);
-      
-      setTimeout(() => {
-        adElement.remove();
-      }, AD_DISPLAY_DURATION);
-      
-      adElement.querySelector('.ad-notification-close').addEventListener('click', (e) => {
-        e.stopPropagation();
-        adElement.remove();
-      });
     };
 
     const showError = (message) => {
@@ -387,5 +329,8 @@
       document.addEventListener('DOMContentLoaded', initPlayer);
     }
   </script>
+
+  <!-- Subscription Checker Script -->
+  <script src="js/subscription-checker.js"></script>
 </body>
 </html>
