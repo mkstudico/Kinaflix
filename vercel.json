@@ -1,18 +1,4 @@
 {
-  "functions": {
-    "api/paypack-cashin.js": {
-      "maxDuration": 30,
-      "memory": 1024
-    },
-    "api/check-payment.js": {
-      "maxDuration": 10,
-      "memory": 512
-    },
-    "api/payment-webhook.js": {
-      "maxDuration": 10,
-      "memory": 512
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
@@ -23,26 +9,23 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://kinaflix.vercel.app"
+          "value": "https://yourdomain.com"
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET,POST,OPTIONS"
+          "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Authorization, Content-Type"
+          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
         }
       ]
     }
   ],
-  "env": {
-    "FIREBASE_PROJECT_ID": "@kinaflix-firebase-project-id",
-    "FIREBASE_CLIENT_EMAIL": "@kinaflix-firebase-client-email",
-    "FIREBASE_PRIVATE_KEY": "@kinaflix-firebase-private-key",
-    "PAYPACK_APP_ID": "@kinaflix-paypack-app-id",
-    "PAYPACK_APP_SECRET": "@kinaflix-paypack-app-secret",
-    "PAYPACK_WEBHOOK_SECRET": "@kinaflix-paypack-webhook-secret",
-    "FRONTEND_URL": "https://kinaflix.vercel.app"
-  }
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
