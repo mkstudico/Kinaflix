@@ -110,6 +110,21 @@
       display: flex;
     }
     
+    /* Ad container for view1.html */
+    .ad-section {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100px;
+    }
+    
     /* Transparent back button */
     .transparent-back-btn {
       position: fixed;
@@ -258,6 +273,10 @@
         font-size: 0.7rem;
         padding: 6px 12px;
       }
+      
+      .ad-section {
+        min-height: 80px;
+      }
     }
     
     @media (max-width: 480px) {
@@ -265,6 +284,10 @@
         width: 40px;
         height: 40px;
         font-size: 1rem;
+      }
+      
+      .ad-section {
+        min-height: 60px;
       }
     }
   </style>
@@ -299,6 +322,11 @@
         <div class="play-overlay" id="play-overlay">Click to play</div>
       </div>
     </section>
+    
+    <!-- Ad Container for view1.html -->
+    <div class="ad-section">
+      <div id="kinaflix-ad-container" style="text-align:center; width: 100%;"></div>
+    </div>
   </div>
   
   <!-- Loading and error states -->
@@ -588,5 +616,8 @@
       document.removeEventListener('keydown', handleKeyDown);
     });
   </script>
+
+  <!-- Subscription Checker Script -->
+  <script src="js/subscription-checker.js"></script>
 </body>
 </html>
