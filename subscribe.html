@@ -4,19 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subscribe - Kinaflix</title>
-    <link rel="stylesheet" href="css/style.css"> 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    
     <style>
-        body { background-color: #0f0f0f; color: white; font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        body { background-color: #0f0f0f; color: white; font-family: 'Segoe UI', Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         .payment-container { background: #1f1f1f; padding: 40px; border-radius: 8px; text-align: center; max-width: 400px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         input { width: 100%; padding: 12px; margin: 10px 0; background: #333; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #e50914; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #e50914; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 16px; margin-top: 10px; }
         button:hover { background: #b20710; }
+        .back-link { display: block; margin-top: 15px; color: #999; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: white; }
         .message { margin-top: 15px; font-size: 14px; display: none; }
-        .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid #e50914; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin: 0 auto; }
+        .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid #e50914; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -29,41 +26,51 @@
         
         <div id="payment-form">
             <input type="tel" id="phone" placeholder="Enter Momo/Airtel Number (e.g. 078...)" maxlength="10">
-            <button id="pay-btn" onclick="initiatePayment()">Pay Now</button>
+            <button id="pay-btn">Pay Now</button>
         </div>
 
         <div id="loader" class="loader"></div>
         <p id="status-msg" class="message"></p>
+        
+        <a href="index.html" class="back-link">← Back to Home</a>
     </div>
 
-    <script src="js/firebase-config.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
 
-    <script>
-        // Check Login Status immediately
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!window.firebase) {
-                console.error("Firebase not loaded! Check internet or script tags.");
-                return;
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+            authDomain: "kinaflix.firebaseapp.com",
+            projectId: "kinaflix",
+            storageBucket: "kinaflix.appspot.com",
+            messagingSenderId: "318239806217",
+            appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        let currentUser = null;
+
+        // 1. Check Login
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                console.log("Logged in as:", user.uid);
+            } else {
+                window.location.href = "login.html"; // Redirect if not logged in
             }
-            
-            // Auto-redirect if not logged in
-            firebase.auth().onAuthStateChanged((user) => {
-                if (!user) {
-                    console.log("User not logged in. Redirecting...");
-                    window.location.href = "login.html";
-                } else {
-                    console.log("User logged in:", user.uid);
-                }
-            });
         });
 
-        async function initiatePayment() {
+        // 2. Handle Payment
+        document.getElementById('pay-btn').addEventListener('click', async () => {
             const phone = document.getElementById('phone').value;
             const btn = document.getElementById('pay-btn');
             const loader = document.getElementById('loader');
             const msg = document.getElementById('status-msg');
 
-            // Simple Validation
+            // Validation
             if (phone.length !== 10 || (!phone.startsWith('078') && !phone.startsWith('079') && !phone.startsWith('072') && !phone.startsWith('073'))) {
                 msg.style.color = 'orange';
                 msg.innerText = "Please enter a valid Rwanda phone number.";
@@ -71,18 +78,16 @@
                 return;
             }
 
-            // UI Loading State
+            // UI Loading
             btn.style.display = 'none';
             loader.style.display = 'block';
             msg.style.display = 'none';
 
             try {
-                // Get the current user's token securely
-                const user = firebase.auth().currentUser;
-                if (!user) throw new Error("Please log in again.");
-                const token = await user.getIdToken();
+                if (!currentUser) throw new Error("Please log in again.");
+                const token = await currentUser.getIdToken();
 
-                // Call YOUR new Backend
+                // Call API
                 const response = await fetch('/api/paypack-cashin', {
                     method: 'POST',
                     headers: {
@@ -96,8 +101,8 @@
 
                 if (data.success) {
                     msg.style.color = '#46d369'; // Green
-                    msg.innerText = "Check your phone to approve the PIN!";
-                    // Optional: Start checking for payment success
+                    msg.innerText = "✅ Check your phone to approve the PIN!";
+                    // You could add a listener here to check if payment succeeded
                 } else {
                     throw new Error(data.error || "Payment failed.");
                 }
@@ -106,12 +111,12 @@
                 console.error(error);
                 msg.style.color = 'red';
                 msg.innerText = error.message;
-                btn.style.display = 'block'; // Show button again
+                btn.style.display = 'block';
             } finally {
                 loader.style.display = 'none';
                 msg.style.display = 'block';
             }
-        }
+        });
     </script>
 </body>
 </html>
