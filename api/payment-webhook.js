@@ -1,146 +1,188 @@
 // /api/payment-webhook.js
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import crypto from 'crypto';
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 
-// Initialize Firebase Admin SDK
-let firebaseApp, db;
-
-try {
-  if (!global.firebaseApp) {
-    firebaseApp = initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
-    global.firebaseApp = firebaseApp;
-  } else {
-    firebaseApp = global.firebaseApp;
-  }
-  
-  db = getFirestore(firebaseApp);
-} catch (error) {
-  console.error('Firebase Admin initialization error:', error);
+// Initialize Firebase Admin if not already initialized
+if (!getApps().length) {
+  initializeApp({
+    credential: cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    }),
+  });
 }
+
+const db = getFirestore();
 
 export default async function handler(req, res) {
-  // PayPack webhook endpoint - no authentication required (validated by signature)
+  // Verify webhook signature
+  const signature = req.headers['x-paypack-signature'];
+  const payload = JSON.stringify(req.body);
   
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      success: false,
-      error: 'Method not allowed'
+  const expectedSignature = crypto
+    .createHmac('sha256', process.env.PAYPACK_WEBHOOK_SECRET)
+    .update(payload)
+    .digest('hex');
+  
+  if (signature !== expectedSignature) {
+    console.error('Invalid webhook signature');
+    return res.status(401).json({ 
+      success: false, 
+      error: 'Invalid signature' 
     });
   }
-
+  
+  const event = req.body;
+  console.log('Received PayPack webhook:', event);
+  
   try {
-    const webhookData = req.body;
-    console.log('PayPack webhook received:', webhookData);
-
-    // Validate webhook signature (you should implement this with PayPack's signature verification)
-    // const signature = req.headers['x-paypack-signature'];
-    // if (!verifySignature(webhookData, signature)) {
-    //   return res.status(401).json({ success: false, error: 'Invalid signature' });
-    // }
-
-    const { ref: transactionId, status, amount, number } = webhookData;
-
-    // Find pending payment by transaction ID
-    const pendingRef = db.collection('pending_payments').doc(transactionId);
-    const pendingDoc = await pendingRef.get();
+    switch (event.event) {
+      case 'transaction.successful':
+        await handleSuccessfulTransaction(event.data);
+        break;
+        
+      case 'transaction.failed':
+        await handleFailedTransaction(event.data);
+        break;
+        
+      case 'transaction.canceled':
+        await handleCanceledTransaction(event.data);
+        break;
+        
+      default:
+        console.log('Unhandled webhook event:', event.event);
+    }
     
-    if (!pendingDoc.exists) {
-      console.log('No pending payment found for transaction:', transactionId);
-      return res.status(200).json({ success: true, message: 'No pending payment found' });
-    }
-
-    const pendingData = pendingDoc.data();
-    const userId = pendingData.userId;
-
-    if (status === 'successful' || status === 'success') {
-      // Payment successful
-      const now = Timestamp.now();
-      const subscriptionEnd = new Date(now.toDate());
-      subscriptionEnd.setDate(subscriptionEnd.getDate() + 21); // Add 21 days
-
-      // Update user subscription
-      const userRef = db.collection('users').doc(userId);
-      await userRef.set({
-        adsFree: true,
-        subscriptionStart: now,
-        subscriptionEnd: Timestamp.fromDate(subscriptionEnd),
-        lastPayment: {
-          amount: amount || 1000,
-          currency: 'RWF',
-          phoneNumber: number,
-          transactionId: transactionId,
-          timestamp: now,
-          status: 'success'
-        },
-        updatedAt: now
-      }, { merge: true });
-
-      // Update pending payment status
-      await pendingRef.update({
-        status: 'completed',
-        completedAt: now,
-        webhookData: webhookData
-      });
-
-      // Log successful payment
-      await db.collection('payment_logs').add({
-        userId: userId,
-        transactionId: transactionId,
-        amount: amount || 1000,
-        currency: 'RWF',
-        phoneNumber: number,
-        status: 'success',
-        source: 'webhook',
-        timestamp: now
-      });
-
-      console.log(`Subscription activated for user ${userId} via webhook`);
-
-    } else if (status === 'failed') {
-      // Payment failed
-      const now = Timestamp.now();
-      
-      await pendingRef.update({
-        status: 'failed',
-        failedAt: now,
-        webhookData: webhookData
-      });
-
-      // Log failed payment
-      await db.collection('payment_logs').add({
-        userId: userId,
-        transactionId: transactionId,
-        amount: amount || 1000,
-        currency: 'RWF',
-        phoneNumber: number,
-        status: 'failed',
-        source: 'webhook',
-        timestamp: now
-      });
-
-      console.log(`Payment failed for user ${userId} via webhook`);
-    }
-
-    return res.status(200).json({ success: true, message: 'Webhook processed' });
-
+    return res.status(200).json({ 
+      success: true, 
+      received: true 
+    });
+    
   } catch (error) {
     console.error('Webhook processing error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Error processing webhook'
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Processing failed' 
     });
   }
 }
 
-// Function to verify webhook signature (implement based on PayPack documentation)
-function verifySignature(payload, signature) {
-  // Implement signature verification logic here
-  // This is a placeholder - you need to implement this based on PayPack's documentation
-  return true; // For now, return true. Implement proper verification in production.
+async function handleSuccessfulTransaction(transaction) {
+  console.log('Processing successful transaction:', transaction.ref);
+  
+  try {
+    // Find transaction in Firestore
+    const transactionsRef = db.collection('transactions');
+    const query = transactionsRef.where('transactionId', '==', transaction.ref);
+    const snapshot = await query.get();
+    
+    if (snapshot.empty) {
+      console.log('Transaction not found in database:', transaction.ref);
+      return;
+    }
+    
+    const transactionDoc = snapshot.docs[0];
+    const transactionData = transactionDoc.data();
+    
+    // Update transaction status
+    await transactionDoc.ref.update({
+      status: 'successful',
+      confirmedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      providerResponse: transaction,
+    });
+    
+    // Calculate subscription end date (21 days from now)
+    const subscriptionEnd = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000);
+    
+    // Update user's subscription
+    const userRef = db.collection('users').doc(transactionData.userId);
+    
+    await userRef.update({
+      subscriptionEnd: subscriptionEnd.toISOString(),
+      adsFree: true,
+      lastPayment: {
+        amount: transactionData.amount,
+        currency: transactionData.currency || 'RWF',
+        transactionId: transaction.ref,
+        timestamp: new Date().toISOString(),
+        phoneNumber: transactionData.phoneNumber,
+        status: 'successful',
+      },
+      updatedAt: new Date().toISOString(),
+    });
+    
+    console.log(`Updated subscription for user: ${transactionData.userId}`);
+    
+  } catch (error) {
+    console.error('Error handling successful transaction:', error);
+    throw error;
+  }
+}
+
+async function handleFailedTransaction(transaction) {
+  console.log('Processing failed transaction:', transaction.ref);
+  
+  try {
+    // Find transaction in Firestore
+    const transactionsRef = db.collection('transactions');
+    const query = transactionsRef.where('transactionId', '==', transaction.ref);
+    const snapshot = await query.get();
+    
+    if (snapshot.empty) {
+      console.log('Transaction not found in database:', transaction.ref);
+      return;
+    }
+    
+    const transactionDoc = snapshot.docs[0];
+    
+    // Update transaction status
+    await transactionDoc.ref.update({
+      status: 'failed',
+      confirmedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      failureReason: transaction.reason || 'Unknown',
+      providerResponse: transaction,
+    });
+    
+    console.log(`Marked transaction as failed: ${transaction.ref}`);
+    
+  } catch (error) {
+    console.error('Error handling failed transaction:', error);
+    throw error;
+  }
+}
+
+async function handleCanceledTransaction(transaction) {
+  console.log('Processing canceled transaction:', transaction.ref);
+  
+  try {
+    // Find transaction in Firestore
+    const transactionsRef = db.collection('transactions');
+    const query = transactionsRef.where('transactionId', '==', transaction.ref);
+    const snapshot = await query.get();
+    
+    if (snapshot.empty) {
+      console.log('Transaction not found in database:', transaction.ref);
+      return;
+    }
+    
+    const transactionDoc = snapshot.docs[0];
+    
+    // Update transaction status
+    await transactionDoc.ref.update({
+      status: 'canceled',
+      confirmedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      providerResponse: transaction,
+    });
+    
+    console.log(`Marked transaction as canceled: ${transaction.ref}`);
+    
+  } catch (error) {
+    console.error('Error handling canceled transaction:', error);
+    throw error;
+  }
 }
