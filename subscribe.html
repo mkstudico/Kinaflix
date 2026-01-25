@@ -3,964 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remove Ads - KINAFLIX</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #e50914;
-            --primary-dark: #b2070f;
-            --dark: #141414;
-            --darker: #0a0a0a;
-            --light: #f4f4f4;
-            --gray: #999;
-            --success: #4CAF50;
-            --error: #f44336;
-            --warning: #ff9800;
-            --info: #2196F3;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
-            color: var(--light);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .checkout-container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            border: 1px solid rgba(229, 9, 20, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .checkout-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-        }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .logo h1 {
-            color: var(--primary);
-            font-size: 2.8rem;
-            margin-bottom: 5px;
-            font-weight: 900;
-            letter-spacing: 1px;
-        }
-        
-        .logo p {
-            color: var(--gray);
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-        
-        .subscription-status {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-left: 4px solid var(--info);
-            display: none;
-        }
-        
-        .subscription-status.active {
-            border-left-color: var(--success);
-            display: block;
-        }
-        
-        .subscription-status.expired {
-            border-left-color: var(--warning);
-            display: block;
-        }
-        
-        .status-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-        }
-        
-        .status-icon.active {
-            background: rgba(76, 175, 80, 0.2);
-            color: var(--success);
-        }
-        
-        .status-icon.expired {
-            background: rgba(255, 152, 0, 0.2);
-            color: var(--warning);
-        }
-        
-        .status-icon.inactive {
-            background: rgba(33, 150, 243, 0.2);
-            color: var(--info);
-        }
-        
-        .status-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            color: var(--light);
-        }
-        
-        .status-details {
-            font-size: 0.9rem;
-            color: var(--gray);
-            line-height: 1.5;
-        }
-        
-        .status-details strong {
-            color: var(--light);
-        }
-        
-        .price-card {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .price-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            animation: float 20s linear infinite;
-            opacity: 0.1;
-        }
-        
-        @keyframes float {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            100% { transform: translate(-20px, -20px) rotate(360deg); }
-        }
-        
-        .price-amount {
-            font-size: 3.5rem;
-            font-weight: 900;
-            margin-bottom: 5px;
-            line-height: 1;
-        }
-        
-        .price-currency {
-            font-size: 1.5rem;
-            opacity: 0.9;
-            font-weight: 600;
-        }
-        
-        .price-duration {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-        
-        .features {
-            margin-bottom: 30px;
-        }
-        
-        .feature-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-        
-        .feature-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-        }
-        
-        .feature-icon {
-            color: var(--primary);
-            font-size: 1.2rem;
-            min-width: 24px;
-            margin-top: 2px;
-        }
-        
-        .feature-text {
-            flex: 1;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-        
-        .feature-text strong {
-            color: var(--light);
-        }
-        
-        .feature-item.negative .feature-icon {
-            color: var(--error);
-        }
-        
-        .payment-section {
-            margin-bottom: 25px;
-        }
-        
-        .section-title {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: var(--light);
-            font-weight: 600;
-        }
-        
-        .phone-input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        
-        .phone-prefix {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray);
-            font-weight: 600;
-            font-size: 1rem;
-            pointer-events: none;
-        }
-        
-        .phone-input {
-            width: 100%;
-            padding: 16px 16px 16px 50px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: var(--light);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .phone-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.1);
-        }
-        
-        .phone-input::placeholder {
-            color: var(--gray);
-        }
-        
-        .input-note {
-            font-size: 0.85rem;
-            color: var(--gray);
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .input-note i {
-            color: var(--info);
-        }
-        
-        .payment-button {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .payment-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.7s;
-        }
-        
-        .payment-button:hover::before {
-            left: 100%;
-        }
-        
-        .payment-button:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
-        }
-        
-        .payment-button:active:not(:disabled) {
-            transform: translateY(-1px);
-        }
-        
-        .payment-button:disabled {
-            background: var(--gray);
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-        
-        .payment-button.processing {
-            background: var(--info);
-        }
-        
-        .loading-spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .payment-button.processing .loading-spinner {
-            display: block;
-        }
-        
-        .payment-button.processing .button-text {
-            display: none;
-        }
-        
-        .result-message {
-            padding: 18px;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-            align-items: flex-start;
-            gap: 15px;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .result-message.success {
-            background: rgba(76, 175, 80, 0.15);
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            display: flex;
-        }
-        
-        .result-message.error {
-            background: rgba(244, 67, 54, 0.15);
-            border: 1px solid rgba(244, 67, 54, 0.3);
-            display: flex;
-        }
-        
-        .result-message.pending {
-            background: rgba(255, 152, 0, 0.15);
-            border: 1px solid rgba(255, 152, 0, 0.3);
-            display: flex;
-        }
-        
-        .result-icon {
-            font-size: 1.3rem;
-            margin-top: 2px;
-        }
-        
-        .result-message.success .result-icon {
-            color: var(--success);
-        }
-        
-        .result-message.error .result-icon {
-            color: var(--error);
-        }
-        
-        .result-message.pending .result-icon {
-            color: var(--warning);
-        }
-        
-        .result-content {
-            flex: 1;
-        }
-        
-        .result-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--light);
-        }
-        
-        .result-details {
-            font-size: 0.9rem;
-            color: var(--gray);
-            line-height: 1.5;
-        }
-        
-        .footer-links {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .footer-links a {
-            color: var(--primary);
-            text-decoration: none;
-            margin: 0 12px;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .footer-links a:hover {
-            color: #f40612;
-        }
-        
-        .terms {
-            margin-top: 15px;
-            font-size: 0.8rem;
-            color: var(--gray);
-            line-height: 1.5;
-        }
-        
-        @media (max-width: 600px) {
-            body {
-                padding: 15px;
-                align-items: flex-start;
-                padding-top: 40px;
-            }
-            
-            .checkout-container {
-                padding: 25px 20px;
-                border-radius: 15px;
-            }
-            
-            .logo h1 {
-                font-size: 2.2rem;
-            }
-            
-            .price-amount {
-                font-size: 2.8rem;
-            }
-            
-            .feature-item {
-                padding: 12px;
-            }
-            
-            .payment-button {
-                padding: 16px;
-            }
-            
-            .footer-links {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .footer-links a {
-                margin: 0;
-            }
-        }
-        
-        @media (max-width: 400px) {
-            .price-card {
-                padding: 20px;
-            }
-            
-            .price-amount {
-                font-size: 2.2rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="checkout-container">
-        <div class="logo">
-            <h1>KINAFLIX</h1>
-            <p>Ad-Free Streaming Experience</p>
-        </div>
-        
-        <!-- Subscription Status -->
-        <div id="subscription-status" class="subscription-status">
-            <div class="status-icon" id="status-icon">
-                <i id="status-icon-i"></i>
-            </div>
-            <div class="status-title" id="status-title">Your Subscription Status</div>
-            <div class="status-details" id="status-details"></div>
-        </div>
-        
-        <!-- Price Card -->
-        <div class="price-card">
-            <div class="price-amount">1,000</div>
-            <div class="price-currency">RWF</div>
-            <div class="price-duration">Remove ads for 3 weeks</div>
-        </div>
-        
-        <!-- Features -->
-        <div class="features">
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="feature-text">
-                    <strong>No banner ads</strong> while watching movies
-                </div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="feature-text">
-                    <strong>No pop-up interruptions</strong> during playback
-                </div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="feature-text">
-                    <strong>Clean interface</strong> without distractions
-                </div>
-            </div>
-            <div class="feature-item negative">
-                <div class="feature-icon">
-                    <i class="fas fa-times-circle"></i>
-                </div>
-                <div class="feature-text">
-                    <strong>Important:</strong> All movies remain 100% FREE for everyone. No content locking.
-                </div>
-            </div>
-        </div>
-        
-        <!-- Payment Form -->
-        <div class="payment-section">
-            <div class="section-title">Mobile Money Payment (MTN/Airtel)</div>
-            
-            <form id="payment-form">
-                <div class="phone-input-group">
-                    <span class="phone-prefix">07</span>
-                    <input 
-                        type="tel" 
-                        id="phone-number" 
-                        class="phone-input" 
-                        placeholder="XXXXXX" 
-                        pattern="[0-9]{8}"
-                        maxlength="8"
-                        inputmode="numeric"
-                        required
-                    >
-                </div>
-                <div class="input-note">
-                    <i class="fas fa-info-circle"></i>
-                    Enter last 8 digits of your phone number
-                </div>
-                
-                <button type="submit" id="pay-button" class="payment-button">
-                    <div class="loading-spinner"></div>
-                    <span class="button-text" id="button-text">Remove Ads – 1,000 RWF</span>
-                </button>
-            </form>
-            
-            <!-- Result Message -->
-            <div id="result-message" class="result-message">
-                <div class="result-icon">
-                    <i id="result-icon-i"></i>
-                </div>
-                <div class="result-content">
-                    <div class="result-title" id="result-title"></div>
-                    <div class="result-details" id="result-details"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Footer Links -->
-        <div class="footer-links">
-            <a href="/" onclick="goHome(event)">
-                <i class="fas fa-arrow-left"></i> Back to Movies
-            </a>
-            <a href="/help" onclick="showHelp(event)">
-                <i class="fas fa-question-circle"></i> Need Help?
-            </a>
-            <div class="terms">
-                By proceeding, you authorize a 1,000 RWF charge to your mobile money account.
-                Transaction fee may apply. Ads will be removed immediately upon successful payment.
-                Subscription automatically expires after 21 days.
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
+    <title>Subscribe - Kinaflix</title>
+    <link rel="stylesheet" href="css/style.css"> 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     
-    <!-- Load our scripts -->
-    <script src="/js/firebase-config.js"></script>
-    <script src="/js/payment-processor.js"></script>
-    <script src="/js/subscription-manager.js"></script>
+    <style>
+        body { background-color: #0f0f0f; color: white; font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .payment-container { background: #1f1f1f; padding: 40px; border-radius: 8px; text-align: center; max-width: 400px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #333; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #e50914; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 16px; }
+        button:hover { background: #b20710; }
+        .message { margin-top: 15px; font-size: 14px; display: none; }
+        .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid #e50914; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="payment-container">
+        <h2>Premium Access</h2>
+        <p>Unlimited movies for 3 weeks.</p>
+        <h3 style="color: #e50914;">1,445 RWF</h3>
+        
+        <div id="payment-form">
+            <input type="tel" id="phone" placeholder="Enter Momo/Airtel Number (e.g. 078...)" maxlength="10">
+            <button id="pay-btn" onclick="initiatePayment()">Pay Now</button>
+        </div>
+
+        <div id="loader" class="loader"></div>
+        <p id="status-msg" class="message"></p>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
 
     <script>
-        // DOM Elements
-        const paymentForm = document.getElementById('payment-form');
-        const phoneInput = document.getElementById('phone-number');
-        const payButton = document.getElementById('pay-button');
-        const buttonText = document.getElementById('button-text');
-        const resultMessage = document.getElementById('result-message');
-        const resultIcon = document.getElementById('result-icon-i');
-        const resultTitle = document.getElementById('result-title');
-        const resultDetails = document.getElementById('result-details');
-        const subscriptionStatus = document.getElementById('subscription-status');
-        const statusIcon = document.getElementById('status-icon');
-        const statusIconI = document.getElementById('status-icon-i');
-        const statusTitle = document.getElementById('status-title');
-        const statusDetails = document.getElementById('status-details');
-
-        let isProcessing = false;
-
-        /**
-         * Initialize checkout page
-         */
-        async function init() {
-            console.log('🚀 Initializing subscription page...');
-            
-            // Wait for Firebase to initialize
-            await new Promise(resolve => {
-                const checkAuth = () => {
-                    if (auth) {
-                        if (auth.currentUser) {
-                            resolve();
-                        } else {
-                            auth.onAuthStateChanged((user) => {
-                                if (user) resolve();
-                            });
-                        }
-                    } else {
-                        setTimeout(checkAuth, 100);
-                    }
-                };
-                checkAuth();
-            });
-            
-            // Format phone input
-            phoneInput.addEventListener('input', formatPhoneInput);
-            
-            // Handle form submission
-            paymentForm.addEventListener('submit', handlePayment);
-            
-            // Listen for subscription updates
-            window.addEventListener('subscription-update', (event) => {
-                updateUI(event.detail);
-            });
-            
-            // Initial UI update
-            const subscriptionData = await subscriptionManager.init();
-            updateUI(subscriptionData);
-            
-            console.log('✅ Page initialized successfully');
-        }
-
-        /**
-         * Format phone number input
-         */
-        function formatPhoneInput() {
-            let value = phoneInput.value.replace(/\D/g, '');
-            if (value.length > 8) value = value.substring(0, 8);
-            phoneInput.value = value;
-        }
-
-        /**
-         * Update UI based on subscription status
-         */
-        function updateUI(data) {
-            if (!data) {
-                // No subscription data
-                subscriptionStatus.className = 'subscription-status';
-                statusIcon.className = 'status-icon inactive';
-                statusIconI.className = 'fas fa-ad';
-                statusTitle.textContent = 'Ads Enabled';
-                statusDetails.textContent = 'You are currently seeing ads. Subscribe to remove them.';
-                subscriptionStatus.style.display = 'block';
-                buttonText.textContent = 'Remove Ads – 1,000 RWF';
-                payButton.disabled = false;
-                
-            } else if (data.subscriptionActive) {
-                // Active subscription
-                subscriptionStatus.className = 'subscription-status active';
-                statusIcon.className = 'status-icon active';
-                statusIconI.className = 'fas fa-crown';
-                statusTitle.textContent = 'Ad-Free Active';
-                
-                const expiryDate = new Date(data.subscriptionEnd);
-                const formattedDate = expiryDate.toLocaleDateString('en-RW', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
-                
-                statusDetails.innerHTML = `
-                    Your ad-free subscription is active until <strong>${formattedDate}</strong>.
-                    <br>${data.daysRemaining} days remaining.
-                `;
-                subscriptionStatus.style.display = 'block';
-                buttonText.textContent = 'Subscription Active';
-                payButton.disabled = true;
-                
-            } else if (data.hasSubscription && !data.subscriptionActive) {
-                // Expired subscription
-                subscriptionStatus.className = 'subscription-status expired';
-                statusIcon.className = 'status-icon expired';
-                statusIconI.className = 'fas fa-clock';
-                statusTitle.textContent = 'Subscription Expired';
-                
-                const expiryDate = new Date(data.subscriptionEnd);
-                const formattedDate = expiryDate.toLocaleDateString('en-RW', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                });
-                
-                statusDetails.innerHTML = `
-                    Your subscription expired on <strong>${formattedDate}</strong>.
-                    <br>Renew to continue enjoying ad-free streaming.
-                `;
-                subscriptionStatus.style.display = 'block';
-                buttonText.textContent = 'Renew Subscription – 1,000 RWF';
-                payButton.disabled = false;
-                
-            } else {
-                // No subscription
-                subscriptionStatus.className = 'subscription-status';
-                statusIcon.className = 'status-icon inactive';
-                statusIconI.className = 'fas fa-ad';
-                statusTitle.textContent = 'Ads Enabled';
-                statusDetails.textContent = data.message || 'Subscribe to remove ads.';
-                subscriptionStatus.style.display = 'block';
-                buttonText.textContent = 'Remove Ads – 1,000 RWF';
-                payButton.disabled = false;
-            }
-        }
-
-        /**
-         * Handle payment form submission
-         */
-        async function handlePayment(event) {
-            event.preventDefault();
-            
-            if (isProcessing || !auth.currentUser) return;
-            
-            const phoneNumber = phoneInput.value.trim();
-            if (!phoneNumber || phoneNumber.length !== 8) {
-                showResult('error', 'Invalid Phone Number', 'Please enter a valid 8-digit phone number (after 07).');
+        // Check Login Status immediately
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.firebase) {
+                console.error("Firebase not loaded! Check internet or script tags.");
                 return;
             }
             
-            const fullPhoneNumber = `07${phoneNumber}`;
-            
-            // Start processing
-            isProcessing = true;
-            payButton.classList.add('processing');
-            hideResult();
-            
-            try {
-                console.log('🔄 Processing payment for:', fullPhoneNumber);
-                
-                // Process payment via PayPack
-                const data = await paymentProcessor.processPayment(fullPhoneNumber);
-                
-                if (data.success) {
-                    if (data.status === 'pending') {
-                        showResult('pending', 'Payment Pending', 
-                            data.instructions || 'Please check your phone and enter your PIN to confirm the payment.');
-                        
-                        // Poll for payment confirmation
-                        try {
-                            const confirmedStatus = await paymentProcessor.pollPaymentStatus(data.transactionId);
-                            
-                            if (confirmedStatus.subscriptionActive) {
-                                showResult('success', 'Payment Confirmed!', 
-                                    'Your payment has been confirmed. Ads are now removed for 21 days.');
-                                
-                                phoneInput.value = '';
-                                
-                                // Refresh subscription status
-                                await subscriptionManager.refresh();
-                                
-                                // Show success message for longer
-                                setTimeout(() => {
-                                    showResult('success', '✅ Ready to Watch!', 
-                                        'You can now enjoy ad-free streaming. Return to movies to see the difference.');
-                                }, 2000);
-                            }
-                            
-                        } catch (pollError) {
-                            console.error('Polling error:', pollError);
-                            showResult('error', 'Payment Status Unknown', 
-                                pollError.message || 'Unable to confirm payment status. Please check your phone and refresh the page.');
-                        }
-                        
-                    } else if (data.status === 'successful') {
-                        showResult('success', 'Payment Successful!', 
-                            data.message || 'Payment successful! Ads removed for 21 days.');
-                        
-                        phoneInput.value = '';
-                        
-                        // Refresh subscription status
-                        setTimeout(async () => {
-                            await subscriptionManager.refresh();
-                            
-                            // Show success message for longer
-                            setTimeout(() => {
-                                showResult('success', '✅ Ready to Watch!', 
-                                    'You can now enjoy ad-free streaming. Return to movies to see the difference.');
-                            }, 2000);
-                        }, 1500);
-                    }
+            // Auto-redirect if not logged in
+            firebase.auth().onAuthStateChanged((user) => {
+                if (!user) {
+                    console.log("User not logged in. Redirecting...");
+                    window.location.href = "login.html";
                 } else {
-                    showResult('error', 'Payment Failed', 
-                        data.error || 'Payment could not be processed. Please try again.');
+                    console.log("User logged in:", user.uid);
                 }
-                
+            });
+        });
+
+        async function initiatePayment() {
+            const phone = document.getElementById('phone').value;
+            const btn = document.getElementById('pay-btn');
+            const loader = document.getElementById('loader');
+            const msg = document.getElementById('status-msg');
+
+            // Simple Validation
+            if (phone.length !== 10 || (!phone.startsWith('078') && !phone.startsWith('079') && !phone.startsWith('072') && !phone.startsWith('073'))) {
+                msg.style.color = 'orange';
+                msg.innerText = "Please enter a valid Rwanda phone number.";
+                msg.style.display = 'block';
+                return;
+            }
+
+            // UI Loading State
+            btn.style.display = 'none';
+            loader.style.display = 'block';
+            msg.style.display = 'none';
+
+            try {
+                // Get the current user's token securely
+                const user = firebase.auth().currentUser;
+                if (!user) throw new Error("Please log in again.");
+                const token = await user.getIdToken();
+
+                // Call YOUR new Backend
+                const response = await fetch('/api/paypack-cashin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ phoneNumber: phone })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    msg.style.color = '#46d369'; // Green
+                    msg.innerText = "Check your phone to approve the PIN!";
+                    // Optional: Start checking for payment success
+                } else {
+                    throw new Error(data.error || "Payment failed.");
+                }
+
             } catch (error) {
-                console.error('❌ Payment error:', error);
-                showResult('error', 'Payment Failed', 
-                    error.message || 'Unable to process payment. Please try again.');
+                console.error(error);
+                msg.style.color = 'red';
+                msg.innerText = error.message;
+                btn.style.display = 'block'; // Show button again
             } finally {
-                isProcessing = false;
-                payButton.classList.remove('processing');
-                paymentProcessor.stopPolling();
+                loader.style.display = 'none';
+                msg.style.display = 'block';
             }
         }
-
-        /**
-         * Show result message
-         */
-        function showResult(type, title, details) {
-            console.log(`📝 Result: ${type} - ${title}`);
-            
-            resultMessage.className = `result-message ${type}`;
-            
-            switch(type) {
-                case 'success':
-                    resultIcon.className = 'fas fa-check-circle';
-                    break;
-                case 'error':
-                    resultIcon.className = 'fas fa-exclamation-circle';
-                    break;
-                case 'pending':
-                    resultIcon.className = 'fas fa-clock';
-                    break;
-            }
-            
-            resultTitle.textContent = title;
-            resultDetails.textContent = details;
-            resultMessage.style.display = 'flex';
-            
-            // Auto-hide success messages after 8 seconds
-            if (type === 'success') {
-                setTimeout(() => {
-                    if (resultMessage.style.display === 'flex') {
-                        resultMessage.style.display = 'none';
-                    }
-                }, 8000);
-            }
-            
-            // Auto-hide pending messages after 15 seconds
-            if (type === 'pending') {
-                setTimeout(() => {
-                    if (resultMessage.style.display === 'flex' && 
-                        resultTitle.textContent.includes('Pending')) {
-                        resultMessage.style.display = 'none';
-                    }
-                }, 15000);
-            }
-        }
-
-        /**
-         * Hide result message
-         */
-        function hideResult() {
-            resultMessage.style.display = 'none';
-        }
-
-        /**
-         * Navigate home
-         */
-        function goHome(event) {
-            event.preventDefault();
-            window.location.href = '/';
-        }
-
-        /**
-         * Show help
-         */
-        function showHelp(event) {
-            event.preventDefault();
-            alert('💰 KINAFLIX Payment Help:\n\n' +
-                  '1. Enter your 10-digit Rwandan phone number (07XXXXXXXX)\n' +
-                  '2. Click "Remove Ads – 1,000 RWF"\n' +
-                  '3. Check your phone for a payment request\n' +
-                  '4. Enter your mobile money PIN to confirm\n' +
-                  '5. Ads will be removed immediately\n\n' +
-                  '📞 Support: support@kinaflix.com\n' +
-                  '📱 Phone: +250 788 123 456');
-        }
-
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', init);
-        
-        // For admin debugging
-        window.debugKinaflix = {
-            getUser: () => auth.currentUser,
-            getSubscription: () => subscriptionManager.subscriptionData,
-            refresh: () => subscriptionManager.refresh(),
-            clearCache: () => {
-                subscriptionManager.clearCache();
-                updateUI(null);
-                console.log('✅ Cache cleared');
-            }
-        };
     </script>
 </body>
 </html>
