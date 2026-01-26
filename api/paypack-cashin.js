@@ -1,40 +1,15 @@
 import axios from 'axios';
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { initializeApp, cert, getApps, getApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
-// 1. Initialize Firebase Admin (Only once)
-if (!getApps().length) {
-    try {
-        const privateKey = process.env.FIREBASE_PRIVATE_KEY 
-            ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
-            : undefined;
-
-        if (!privateKey) throw new Error("FIREBASE_PRIVATE_KEY is missing in Vercel Settings");
-
-        initializeApp({
-            credential: cert({
-                projectId: process.env.FIREBASE_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: privateKey,
-            }),
-        });
-    } catch (e) {
-        console.error("Firebase Init Error:", e);
-    }
-}
-
-const db = getFirestore();
-const auth = getAuth();
-
 export default async function handler(req, res) {
-    // 2. Fix CORS (Allow your Vercel frontend to talk to this backend)
+    // 1. CORS Headers (Essential for Vercel)
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*'); 
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
 
-    // Handle "Preflight" check from browser
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -43,8 +18,42 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
+    let db, auth;
+
     try {
-        // 3. Security Check (Verify User is Logged In)
+        // 2. Safe Initialization (Inside the handler to catch errors)
+        if (!getApps().length) {
+            // Check for keys BEFORE crashing
+            if (!process.env.FIREBASE_PRIVATE_KEY) throw new Error("Missing FIREBASE_PRIVATE_KEY in Vercel");
+            if (!process.env.FIREBASE_CLIENT_EMAIL) throw new Error("Missing FIREBASE_CLIENT_EMAIL in Vercel");
+            if (!process.env.FIREBASE_PROJECT_ID) throw new Error("Missing FIREBASE_PROJECT_ID in Vercel");
+
+            const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+
+            initializeApp({
+                credential: cert({
+                    projectId: process.env.FIREBASE_PROJECT_ID,
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    privateKey: privateKey,
+                }),
+            });
+        }
+        
+        // Get instances safely
+        const app = getApp();
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+    } catch (initError) {
+        console.error("FIREBASE INIT ERROR:", initError);
+        return res.status(500).json({ 
+            success: false, 
+            error: `Server Config Error: ${initError.message}` 
+        });
+    }
+
+    try {
+        // 3. Verify User Token
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ error: 'Missing authorization token' });
@@ -53,15 +62,16 @@ export default async function handler(req, res) {
         const decodedToken = await auth.verifyIdToken(idToken);
         const userId = decodedToken.uid;
 
-        // 4. Validate Input
+        // 4. Validate Inputs
         const { phoneNumber } = req.body;
-        if (!phoneNumber) {
-            return res.status(400).json({ error: 'Phone number is required' });
+        if (!phoneNumber) return res.status(400).json({ error: 'Phone number is required' });
+        
+        if (!process.env.PAYPACK_CLIENT_ID || !process.env.PAYPACK_CLIENT_SECRET) {
+            throw new Error("Missing Paypack Credentials in Vercel");
         }
 
-        // --- STEP 5: AUTHENTICATE WITH PAYPACK (This was missing!) ---
-        // We must exchange Client ID/Secret for a temporary Access Token
-        console.log("Getting Paypack Token...");
+        // 5. Paypack Authentication
+        console.log("Authenticating with Paypack...");
         const authResponse = await axios.post(
             'https://payments.paypack.rw/api/auth/agents/authorize',
             {
@@ -71,19 +81,18 @@ export default async function handler(req, res) {
         );
 
         const accessToken = authResponse.data.access; 
-        console.log("Paypack Token Received.");
 
-        // --- STEP 6: REQUEST PAYMENT (CASHIN) ---
-        console.log(`Requesting Payment for ${phoneNumber}...`);
+        // 6. Request Payment
+        console.log(`Requesting 1445 RWF from ${phoneNumber}...`);
         const paymentResponse = await axios.post(
             'https://payments.paypack.rw/api/transactions/cashin',
             {
-                amount: 1445, // Fixed amount
+                amount: 1445,
                 number: phoneNumber,
             },
             {
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`, // Use the token we just got
+                    'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
             }
@@ -91,19 +100,17 @@ export default async function handler(req, res) {
 
         const paypackData = paymentResponse.data;
 
-        // 7. Save to Database
+        // 7. Save Transaction
         await db.collection('transactions').doc(paypackData.ref).set({
             userId: userId,
             amount: 1445,
             phoneNumber: phoneNumber,
-            status: 'pending', // Webhook will update this to 'successful' later
+            status: 'pending',
             paypackRef: paypackData.ref,
             createdAt: new Date().toISOString(),
-            // Pre-calculate subscription end date (inactive until payment confirms)
             subscriptionEnd: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString()
         });
 
-        // 8. Send Success Response to Frontend
         return res.status(200).json({
             success: true,
             message: 'Check your phone to confirm payment',
@@ -111,9 +118,7 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('SERVER ERROR:', error.response?.data || error.message);
-        
-        // Return a JSON error so your frontend doesn't crash with "Unexpected token A"
+        console.error('RUNTIME ERROR:', error.response?.data || error.message);
         return res.status(500).json({ 
             success: false,
             error: error.response?.data?.message || error.message || "Internal Server Error" 
