@@ -17,13 +17,13 @@ export default async function handler(req, res) {
     let db, auth;
 
     try {
-        // 2. Safe Firebase Initialization
+        // 2. Safe Firebase Initialization (Inside the function to catch errors)
         if (!getApps().length) {
-            // Check keys before crashing
-            if (!process.env.FIREBASE_PRIVATE_KEY) throw new Error("Missing FIREBASE_PRIVATE_KEY");
-            if (!process.env.FIREBASE_CLIENT_EMAIL) throw new Error("Missing FIREBASE_CLIENT_EMAIL");
-            if (!process.env.FIREBASE_PROJECT_ID) throw new Error("Missing FIREBASE_PROJECT_ID");
+            if (!process.env.FIREBASE_PRIVATE_KEY) throw new Error("Missing FIREBASE_PRIVATE_KEY in Vercel");
+            if (!process.env.FIREBASE_CLIENT_EMAIL) throw new Error("Missing FIREBASE_CLIENT_EMAIL in Vercel");
+            if (!process.env.FIREBASE_PROJECT_ID) throw new Error("Missing FIREBASE_PROJECT_ID in Vercel");
 
+            // Fix the key format safely
             const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
 
             initializeApp({
@@ -41,6 +41,7 @@ export default async function handler(req, res) {
 
     } catch (initError) {
         console.error("FIREBASE INIT ERROR:", initError);
+        // Returns JSON error instead of crashing
         return res.status(500).json({ success: false, error: `Server Config Error: ${initError.message}` });
     }
 
@@ -62,7 +63,7 @@ export default async function handler(req, res) {
             throw new Error("Missing Paypack Credentials in Vercel Settings");
         }
 
-        // --- STEP 5: AUTHENTICATE WITH PAYPACK (The Missing Part) ---
+        // --- STEP 5: AUTHENTICATE WITH PAYPACK (Required!) ---
         console.log("Authenticating with Paypack...");
         const authResponse = await axios.post(
             'https://payments.paypack.rw/api/auth/agents/authorize',
@@ -72,7 +73,7 @@ export default async function handler(req, res) {
             }
         );
 
-        const accessToken = authResponse.data.access; // Get the REAL token
+        const accessToken = authResponse.data.access; 
         console.log("Paypack Token Received.");
 
         // --- STEP 6: REQUEST PAYMENT ---
@@ -85,7 +86,7 @@ export default async function handler(req, res) {
             },
             {
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`, // Use the Access Token, NOT the secret
+                    'Authorization': `Bearer ${accessToken}`, // Use the token we just got
                     'Content-Type': 'application/json',
                 },
             }
@@ -112,7 +113,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('RUNTIME ERROR:', error.response?.data || error.message);
-        // Return JSON so the frontend doesn't crash with "Unexpected token A"
         return res.status(500).json({ 
             success: false,
             error: error.response?.data?.message || error.message || "Internal Server Error" 
