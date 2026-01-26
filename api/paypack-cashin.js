@@ -1,42 +1,32 @@
-import axios from 'axios';
-// We import these, but we won't use them until INSIDE the function
-import { initializeApp, cert, getApps, getApp } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+// Use 'require' instead of 'import' to prevent server crashes
+const axios = require('axios');
+const { initializeApp, cert, getApps, getApp } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+const { getFirestore } = require('firebase-admin/firestore');
 
-export default async function handler(req, res) {
-    // 1. Set CORS Headers (So your browser accepts the answer)
+module.exports = async function handler(req, res) {
+    // 1. CORS Headers
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*'); 
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
 
-    // 2. Handle Preflight (Browser checking if server is safe)
+    // Handle Preflight
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
-    console.log("Starting Request..."); // Log to Vercel Console
+    console.log("Starting Request (CommonJS)...");
 
-    // 3. DEBUG: Check Variables (Don't reveal secrets, just check existence)
-    if (!process.env.FIREBASE_PRIVATE_KEY) {
-        console.error("CRITICAL: FIREBASE_PRIVATE_KEY is missing!");
-        return res.status(500).json({ error: "Server Config Error: Private Key Missing" });
-    }
-    if (!process.env.PAYPACK_CLIENT_ID) {
-        console.error("CRITICAL: PAYPACK_CLIENT_ID is missing!");
-        return res.status(500).json({ error: "Server Config Error: Paypack ID Missing" });
-    }
-
+    // 2. Safe Firebase Initialization
     let db, auth;
-
     try {
-        // 4. Initialize Firebase SAFELY (Inside the function)
-        // This prevents the "Unexpected token A" crash
         if (getApps().length === 0) {
-            console.log("Initializing Firebase...");
-            const rawKey = process.env.FIREBASE_PRIVATE_KEY;
-            // Handle both escaped newlines (\\n) and real newlines (\n)
-            const privateKey = rawKey.replace(/\\n/g, '\n');
+            if (!process.env.FIREBASE_PRIVATE_KEY) throw new Error("Missing FIREBASE_PRIVATE_KEY");
+            if (!process.env.FIREBASE_CLIENT_EMAIL) throw new Error("Missing FIREBASE_CLIENT_EMAIL");
+            if (!process.env.FIREBASE_PROJECT_ID) throw new Error("Missing FIREBASE_PROJECT_ID");
+
+            // Fix the key format
+            const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
 
             initializeApp({
                 credential: cert({
@@ -53,29 +43,30 @@ export default async function handler(req, res) {
         auth = getAuth(app);
 
     } catch (initError) {
-        console.error("FIREBASE CRASH:", initError);
-        return res.status(500).json({ 
-            error: `Firebase Init Failed: ${initError.message}` 
-        });
+        console.error("FIREBASE INIT ERROR:", initError);
+        return res.status(500).json({ success: false, error: `Server Config Error: ${initError.message}` });
     }
 
     try {
-        // 5. Check User Token
+        // 3. Verify User Token
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ error: 'Missing authorization token' });
         }
         const idToken = authHeader.split('Bearer ')[1];
-        // Verify token
         const decodedToken = await auth.verifyIdToken(idToken);
         const userId = decodedToken.uid;
 
-        // 6. Get Data
+        // 4. Validate Input
         const { phoneNumber } = req.body;
         if (!phoneNumber) return res.status(400).json({ error: 'Phone number is required' });
+        
+        if (!process.env.PAYPACK_CLIENT_ID || !process.env.PAYPACK_CLIENT_SECRET) {
+            throw new Error("Missing Paypack Credentials in Vercel Settings");
+        }
 
-        // 7. Paypack Authentication
-        console.log("Logging into Paypack...");
+        // 5. Paypack Authentication
+        console.log("Authenticating with Paypack...");
         const authResponse = await axios.post(
             'https://payments.paypack.rw/api/auth/agents/authorize',
             {
@@ -85,10 +76,10 @@ export default async function handler(req, res) {
         );
 
         const accessToken = authResponse.data.access; 
-        console.log("Paypack Login Success.");
+        console.log("Paypack Token Received.");
 
-        // 8. Request Money
-        console.log(`Asking ${phoneNumber} for payment...`);
+        // 6. Request Payment
+        console.log(`Requesting 1445 RWF from ${phoneNumber}...`);
         const paymentResponse = await axios.post(
             'https://payments.paypack.rw/api/transactions/cashin',
             {
@@ -105,7 +96,7 @@ export default async function handler(req, res) {
 
         const paypackData = paymentResponse.data;
 
-        // 9. Save to Database
+        // 7. Save Transaction
         await db.collection('transactions').doc(paypackData.ref).set({
             userId: userId,
             amount: 1445,
@@ -123,10 +114,10 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('RUNTIME ERROR:', error.message);
-        // Returns JSON so frontend doesn't break
+        console.error('RUNTIME ERROR:', error.response?.data || error.message);
         return res.status(500).json({ 
-            error: error.response?.data?.message || error.message || "Unknown Server Error" 
+            success: false,
+            error: error.response?.data?.message || error.message || "Internal Server Error" 
         });
     }
-}
+};
