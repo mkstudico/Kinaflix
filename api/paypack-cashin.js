@@ -10,23 +10,19 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
-    }
+    // Handle Preflight
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
     let db, auth;
 
     try {
-        // 2. Safe Initialization (Inside the handler to catch errors)
+        // 2. Safe Firebase Initialization
         if (!getApps().length) {
-            // Check for keys BEFORE crashing
-            if (!process.env.FIREBASE_PRIVATE_KEY) throw new Error("Missing FIREBASE_PRIVATE_KEY in Vercel");
-            if (!process.env.FIREBASE_CLIENT_EMAIL) throw new Error("Missing FIREBASE_CLIENT_EMAIL in Vercel");
-            if (!process.env.FIREBASE_PROJECT_ID) throw new Error("Missing FIREBASE_PROJECT_ID in Vercel");
+            // Check keys before crashing
+            if (!process.env.FIREBASE_PRIVATE_KEY) throw new Error("Missing FIREBASE_PRIVATE_KEY");
+            if (!process.env.FIREBASE_CLIENT_EMAIL) throw new Error("Missing FIREBASE_CLIENT_EMAIL");
+            if (!process.env.FIREBASE_PROJECT_ID) throw new Error("Missing FIREBASE_PROJECT_ID");
 
             const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
 
@@ -39,17 +35,13 @@ export default async function handler(req, res) {
             });
         }
         
-        // Get instances safely
         const app = getApp();
         db = getFirestore(app);
         auth = getAuth(app);
 
     } catch (initError) {
         console.error("FIREBASE INIT ERROR:", initError);
-        return res.status(500).json({ 
-            success: false, 
-            error: `Server Config Error: ${initError.message}` 
-        });
+        return res.status(500).json({ success: false, error: `Server Config Error: ${initError.message}` });
     }
 
     try {
@@ -67,10 +59,10 @@ export default async function handler(req, res) {
         if (!phoneNumber) return res.status(400).json({ error: 'Phone number is required' });
         
         if (!process.env.PAYPACK_CLIENT_ID || !process.env.PAYPACK_CLIENT_SECRET) {
-            throw new Error("Missing Paypack Credentials in Vercel");
+            throw new Error("Missing Paypack Credentials in Vercel Settings");
         }
 
-        // 5. Paypack Authentication
+        // --- STEP 5: AUTHENTICATE WITH PAYPACK (The Missing Part) ---
         console.log("Authenticating with Paypack...");
         const authResponse = await axios.post(
             'https://payments.paypack.rw/api/auth/agents/authorize',
@@ -80,9 +72,10 @@ export default async function handler(req, res) {
             }
         );
 
-        const accessToken = authResponse.data.access; 
+        const accessToken = authResponse.data.access; // Get the REAL token
+        console.log("Paypack Token Received.");
 
-        // 6. Request Payment
+        // --- STEP 6: REQUEST PAYMENT ---
         console.log(`Requesting 1445 RWF from ${phoneNumber}...`);
         const paymentResponse = await axios.post(
             'https://payments.paypack.rw/api/transactions/cashin',
@@ -92,7 +85,7 @@ export default async function handler(req, res) {
             },
             {
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`,
+                    'Authorization': `Bearer ${accessToken}`, // Use the Access Token, NOT the secret
                     'Content-Type': 'application/json',
                 },
             }
@@ -100,7 +93,7 @@ export default async function handler(req, res) {
 
         const paypackData = paymentResponse.data;
 
-        // 7. Save Transaction
+        // 7. Save Transaction to Firebase
         await db.collection('transactions').doc(paypackData.ref).set({
             userId: userId,
             amount: 1445,
@@ -119,6 +112,7 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('RUNTIME ERROR:', error.response?.data || error.message);
+        // Return JSON so the frontend doesn't crash with "Unexpected token A"
         return res.status(500).json({ 
             success: false,
             error: error.response?.data?.message || error.message || "Internal Server Error" 
