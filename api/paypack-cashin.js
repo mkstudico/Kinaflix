@@ -1,130 +1,147 @@
-// 1. Use 'require' (CommonJS) to match your package.json configuration
+// 1. USE STANDARD NODE.JS SYNTAX (CommonJS)
 const axios = require('axios');
-const { initializeApp, cert, getApps, getApp } = require('firebase-admin/app');
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore } = require('firebase-admin/firestore');
 
+// Initialize Firebase safely
+if (!getApps().length) {
+  // Check if keys exist to prevent silent crashes
+  if (process.env.FIREBASE_PRIVATE_KEY) {
+    initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        // Handle Vercel newlines correctly
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      }),
+    });
+  } else {
+    console.error("FIREBASE_PRIVATE_KEY is missing!");
+  }
+}
+
+const db = getFirestore();
+const auth = getAuth();
+
+// 2. USE 'module.exports' INSTEAD OF 'export default'
 module.exports = async function handler(req, res) {
-    // 2. CORS Headers - Critical for Vercel
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*'); 
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
-
-    // Handle Preflight requests
-    if (req.method === 'OPTIONS') return res.status(200).end();
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
-
-    console.log("Starting Paypack Request...");
-
-    // 3. Safe Firebase Initialization
-    let db, auth;
-    try {
-        if (getApps().length === 0) {
-            // Check keys before crashing
-            if (!process.env.FIREBASE_PRIVATE_KEY) throw new Error("Missing FIREBASE_PRIVATE_KEY");
-            if (!process.env.FIREBASE_CLIENT_EMAIL) throw new Error("Missing FIREBASE_CLIENT_EMAIL");
-            if (!process.env.FIREBASE_PROJECT_ID) throw new Error("Missing FIREBASE_PROJECT_ID");
-
-            // Fix the key format (handles \n from Vercel)
-            const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
-
-            initializeApp({
-                credential: cert({
-                    projectId: process.env.FIREBASE_PROJECT_ID,
-                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                    privateKey: privateKey,
-                }),
-            });
-            console.log("Firebase Initialized!");
-        }
-        
-        const app = getApp();
-        db = getFirestore(app);
-        auth = getAuth(app);
-
-    } catch (initError) {
-        console.error("FIREBASE INIT ERROR:", initError);
-        return res.status(500).json({ success: false, error: `Server Config Error: ${initError.message}` });
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Method not allowed. Use POST.' });
+  }
+  
+  try {
+    // 3. VERIFY FIREBASE TOKEN
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, error: 'Unauthorized. Valid Firebase token required.' });
     }
-
+    
+    const token = authHeader.split('Bearer ')[1];
+    let decodedToken;
     try {
-        // 4. Verify User is Logged In
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ error: 'Missing authorization token' });
-        }
-        const idToken = authHeader.split('Bearer ')[1];
-        const decodedToken = await auth.verifyIdToken(idToken);
-        const userId = decodedToken.uid;
-
-        // 5. Validate Input
-        const { phoneNumber } = req.body;
-        // Accept user provided amount or default to 1445
-        const amount = req.body.amount || 1445; 
-
-        if (!phoneNumber) return res.status(400).json({ error: 'Phone number is required' });
-        
-        if (!process.env.PAYPACK_CLIENT_ID || !process.env.PAYPACK_CLIENT_SECRET) {
-            throw new Error("Missing Paypack Credentials in Vercel Settings");
-        }
-
-        // --- STEP 6: AUTHENTICATE WITH PAYPACK (The Missing Link) ---
-        console.log("Authenticating with Paypack...");
-        const authResponse = await axios.post(
-            'https://payments.paypack.rw/api/auth/agents/authorize',
-            {
-                client_id: process.env.PAYPACK_CLIENT_ID,
-                client_secret: process.env.PAYPACK_CLIENT_SECRET,
-            }
-        );
-
-        const accessToken = authResponse.data.access; // Get the REAL token
-        console.log("Paypack Token Received.");
-
-        // --- STEP 7: REQUEST PAYMENT ---
-        console.log(`Requesting ${amount} RWF from ${phoneNumber}...`);
-        const paymentResponse = await axios.post(
-            'https://payments.paypack.rw/api/transactions/cashin',
-            {
-                amount: amount,
-                number: phoneNumber,
-                environment: 'production' // or 'development' if testing
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`, // Use the Access Token
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        const paypackData = paymentResponse.data;
-
-        // 8. Save Transaction to Firebase
-        await db.collection('transactions').doc(paypackData.ref).set({
-            userId: userId,
-            amount: amount,
-            phoneNumber: phoneNumber,
-            status: 'pending',
-            paypackRef: paypackData.ref,
-            createdAt: new Date().toISOString(),
-            // 21 days subscription
-            subscriptionEnd: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString()
-        });
-
-        return res.status(200).json({
-            success: true,
-            message: 'Check your phone to confirm payment',
-            ref: paypackData.ref
-        });
-
+      decodedToken = await auth.verifyIdToken(token);
     } catch (error) {
-        console.error('RUNTIME ERROR:', error.response?.data || error.message);
-        // Return JSON so the frontend doesn't crash with "Unexpected token A"
-        return res.status(500).json({ 
-            success: false,
-            error: error.response?.data?.message || error.message || "Internal Server Error" 
-        });
+      console.error("Token verification failed:", error);
+      return res.status(401).json({ success: false, error: 'Invalid or expired token.' });
     }
+    
+    const userId = decodedToken.uid;
+    const { phoneNumber, amount = 1445 } = req.body; // Default price 1445 RWF
+    
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, error: 'Valid phone number required' });
+    }
+
+    // 4. CHECK EXISTING SUBSCRIPTION (Keep your logic)
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+    
+    if (userDoc.exists) {
+      const userData = userDoc.data();
+      if (userData.subscriptionEnd) {
+        const subscriptionEnd = new Date(userData.subscriptionEnd);
+        if (subscriptionEnd > new Date()) {
+          return res.status(400).json({ success: false, error: 'You already have an active subscription.' });
+        }
+      }
+    }
+    
+    // 5. GET PAYPACK ACCESS TOKEN (This was missing!)
+    console.log("Getting PayPack Access Token...");
+    const authResponse = await axios.post(
+      'https://payments.paypack.rw/api/auth/agents/authorize',
+      {
+        client_id: process.env.PAYPACK_CLIENT_ID,
+        client_secret: process.env.PAYPACK_CLIENT_SECRET,
+      }
+    );
+    const accessToken = authResponse.data.access;
+
+    // 6. REQUEST PAYMENT
+    console.log('Calling PayPack API for:', phoneNumber, 'Amount:', amount);
+    const paypackResponse = await axios.post(
+      'https://payments.paypack.rw/api/transactions/cashin',
+      {
+        amount: parseInt(amount),
+        number: phoneNumber,
+        environment: process.env.PAYPACK_ENVIRONMENT || 'production',
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`, // Use the TOKEN, not the secret
+          'Content-Type': 'application/json',
+          'Idempotency-Key': `${userId}_${Date.now()}`,
+        },
+        timeout: 30000,
+      }
+    );
+    
+    console.log('PayPack Response:', paypackResponse.data);
+    
+    // 7. SAVE TRANSACTION & RETURN RESULT
+    const transactionId = paypackResponse.data.ref;
+    // Note: Status is usually 'pending' immediately after request
+    const status = paypackResponse.data.status || 'pending'; 
+    
+    // Save transaction
+    await db.collection('transactions').doc(transactionId).set({
+      userId: userId,
+      phoneNumber: phoneNumber,
+      amount: parseInt(amount),
+      transactionId: transactionId,
+      status: status,
+      provider: 'paypack',
+      createdAt: new Date().toISOString(),
+      // We set subscriptionEnd, but user stays 'inactive' until webhook confirms success
+      subscriptionEnd: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString()
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Payment initiated. Check your phone.',
+      transactionId: transactionId,
+      status: status
+    });
+
+  } catch (error) {
+    console.error('SERVER ERROR:', error.response?.data || error.message);
+    
+    // Return a clean JSON error so the frontend doesn't crash
+    return res.status(500).json({
+      success: false,
+      error: error.response?.data?.message || error.message || 'Payment processing failed',
+    });
+  }
 };
