@@ -1,23 +1,25 @@
 <!DOCTYPE html>
 <html translate="no">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="google-adsense-account" content="ca-pub-6280599021277554">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Watch Movie - KINAFLIX</title>
   <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
-<meta property="og:title" content="Click to watch.." />
-<meta property="og:description" content="Fungura ino link urebe movie zisobanuye zirenga +100 kubuntu." />
-<meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
-<meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
-<meta property="og:type" content="entertainment" />
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Click to watch.." />
-<meta name="twitter:description" content="Fungura ino link urebe movie zisobanuye zirenga +100 kubuntu." />
-<meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+  <meta property="og:title" content="Click to watch.." />
+  <meta property="og:description" content="Fungura ino link urebe movie zisobanuye zirenga +100 kubuntu." />
+  <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+  <meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
+  <meta property="og:type" content="entertainment" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Click to watch.." />
+  <meta name="twitter:description" content="Fungura ino link urebe movie zisobanuye zirenga +100 kubuntu." />
+  <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
+    /* Your existing CSS - keep exactly as before */
     :root {
       --primary: #e50914;
       --dark: #141414;
@@ -66,8 +68,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .back-button {
@@ -266,19 +273,162 @@
       border: 1px solid rgba(0, 255, 0, 0.4);
     }
 
-    .series-section, .popular-movies-section {
+    /* Series Section Styles */
+    .series-section {
       padding: 1rem;
       background: var(--dark-gray);
       display: none;
     }
 
-    .series-title, .popular-movies-title {
+    .series-title {
       font-size: 1.3rem;
       color: var(--primary);
       margin-bottom: 1rem;
     }
 
-    .series-movies, .popular-movies-grid {
+    .season-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .season-tab {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .season-tab.active {
+      background: var(--primary);
+    }
+
+    .episodes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.8rem;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+
+    .episode-card {
+      background: #2a2a2a;
+      border-radius: 8px;
+      padding: 0.8rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .episode-card:hover {
+      background: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    .episode-card.active {
+      background: var(--primary);
+      border: 2px solid #ff6b6b;
+    }
+
+    .episode-number {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+    }
+
+    .episode-title {
+      font-size: 0.7rem;
+      color: #ccc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .episode-card:hover .episode-title {
+      color: #fff;
+    }
+
+    .premium-badge {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: gold;
+      color: #000;
+      font-size: 0.6rem;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .coming-soon-badge {
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #ff9800;
+      font-size: 0.6rem;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .playing-bars {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      justify-content: center;
+      height: 20px;
+    }
+
+    .playing-bars span {
+      width: 3px;
+      height: 8px;
+      background: white;
+      border-radius: 1px;
+      animation: wave 1s infinite ease-in-out;
+    }
+
+    .playing-bars span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .playing-bars span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes wave {
+
+      0%,
+      100% {
+        height: 8px;
+      }
+
+      50% {
+        height: 16px;
+      }
+    }
+
+    .popular-movies-section {
+      padding: 1rem;
+      background: var(--dark-gray);
+      display: none;
+    }
+
+    .popular-movies-title {
+      font-size: 1.3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .series-movies,
+    .popular-movies-grid {
       display: flex;
       overflow-x: auto;
       gap: 0.5rem;
@@ -289,20 +439,24 @@
       touch-action: pan-x;
     }
 
-    .series-movies::-webkit-scrollbar, .popular-movies-grid::-webkit-scrollbar {
+    .series-movies::-webkit-scrollbar,
+    .popular-movies-grid::-webkit-scrollbar {
       height: 6px;
     }
 
-    .series-movies::-webkit-scrollbar-track, .popular-movies-grid::-webkit-scrollbar-track {
+    .series-movies::-webkit-scrollbar-track,
+    .popular-movies-grid::-webkit-scrollbar-track {
       background: var(--dark-gray);
     }
 
-    .series-movies::-webkit-scrollbar-thumb, .popular-movies-grid::-webkit-scrollbar-thumb {
+    .series-movies::-webkit-scrollbar-thumb,
+    .popular-movies-grid::-webkit-scrollbar-thumb {
       background: var(--primary);
       border-radius: 4px;
     }
 
-    .series-movie-card, .popular-movie-card {
+    .series-movie-card,
+    .popular-movie-card {
       flex: 0 0 auto;
       width: 120px;
       background: rgba(255, 255, 255, 0.1);
@@ -312,17 +466,20 @@
       transition: transform 0.3s ease;
     }
 
-    .series-movie-card:hover, .popular-movie-card:hover {
+    .series-movie-card:hover,
+    .popular-movie-card:hover {
       transform: translateY(-5px);
     }
 
-    .series-movie-poster, .popular-movie-poster {
+    .series-movie-poster,
+    .popular-movie-poster {
       width: 100%;
       height: 160px;
       object-fit: cover;
     }
 
-    .series-movie-title, .popular-movie-title {
+    .series-movie-title,
+    .popular-movie-title {
       padding: 0.5rem;
       font-size: 0.8rem;
       text-align: center;
@@ -622,7 +779,8 @@
         min-height: 200px;
       }
 
-      .back-button, .logo {
+      .back-button,
+      .logo {
         top: 0.5rem;
         z-index: 3;
         background: transparent;
@@ -703,7 +861,8 @@
         margin-left: 12px;
       }
 
-      .series-section, .popular-movies-section {
+      .series-section,
+      .popular-movies-section {
         display: block;
       }
 
@@ -787,7 +946,8 @@
         color: white;
       }
 
-      .series-section, .popular-movies-section {
+      .series-section,
+      .popular-movies-section {
         display: block;
       }
 
@@ -795,7 +955,8 @@
         flex-direction: row;
       }
 
-      .trailer-section, .comments-section {
+      .trailer-section,
+      .comments-section {
         width: 50%;
       }
     }
@@ -810,6 +971,8 @@
       }
     }
   </style>
+</head>
+
 <body>
   <div id="preloader">
     <div id="loader"></div>
@@ -822,11 +985,8 @@
 
   <a href="index.html" class="logo">KINAFLIX</a>
 
- <!--ADVANCED AD PLACEMENT-->
-    <div id="kinaflix-ad-container" style="text-align:center; margin: 20px 10px;"></div>
-    <script type="module" src="js/subscription-checker.js"></script>
-    <!--End-->
-  
+  <div id="kinaflix-ad-container" style="text-align:center; margin: 20px 10px;"></div>
+
   <div class="player-section">
     <div class="player-container" id="player-container">
       <img src="" alt="Movie Poster" id="player-image" class="player-image" />
@@ -838,7 +998,8 @@
           <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
           <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> NZAYIREBA UBUTAHA</button>
           <button class="action-btn download" id="download-btn"><i class="fas fa-download"></i> Download</button>
-          <button class="action-btn whatsapp" id="whatsapp-btn"><i class="fab fa-whatsapp"></i> MENYA UTUGEZWEHO</button>
+          <button class="action-btn whatsapp" id="whatsapp-btn"><i class="fab fa-whatsapp"></i> MENYA
+            UTUGEZWEHO</button>
           <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Sangiza</button>
         </div>
       </div>
@@ -847,8 +1008,8 @@
 
   <div class="series-section" id="series-section">
     <h2 class="series-title" id="series-title"></h2>
-    <input type="range" class="scroll-slider" id="series-slider" min="0" max="100" value="0">
-    <div class="series-movies" id="series-movies"></div>
+    <div class="season-tabs" id="season-tabs"></div>
+    <div class="episodes-grid" id="episodes-grid"></div>
   </div>
 
   <div class="content-section">
@@ -904,7 +1065,8 @@
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
     import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
 
-    const firebaseConfig = {
+    // ===== FIREBASE CONFIGURATION 1 (Kinaflix) =====
+    const firebaseConfig1 = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
       databaseURL: "https://kinaflix-default-rtdb.firebaseio.com",
@@ -915,15 +1077,111 @@
       measurementId: "G-DC1T9B6B9W"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const analytics = getAnalytics(app);
+    // ===== FIREBASE CONFIGURATION 2 (CULLO Movies) =====
+    const firebaseConfig2 = {
+      apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
+      authDomain: "cullo-movies-6813f.firebaseapp.com",
+      projectId: "cullo-movies-6813f",
+      messagingSenderId: "12310118231",
+      appId: "1:12310118231:web:34682f354027fd19758812"
+    };
+
+    // Initialize Primary App (Kinaflix)
+    const app1 = initializeApp(firebaseConfig1);
+    let analytics;
+    try {
+      analytics = getAnalytics(app1);
+    } catch (e) {
+      console.log('Analytics not available');
+      analytics = { logEvent: () => { } };
+    }
+    const auth = getAuth(app1);
+    const db1 = getFirestore(app1);
+
+    // Initialize Secondary App (CULLO Movies)
+    const app2 = initializeApp(firebaseConfig2, "culloMovies");
+    const db2 = getFirestore(app2);
 
     logEvent(analytics, 'page_view', { page_title: 'Watch Movie - KINAFLIX' });
 
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
+    const sourceParam = urlParams.get('source');
+
+    function getDb(source) {
+      return source === 'cullo' ? db2 : db1;
+    }
+
+    function getDownloadUrl(videoUrl, title) {
+      if (!videoUrl) return null;
+      if (videoUrl.includes('drive.google.com') || videoUrl.includes('gdrive')) {
+        const fileIdMatch = videoUrl.match(/\/d\/(.+?)\//) || videoUrl.match(/id=(.+?)(&|$)/);
+        if (fileIdMatch && fileIdMatch[1]) {
+          return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+        }
+      }
+      if (videoUrl.includes('rumble.com')) return null;
+      if (videoUrl.includes('archive.org')) {
+        const identifierMatch = videoUrl.match(/\/details\/([^\/?#]+)/);
+        if (identifierMatch && identifierMatch[1]) {
+          return `https://archive.org/download/${identifierMatch[1]}/${identifierMatch[1]}.mp4`;
+        }
+        return videoUrl;
+      }
+      if (videoUrl.match(/\.(mp4|webm|mkv|avi|mov)$/i)) return videoUrl;
+      return videoUrl;
+    }
+
+    function getStreamingUrl(videoUrl) {
+      if (!videoUrl) return null;
+      if (videoUrl.includes('rumble.com')) {
+        const rumbleMatch = videoUrl.match(/rumble\.com\/(?:embed\/)?([a-zA-Z0-9_-]+)/);
+        if (rumbleMatch && rumbleMatch[1]) {
+          return `https://rumble.com/embed/${rumbleMatch[1]}/?pub=4`;
+        }
+        return videoUrl;
+      }
+      if (videoUrl.includes('drive.google.com')) {
+        const fileIdMatch = videoUrl.match(/\/d\/(.+?)\//) || videoUrl.match(/id=(.+?)(&|$)/);
+        if (fileIdMatch && fileIdMatch[1]) {
+          return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+        }
+      }
+      if (videoUrl.includes('archive.org')) {
+        const identifierMatch = videoUrl.match(/\/details\/([^\/?#]+)/);
+        if (identifierMatch && identifierMatch[1]) {
+          return `https://archive.org/embed/${identifierMatch[1]}`;
+        }
+      }
+      return videoUrl;
+    }
+
+    function extractYouTubeVideoId(url) {
+      if (!url) return null;
+      const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([^"&?\/\s]{11})/,
+        /youtube\.com\/shorts\/([^"&?\/\s]{11})/,
+        /youtube\.com\/live\/([^"&?\/\s]{11})/,
+        /youtube\.com\/watch\?.*v=([^&]+)/
+      ];
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1] && match[1].length === 11) return match[1];
+      }
+      const idMatch = url.match(/([a-zA-Z0-9_-]{11})/);
+      if (idMatch && idMatch[1] && !idMatch[1].includes('youtube') && !idMatch[1].includes('youtu.be')) {
+        return idMatch[1];
+      }
+      return null;
+    }
+
+    // Helper: Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
 
     const playerImage = document.getElementById('player-image');
     const movieTitle = document.getElementById('movie-title');
@@ -939,11 +1197,11 @@
     const commentsList = document.getElementById('comments-list');
     const seriesSection = document.getElementById('series-section');
     const seriesTitle = document.getElementById('series-title');
-    const seriesMovies = document.getElementById('series-movies');
+    const seasonTabs = document.getElementById('season-tabs');
+    const episodesGrid = document.getElementById('episodes-grid');
     const trailerContainer = document.getElementById('trailer-container');
     const popularMoviesSection = document.getElementById('popular-movies-section');
     const popularMoviesGrid = document.getElementById('popular-movies-grid');
-    const seriesSlider = document.getElementById('series-slider');
     const popularSlider = document.getElementById('popular-slider');
     const preloader = document.getElementById('preloader');
     const descriptionPopup = document.getElementById('description-popup');
@@ -952,6 +1210,13 @@
 
     let currentMovie = null;
     let currentUser = null;
+    let currentSource = sourceParam || 'kinaflix';
+    let isSeries = false;
+    let seriesData = null;
+    let allEpisodes = [];
+    let seasonsList = [];
+    let currentSeason = 1;
+    let currentEpisode = null;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     const toast = document.createElement('div');
@@ -966,9 +1231,7 @@
     }
 
     function formatEmail(email) {
-      if (email && email.includes('@gmail.com')) {
-        return email.replace('@gmail.com', '');
-      }
+      if (email && email.includes('@gmail.com')) return email.replace('@gmail.com', '');
       return email || 'Anonymous';
     }
 
@@ -996,13 +1259,24 @@
 
       const watchHandler = () => {
         if (currentMovie) {
-          const streamingLink = currentMovie.googleDriveLink || currentMovie.streamingLink;
-          if (streamingLink) {
-            const encodedLink = encodeURIComponent(streamingLink);
-            window.location.href = `watch.html?movieId=${movieId}&streamingLink=${encodedLink}`;
+          let videoUrl;
+          if (isSeries && currentEpisode) {
+            videoUrl = currentEpisode.videoUrl;
+            // Extra check: if episode has no videoUrl, show helpful message
+            if (!videoUrl) {
+              showToast(`Episode ${currentEpisode.number}${currentEpisode.part ? currentEpisode.part : ''} has no streaming link yet. Coming soon!`, 'info');
+              return;
+            }
+          } else {
+            videoUrl = currentMovie.googleDriveLink || currentMovie.streamingLink || currentMovie.videoUrl;
+          }
+          if (videoUrl) {
+            const streamingUrl = getStreamingUrl(videoUrl);
+            const encodedLink = encodeURIComponent(streamingUrl);
+            window.location.href = `watch.html?movieId=${movieId}&streamingLink=${encodedLink}&source=${currentSource}`;
             logEvent(analytics, 'watch_movie', { movie_id: movieId, title: currentMovie.title });
           } else {
-            showToast('No streaming link available.', 'error');
+            showToast('No streaming link available for this content.', 'error');
           }
         } else {
           showToast('Movie data not loaded.', 'error');
@@ -1021,17 +1295,29 @@
 
       if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
-          if (currentMovie && currentMovie.googleDriveLink) {
-            const fileIdMatch = currentMovie.googleDriveLink.match(/\/d\/(.+?)\//);
-            if (fileIdMatch && fileIdMatch[1]) {
-              const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-              window.open(downloadUrl, '_blank');
-              logEvent(analytics, 'download_movie', { movie_id: movieId, title: currentMovie.title });
+          if (currentMovie) {
+            let videoUrl;
+            if (isSeries && currentEpisode) {
+              videoUrl = currentEpisode.videoUrl;
             } else {
-              showToast('Invalid Google Drive link format.', 'error');
+              videoUrl = currentMovie.googleDriveLink || currentMovie.streamingLink || currentMovie.videoUrl;
+            }
+            const downloadUrl = getDownloadUrl(videoUrl, currentMovie.title);
+            if (downloadUrl) {
+              if (videoUrl && videoUrl.includes('rumble.com')) {
+                showToast('Rumble videos cannot be downloaded directly. Use the watch button to stream.', 'info');
+                return;
+              }
+              window.open(downloadUrl, '_blank');
+              showToast('Download started!', 'success');
+              logEvent(analytics, 'download_movie', { movie_id: movieId, title: currentMovie.title });
+            } else if (videoUrl && videoUrl.includes('rumble.com')) {
+              showToast('Rumble videos are stream-only. Click Watch to view.', 'info');
+            } else {
+              showToast('Download link not available for this source.', 'error');
             }
           } else {
-            showToast('Download link not available.', 'error');
+            showToast('Movie data not loaded.', 'error');
           }
         });
       }
@@ -1105,9 +1391,6 @@
         });
       }
 
-      if (seriesSlider && seriesMovies) {
-        seriesSlider.addEventListener('input', () => updateScrollPosition(seriesSlider, seriesMovies));
-      }
       if (popularSlider && popularMoviesGrid) {
         popularSlider.addEventListener('input', () => updateScrollPosition(popularSlider, popularMoviesGrid));
       }
@@ -1121,80 +1404,272 @@
       }
 
       try {
-        const movieRef = doc(db, 'movies', movieId);
-        const movieSnap = await getDoc(movieRef);
+        const db = getDb(currentSource);
+        let movieSnap = null;
+        isSeries = false;
 
-        if (!movieSnap.exists()) {
-          throw new Error('Movie not found');
+        if (currentSource === 'cullo') {
+          // First try movies collection
+          const movieRef = doc(db, 'movies', movieId);
+          movieSnap = await getDoc(movieRef);
+          if (!movieSnap.exists()) {
+            // Then try series collection
+            const seriesRef = doc(db, 'series', movieId);
+            movieSnap = await getDoc(seriesRef);
+            if (movieSnap.exists()) isSeries = true;
+          }
+        } else {
+          const movieRef = doc(db, 'movies', movieId);
+          movieSnap = await getDoc(movieRef);
         }
 
-        currentMovie = {
-          id: movieSnap.id,
-          ...movieSnap.data(),
-          timestamp: movieSnap.data().dateAdded?.toDate() || new Date()
-        };
+        if (!movieSnap.exists()) {
+          if (currentSource === 'cullo') {
+            const fallbackRef = doc(db1, 'movies', movieId);
+            const fallbackSnap = await getDoc(fallbackRef);
+            if (fallbackSnap.exists()) {
+              currentSource = 'kinaflix';
+              movieSnap = fallbackSnap;
+            }
+          } else {
+            const fallbackRef = doc(db2, 'movies', movieId);
+            const fallbackSnap = await getDoc(fallbackRef);
+            if (fallbackSnap.exists()) {
+              currentSource = 'cullo';
+              movieSnap = fallbackSnap;
+            }
+          }
+          if (!movieSnap || !movieSnap.exists()) {
+            throw new Error('Movie not found in any database');
+          }
+        }
+
+        const data = movieSnap.data();
+
+        if (currentSource === 'cullo') {
+          // Check if this is a series (has seasons array OR isSeries flag)
+          if (isSeries || (data.seasons && Array.isArray(data.seasons) && data.seasons.length > 0)) {
+            isSeries = true;
+            seriesData = data;
+            allEpisodes = [];
+            seasonsList = [];
+
+            if (data.seasons && Array.isArray(data.seasons)) {
+              data.seasons.forEach((season, idx) => {
+                const seasonNum = season.number || idx + 1;
+                if (!seasonsList.includes(seasonNum)) seasonsList.push(seasonNum);
+
+                const episodesArray = season.episodes || [];
+                if (episodesArray.length === 0) {
+                  console.warn(`Season ${seasonNum} has no episodes`);
+                }
+
+                episodesArray.forEach(ep => {
+                  allEpisodes.push({
+                    id: ep.id || `${movieId}_s${seasonNum}_e${ep.number}`,
+                    season: seasonNum,
+                    number: ep.number || '?',
+                    part: ep.part || null,
+                    title: ep.title || `Episode ${ep.number}${ep.part ? ep.part : ''}`,
+                    videoUrl: ep.videoUrl || '',  // May be empty
+                    thumbnail: ep.thumbnail || data.thumbnailUrl,
+                    isPremium: ep.isPremium || false,
+                    duration: ep.duration || '45 min'
+                  });
+                });
+              });
+            }
+
+            seasonsList.sort((a, b) => a - b);
+            if (seasonsList.length > 0 && currentSeason === 1) {
+              currentSeason = seasonsList[0];
+              const firstEpisodes = allEpisodes.filter(ep => ep.season === currentSeason);
+              if (firstEpisodes.length > 0) {
+                currentEpisode = firstEpisodes[0];
+                // If first episode has no videoUrl, log warning but don't break
+                if (!currentEpisode.videoUrl) {
+                  console.log(`First episode of ${data.title} has no streaming link`);
+                }
+              } else {
+                // No episodes in first season
+                console.warn(`Season ${currentSeason} has no episodes`);
+                currentEpisode = null;
+              }
+            }
+
+            currentMovie = {
+              id: movieSnap.id,
+              title: data.title || 'Untitled Series',
+              description: data.description || 'No description available.',
+              coverImageUrl: data.thumbnailUrl || data.posterUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+              posterUrl: data.posterUrl || data.thumbnailUrl || '',
+              genres: Array.isArray(data.genre) ? data.genre : (data.genres ? (Array.isArray(data.genres) ? data.genres : [data.genres]) : []),
+              country: data.country || 'International',
+              releaseYear: data.year || data.releaseYear || 'N/A',
+              rating: data.rating || 'N/A',
+              youtubeTrailerUrl: data.trailerUrl || data.youtubeTrailerUrl || ''
+            };
+          } else {
+            // It's a movie
+            isSeries = false;
+            currentMovie = {
+              id: movieSnap.id,
+              title: data.title || 'Untitled',
+              description: data.description || 'No description available.',
+              coverImageUrl: data.thumbnailUrl || data.posterUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80',
+              posterUrl: data.posterUrl || data.thumbnailUrl || '',
+              genres: Array.isArray(data.genre) ? data.genre : (data.genres ? (Array.isArray(data.genres) ? data.genres : [data.genres]) : []),
+              country: data.country || 'International',
+              releaseYear: data.year || data.releaseYear || 'N/A',
+              rating: data.rating || 'N/A',
+              googleDriveLink: data.videoUrl || data.googleDriveLink || '',
+              streamingLink: data.videoUrl || data.streamingLink || '',
+              videoUrl: data.videoUrl || '',
+              youtubeTrailerUrl: data.trailerUrl || data.youtubeTrailerUrl || '',
+              seriesId: data.seriesId || null,
+              timestamp: data.createdAt?.toDate ? data.createdAt.toDate() : new Date()
+            };
+          }
+        } else {
+          currentMovie = {
+            id: movieSnap.id,
+            ...data,
+            timestamp: data.dateAdded?.toDate() || new Date()
+          };
+        }
 
         renderMovieDetails();
         loadComments();
         checkWatchlistStatus();
-        if (currentMovie.seriesId) {
-          await loadSeriesData(currentMovie.seriesId);
-        } else {
-          if (seriesSection) seriesSection.style.display = 'none';
-        }
         await loadPopularMovies();
       } catch (error) {
+        console.error('Error loading movie:', error);
         showToast(`Error loading movie: ${error.message}`, 'error');
-        setTimeout(() => window.location.href = 'index.html', 1000);
+        setTimeout(() => window.location.href = 'index.html', 2000);
       }
+    }
+
+    // Improved series episode rendering with "Coming Soon" for missing video links
+    function renderSeriesEpisodes() {
+      if (!isSeries || allEpisodes.length === 0) {
+        seriesSection.style.display = 'none';
+        // If it's a series but no episodes, show a message in the series section
+        if (isSeries && allEpisodes.length === 0 && seriesSection) {
+          seriesSection.style.display = 'block';
+          seriesTitle.textContent = currentMovie.title;
+          episodesGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:2rem;">No episodes available for this series yet. Check back later!</div>';
+          seasonTabs.innerHTML = '';
+        }
+        return;
+      }
+
+      seriesSection.style.display = 'block';
+      seriesTitle.textContent = currentMovie.title;
+
+      const seasonEpisodes = allEpisodes.filter(ep => ep.season === currentSeason);
+
+      seasonTabs.innerHTML = seasonsList.map(season => `
+        <button class="season-tab ${season === currentSeason ? 'active' : ''}" data-season="${season}">
+          Season ${season}
+        </button>
+      `).join('');
+
+      if (seasonEpisodes.length === 0) {
+        episodesGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:2rem;">No episodes in this season yet. Coming soon!</div>';
+      } else {
+        episodesGrid.innerHTML = seasonEpisodes.map(ep => {
+          const isActive = currentEpisode && currentEpisode.number === ep.number && currentEpisode.part === ep.part;
+          const hasVideo = ep.videoUrl && ep.videoUrl.trim() !== '';
+          return `
+            <div class="episode-card ${isActive ? 'active' : ''}" data-episode='${JSON.stringify(ep)}'>
+              <div class="episode-number">
+                ${isActive ? '<div class="playing-bars"><span></span><span></span><span></span></div>' : `Episode ${ep.number}${ep.part ? ep.part : ''}`}
+              </div>
+              <div class="episode-title">${escapeHtml(ep.title || `Episode ${ep.number}${ep.part ? ep.part : ''}`)}</div>
+              ${ep.isPremium ? '<div class="premium-badge"><i class="fas fa-crown"></i></div>' : ''}
+              ${!hasVideo ? '<div class="coming-soon-badge"><i class="fas fa-clock"></i> Soon</div>' : ''}
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Season tab event listeners
+      document.querySelectorAll('.season-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const season = parseInt(tab.dataset.season);
+          currentSeason = season;
+          const seasonEpisodesList = allEpisodes.filter(ep => ep.season === currentSeason);
+          if (seasonEpisodesList.length > 0) {
+            currentEpisode = seasonEpisodesList[0];
+          } else {
+            currentEpisode = null;
+          }
+          renderSeriesEpisodes();
+        });
+      });
+
+      // Episode card event listeners
+      document.querySelectorAll('.episode-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const episode = JSON.parse(card.dataset.episode);
+          if (episode.isPremium) {
+            showToast('This episode requires premium subscription', 'error');
+            return;
+          }
+          if (!episode.videoUrl || episode.videoUrl.trim() === '') {
+            showToast(`Episode ${episode.number}${episode.part ? episode.part : ''} - "${episode.title}" has no streaming link yet. Coming soon!`, 'info');
+            return;
+          }
+          currentEpisode = episode;
+          document.querySelectorAll('.episode-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          showToast(`Now playing: Episode ${episode.number}${episode.part ? episode.part : ''} - ${episode.title}`, 'success');
+          // Auto-play if watch button exists (user can also click watch button)
+          if (watchNowBtn) {
+            // Trigger watch handler directly
+            const videoUrl = episode.videoUrl;
+            if (videoUrl) {
+              const streamingUrl = getStreamingUrl(videoUrl);
+              const encodedLink = encodeURIComponent(streamingUrl);
+              window.location.href = `watch.html?movieId=${movieId}&streamingLink=${encodedLink}&source=${currentSource}`;
+              logEvent(analytics, 'watch_episode', { movie_id: movieId, episode: episode.number, title: episode.title });
+            }
+          }
+        });
+      });
     }
 
     async function loadPopularMovies() {
       try {
         let movies = [];
-        const popularQuery = query(
-          collection(db, 'movies'),
-          orderBy('views', 'desc'),
-          limit(50)
-        );
+
+        const popularQuery = query(collection(db1, 'movies'), orderBy('views', 'desc'), limit(50));
         const popularSnap = await getDocs(popularQuery);
-        movies = movies.concat(popularSnap.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })));
+        movies = movies.concat(popularSnap.docs.map(doc => ({ id: doc.id, source: 'kinaflix', ...doc.data() })));
+
+        try {
+          const culloMoviesSnap = await getDocs(collection(db2, 'movies'));
+          const culloMovies = culloMoviesSnap.docs.map(doc => ({
+            id: doc.id, source: 'cullo', title: doc.data().title,
+            coverImageUrl: doc.data().thumbnailUrl || doc.data().posterUrl,
+            releaseYear: doc.data().year || doc.data().releaseYear
+          }));
+          movies = movies.concat(culloMovies);
+        } catch (e) { console.warn('Could not load CULLO movies for popular list', e); }
 
         if (currentMovie?.genres?.length > 0) {
-          const genresQuery = query(
-            collection(db, 'movies'),
-            where('genres', 'array-contains-any', currentMovie.genres),
-            limit(50)
-          );
+          const genresQuery = query(collection(db1, 'movies'), where('genres', 'array-contains-any', currentMovie.genres), limit(50));
           const genresSnap = await getDocs(genresQuery);
-          movies = movies.concat(genresSnap.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          })));
+          movies = movies.concat(genresSnap.docs.map(doc => ({ id: doc.id, source: 'kinaflix', ...doc.data() })));
         }
 
-        const randomQuery = query(
-          collection(db, 'movies'),
-          limit(50)
-        );
+        const randomQuery = query(collection(db1, 'movies'), limit(50));
         const randomSnap = await getDocs(randomQuery);
-        movies = movies.concat(randomSnap.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })));
+        movies = movies.concat(randomSnap.docs.map(doc => ({ id: doc.id, source: 'kinaflix', ...doc.data() })));
 
         const movieMap = new Map();
-        movies.forEach(movie => {
-          if (movie.id !== movieId) {
-            movieMap.set(movie.id, movie);
-          }
-        });
-        movies = Array.from(movieMap.values());
-
-        movies = movies.sort(() => Math.random() - 0.5).slice(0, 20);
+        movies.forEach(movie => { if (movie.id !== movieId) movieMap.set(movie.id, movie); });
+        movies = Array.from(movieMap.values()).sort(() => Math.random() - 0.5).slice(0, 20);
 
         if (popularMoviesGrid) {
           popularMoviesGrid.innerHTML = '';
@@ -1207,20 +1682,17 @@
             const movieCard = document.createElement('div');
             movieCard.className = 'popular-movie-card';
             movieCard.setAttribute('data-movie-id', movie.id);
-            movieCard.innerHTML = `
-              <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
-                   alt="${movie.title}" class="popular-movie-poster" />
-              <div class="popular-movie-title">${movie.title}</div>
-            `;
+            const posterUrl = movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image';
+            movieCard.innerHTML = `<img src="${posterUrl}" alt="${movie.title}" class="popular-movie-poster" /><div class="popular-movie-title">${escapeHtml(movie.title)}</div>`;
             popularMoviesGrid.appendChild(movieCard);
             movieCard.addEventListener('click', () => {
-              window.location.href = `see.html?id=${movie.id}`;
+              window.location.href = `see.html?id=${movie.id}&source=${movie.source || 'kinaflix'}`;
               logEvent(analytics, 'view_popular_movie', { movie_id: movie.id, title: movie.title });
             });
             if (isMobile) {
               movieCard.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                window.location.href = `see.html?id=${movie.id}`;
+                window.location.href = `see.html?id=${movie.id}&source=${movie.source || 'kinaflix'}`;
                 logEvent(analytics, 'view_popular_movie', { movie_id: movie.id, title: movie.title });
               });
             }
@@ -1234,73 +1706,27 @@
       }
     }
 
-    async function loadSeriesData(seriesId) {
-      try {
-        const seriesRef = doc(db, 'series', seriesId);
-        const seriesSnap = await getDoc(seriesRef);
-        if (seriesSnap.exists()) {
-          if (seriesTitle) seriesTitle.textContent = `Series: ${seriesSnap.data().name}`;
-          if (seriesSection) seriesSection.style.display = 'block';
-        } else {
-          if (seriesSection) seriesSection.style.display = 'none';
-          return;
-        }
-
-        const seriesMoviesQuery = query(
-          collection(db, 'movies'),
-          where('seriesId', '==', seriesId),
-          orderBy('title')
-        );
-        const seriesMoviesSnap = await getDocs(seriesMoviesQuery);
-        if (seriesMovies) {
-          seriesMovies.innerHTML = '';
-          seriesMoviesSnap.forEach(doc => {
-            const movie = { id: doc.id, ...doc.data() };
-            const movieCard = document.createElement('div');
-            movieCard.className = 'series-movie-card';
-            movieCard.setAttribute('data-movie-id', movie.id);
-            movieCard.innerHTML = `
-              <img src="${movie.coverImageUrl || 'https://via.placeholder.com/150x200?text=No+Image'}" 
-                   alt="${movie.title}" class="series-movie-poster" />
-              <div class="series-movie-title">${movie.title}</div>
-            `;
-            seriesMovies.appendChild(movieCard);
-            movieCard.addEventListener('click', () => {
-              window.location.href = `see.html?id=${movie.id}`;
-            });
-            if (isMobile) {
-              movieCard.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                window.location.href = `see.html?id=${movie.id}`;
-              });
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Error loading series data:', error);
-        if (seriesSection) seriesSection.style.display = 'none';
-      }
-    }
-
     function renderMovieDetails() {
       if (playerImage) playerImage.src = currentMovie.coverImageUrl || 'https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80';
       if (movieTitle) movieTitle.textContent = currentMovie.title || 'N/A';
       if (movieMeta) movieMeta.innerHTML = `
         ${currentMovie.genres?.[0] || 'N/A'} |
         ${currentMovie.country || 'N/A'} |
-        ${currentMovie.releaseYear || 'N/A'}
+        ${currentMovie.releaseYear || 'N/A'} |
+        ${currentMovie.rating ? `<span><i class="fas fa-star"></i> ${currentMovie.rating}</span>` : ''}
       `;
       if (movieDescription) movieDescription.textContent = currentMovie.description || 'No description available.';
-      
+
+      if (isSeries) {
+        renderSeriesEpisodes();
+      } else {
+        seriesSection.style.display = 'none';
+      }
+
       if (trailerContainer && currentMovie.youtubeTrailerUrl) {
         const videoId = extractYouTubeVideoId(currentMovie.youtubeTrailerUrl);
         if (videoId) {
-          trailerContainer.innerHTML = `
-            <iframe src="https://www.youtube.com/embed/${videoId}" 
-                    frameborder="0" 
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen></iframe>
-          `;
+          trailerContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         } else {
           trailerContainer.innerHTML = '<p>Invalid YouTube trailer URL.</p>';
         }
@@ -1309,17 +1735,11 @@
       }
     }
 
-    function extractYouTubeVideoId(url) {
-      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-      const match = url.match(regex);
-      return match ? match[1] : null;
-    }
-
     async function checkWatchlistStatus() {
       const user = auth.currentUser;
       if (user) {
         currentUser = user;
-        const watchlistRef = doc(db, 'watchlists', currentUser.uid);
+        const watchlistRef = doc(db1, 'watchlists', currentUser.uid);
         onSnapshot(watchlistRef, (docSnap) => {
           if (watchlistBtn) {
             if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
@@ -1349,18 +1769,14 @@
         return;
       }
 
-      const watchlistRef = doc(db, 'watchlists', currentUser.uid);
+      const watchlistRef = doc(db1, 'watchlists', currentUser.uid);
       try {
         const docSnap = await getDoc(watchlistRef);
         if (docSnap.exists() && docSnap.data().movies?.includes(movieId)) {
-          await setDoc(watchlistRef, {
-            movies: arrayRemove(movieId)
-          }, { merge: true });
+          await setDoc(watchlistRef, { movies: arrayRemove(movieId) }, { merge: true });
           logEvent(analytics, 'remove_from_watchlist', { movie_id: movieId });
         } else {
-          await setDoc(watchlistRef, {
-            movies: arrayUnion(movieId)
-          }, { merge: true });
+          await setDoc(watchlistRef, { movies: arrayUnion(movieId) }, { merge: true });
           logEvent(analytics, 'add_to_watchlist', { movie_id: movieId });
         }
       } catch (error) {
@@ -1372,59 +1788,36 @@
     async function loadComments() {
       try {
         if (!movieId) {
-          console.error('No movieId provided for comments query');
           if (commentsList) commentsList.innerHTML = '<p>Error: Invalid movie ID.</p>';
-          showToast('Cannot load comments: Invalid movie ID.', 'error');
           return;
         }
 
-        const commentsRef = collection(db, 'comments');
-        const q = query(
-          commentsRef,
-          where('movieId', '==', movieId),
-          orderBy('timestamp', 'desc')
-        );
+        const commentsRef = collection(db1, 'comments');
+        const q = query(commentsRef, where('movieId', '==', movieId), orderBy('timestamp', 'desc'));
 
         onSnapshot(q, (snapshot) => {
-          console.log('Comments snapshot received:', snapshot.size, 'documents');
           if (commentsList) {
             if (snapshot.empty) {
               commentsList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
               return;
             }
-
             commentsList.innerHTML = '';
             snapshot.forEach(doc => {
               const comment = doc.data();
-              console.log('Comment data:', comment);
-              if (!comment.text || !comment.userEmail) {
-                console.warn('Invalid comment data:', comment);
-                return;
-              }
+              if (!comment.text || !comment.userEmail) return;
               const commentElement = document.createElement('div');
               commentElement.className = 'comment';
-              commentElement.innerHTML = `
-                <span class="user">${formatEmail(comment.userEmail)}</span>
-                <p class="text">${comment.text}</p>
-              `;
+              commentElement.innerHTML = `<span class="user">${escapeHtml(formatEmail(comment.userEmail))}</span><p class="text">${escapeHtml(comment.text)}</p>`;
               commentsList.appendChild(commentElement);
             });
           }
         }, (error) => {
           console.error('Error in comments snapshot:', error);
-          let errorMessage = 'Error loading comments.';
-          if (error.code === 'permission-denied') {
-            errorMessage = 'Permission denied: Cannot access comments.';
-          } else if (error.code === 'unavailable') {
-            errorMessage = 'Network error: Please check your connection.';
-          }
-          if (commentsList) commentsList.innerHTML = `<p>${errorMessage}</p>`;
-          showToast(errorMessage, 'error');
+          if (commentsList) commentsList.innerHTML = '<p>Error loading comments.</p>';
         });
       } catch (error) {
         console.error('Error setting up comments query:', error);
         if (commentsList) commentsList.innerHTML = '<p>Error setting up comments.</p>';
-        showToast('Error setting up comments: ' + error.message, 'error');
       }
     }
 
@@ -1448,8 +1841,7 @@
       }
 
       try {
-        console.log('Adding comment:', { movieId, userId: user.uid, text });
-        await addDoc(collection(db, 'comments'), {
+        await addDoc(collection(db1, 'comments'), {
           movieId: movieId,
           userId: user.uid,
           userEmail: user.email || 'Anonymous',
@@ -1461,20 +1853,10 @@
         logEvent(analytics, 'add_comment', { movie_id: movieId });
       } catch (error) {
         console.error('Error adding comment:', error);
-        let errorMessage = 'Error adding comment.';
-        if (error.code === 'permission-denied') {
-          errorMessage = 'Permission denied: Cannot add comment.';
-        } else if (error.code === 'unavailable') {
-          errorMessage = 'Network error: Please check your connection.';
-        }
-        showToast(errorMessage, 'error');
+        showToast('Error adding comment.', 'error');
       }
     }
   </script>
 </body>
+
 </html>
-
-
-
-
-
