@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="google-adsense-account" content="ca-pub-6280599021277554">
@@ -430,7 +431,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .spinner.active {
@@ -472,7 +475,9 @@
     }
 
     @media (max-width: 1024px) {
-      .search-section, .results-section {
+
+      .search-section,
+      .results-section {
         padding: 2rem;
       }
     }
@@ -488,10 +493,12 @@
     }
 
     @media (max-width: 576px) {
-      .search-section, .results-section {
+
+      .search-section,
+      .results-section {
         padding: 1rem;
       }
-      
+
       .movies-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -510,39 +517,35 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <button class="home-btn" onclick="window.location.href='https://kinaflix-fawn.vercel.app/index.html'">
       <i class="fas fa-home"></i>
     </button>
-    
+
     <div class="auth-buttons" id="auth-buttons">
       <button class="auth-btn login-btn">Login</button>
       <button class="auth-btn register-btn">Register</button>
       <button class="theme-toggle"><i class="fas fa-moon"></i></button>
     </div>
   </header>
-  
+
   <section class="search-section">
     <div class="search-container">
       <div class="search-header">
         <h1 class="search-title">Search Movies</h1>
         <p>Find your favorite movies by title, genre, year, or rating</p>
       </div>
-      
+
       <form id="search-form" class="search-form">
-        <input 
-          type="text" 
-          id="search-input" 
-          class="search-input" 
-          placeholder="ENTER MOVIE TITLE..." 
-          autocomplete="off"
-        />
+        <input type="text" id="search-input" class="search-input" placeholder="ENTER MOVIE TITLE..."
+          autocomplete="off" />
         <button type="submit" class="search-btn">
           <i class="fas fa-search"></i> Search
         </button>
       </form>
-      
+
       <div class="filters">
         <div class="filter-group">
           <label for="genre-filter" class="filter-label">Genre</label>
@@ -550,14 +553,14 @@
             <option value="">All Genres</option>
           </select>
         </div>
-        
+
         <div class="filter-group">
           <label for="year-filter" class="filter-label">Year</label>
           <select id="year-filter" class="filter-select">
             <option value="">All Years</option>
           </select>
         </div>
-        
+
         <div class="filter-group">
           <label for="rating-filter" class="filter-label">Rating</label>
           <select id="rating-filter" class="filter-select">
@@ -570,7 +573,7 @@
       </div>
     </div>
   </section>
-  
+
   <section class="results-section">
     <div class="search-container">
       <div id="results-count" class="results-count"></div>
@@ -589,12 +592,12 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-analytics.js";
-    import { 
-      getAuth, 
-      signOut, 
+    import {
+      getAuth,
+      signOut,
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-    import { 
+    import {
       getFirestore,
       collection,
       doc,
@@ -612,7 +615,8 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
+    // ===== FIREBASE CONFIGURATION 1 (Kinaflix) =====
+    const firebaseConfig1 = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
       databaseURL: "https://kinaflix-default-rtdb.firebaseio.com",
@@ -623,10 +627,24 @@
       measurementId: "G-DC1T9B6B9W"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // ===== FIREBASE CONFIGURATION 2 (CULLO Movies - Secondary Database) =====
+    const firebaseConfig2 = {
+      apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
+      authDomain: "cullo-movies-6813f.firebaseapp.com",
+      projectId: "cullo-movies-6813f",
+      messagingSenderId: "12310118231",
+      appId: "1:12310118231:web:34682f354027fd19758812"
+    };
+
+    // Initialize Primary App (Kinaflix)
+    const app1 = initializeApp(firebaseConfig1);
+    const analytics = getAnalytics(app1);
+    const auth = getAuth(app1);
+    const db1 = getFirestore(app1);
+
+    // Initialize Secondary App (CULLO Movies)
+    const app2 = initializeApp(firebaseConfig2, "culloMovies");
+    const db2 = getFirestore(app2);
 
     // DOM Elements
     const searchForm = document.getElementById('search-form');
@@ -643,12 +661,89 @@
 
     // App State
     let currentUser = null;
-    let movies = [];
+    let allMovies = [];
     let genres = [];
     let watchlist = [];
     let years = [];
     let searchQueryCache = null;
     let debounceTimeout = null;
+
+    // List of umusobanuzi names for random selection on CULLO movies
+    const umusobanuziNames = ['ROCKY', 'GITI', 'SANKARA', 'GAHEZA'];
+
+    function getRandomUmusobanuzi() {
+      return umusobanuziNames[Math.floor(Math.random() * umusobanuziNames.length)];
+    }
+
+    // Fetch movies from both databases
+    async function fetchAllMovies() {
+      const allMoviesList = [];
+
+      try {
+        // Fetch from Kinaflix database (db1)
+        const q1 = query(collection(db1, 'movies'), orderBy('views', 'desc'), limit(200));
+        const querySnapshot1 = await getDocs(q1);
+        const kinaflixMovies = querySnapshot1.docs.map(doc => ({
+          id: doc.id,
+          source: 'kinaflix',
+          ...doc.data(),
+          genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
+          releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
+          views: typeof doc.data().views === 'number' ? doc.data().views : 0,
+          timestamp: doc.data().dateAdded?.toDate() || new Date(),
+          seriesId: doc.data().seriesId || null,
+          umusobanuzi: doc.data().umusobanuzi || null
+        }));
+        allMoviesList.push(...kinaflixMovies);
+      } catch (error) {
+        console.error('Error fetching from Kinaflix database:', error);
+      }
+
+      try {
+        // Fetch from CULLO Movies database (db2)
+        const moviesCollection2 = collection(db2, 'movies');
+        const querySnapshot2 = await getDocs(moviesCollection2);
+        const culloMovies = querySnapshot2.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            source: 'cullo',
+            title: data.title || 'Untitled',
+            description: data.description || '',
+            coverImageUrl: data.thumbnailUrl || data.posterUrl || 'https://via.placeholder.com/300x450?text=No+Image',
+            posterUrl: data.posterUrl || data.thumbnailUrl || '',
+            thumbnailUrl: data.thumbnailUrl || data.posterUrl || '',
+            genres: Array.isArray(data.genre) ? data.genre : (data.genres ? (Array.isArray(data.genres) ? data.genres : []) : []),
+            releaseYear: data.year || data.releaseYear || 2024,
+            rating: data.rating || 7.0,
+            views: data.views || 0,
+            duration: data.duration || '120 min',
+            isPremium: false,
+            videoUrl: data.videoUrl || '',
+            timestamp: data.createdAt?.toDate ? data.createdAt.toDate() : (data.dateAdded?.toDate ? data.dateAdded.toDate() : new Date()),
+            seriesId: data.seriesId || null,
+            umusobanuzi: getRandomUmusobanuzi()
+          };
+        });
+        allMoviesList.push(...culloMovies);
+      } catch (error) {
+        console.error('Error fetching from CULLO Movies database:', error);
+      }
+
+      // Remove duplicates based on title similarity
+      const uniqueMovies = [];
+      const titleMap = new Map();
+      for (const movie of allMoviesList) {
+        const normalizedTitle = movie.title?.toLowerCase().trim().replace(/[^\w\s]/g, '');
+        if (!titleMap.has(normalizedTitle)) {
+          titleMap.set(normalizedTitle, movie);
+          uniqueMovies.push(movie);
+        }
+      }
+
+      console.log(`✓ All movies loaded for search (Total: ${uniqueMovies.length})`);
+      return uniqueMovies;
+    }
 
     // Cookie Management
     const COOKIE_NAME = 'userPreferences';
@@ -674,9 +769,9 @@
         preferences[genre] = (preferences[genre] || 0) + 1;
       });
       setCookie(COOKIE_NAME, JSON.stringify(preferences), COOKIE_EXPIRY_DAYS);
-      
+
       if (currentUser) {
-        const userRef = doc(db, 'users', currentUser.uid);
+        const userRef = doc(db1, 'users', currentUser.uid);
         updateDoc(userRef, { preferences }).catch(error => {
           console.error('Error updating user preferences:', error);
         });
@@ -692,13 +787,26 @@
     }
 
     // Initialize the app
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadAllMoviesData();
       initAuth();
       initUI();
       loadGenres();
       loadYears();
       logPageVisit();
     });
+
+    async function loadAllMoviesData() {
+      showLoading();
+      try {
+        allMovies = await fetchAllMovies();
+      } catch (error) {
+        console.error('Error loading movies:', error);
+        showToast('Error loading movies: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
 
     function initAuth() {
       onAuthStateChanged(auth, async (user) => {
@@ -774,7 +882,7 @@
           <button class="auth-btn logout-btn">Logout</button>
           <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
         `;
-        
+
         document.querySelector('.logout-btn').addEventListener('click', () => {
           signOut(auth).then(() => {
             showToast('Logged out successfully', 'success');
@@ -795,22 +903,22 @@
           <button class="auth-btn register-btn">Register</button>
           <button class="theme-toggle"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
         `;
-        
+
         document.querySelector('.login-btn').addEventListener('click', () => {
           window.location.href = 'https://kinaflix-fawn.vercel.app/index.html';
         });
-        
+
         document.querySelector('.register-btn').addEventListener('click', () => {
           window.location.href = 'https://kinaflix-fawn.vercel.app/index.html';
         });
-        
+
         document.querySelector('.theme-toggle').addEventListener('click', toggleTheme);
       }
     }
 
     async function loadUserData(userId) {
       try {
-        const userRef = doc(db, 'users', userId);
+        const userRef = doc(db1, 'users', userId);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const userData = userSnap.data();
@@ -828,19 +936,21 @@
     async function loadGenres() {
       if (genres.length > 0) return;
       try {
-        const q = query(collection(db, 'movies'), limit(100));
-        const querySnapshot = await getDocs(q);
-        const allGenres = querySnapshot.docs
-          .map(doc => doc.data().genres || [])
-          .flat()
-          .filter(genre => genre && typeof genre === 'string');
-        genres = [...new Set(allGenres)].sort();
-        
+        const allGenres = new Set();
+        allMovies.forEach(movie => {
+          if (movie.genres && Array.isArray(movie.genres)) {
+            movie.genres.forEach(genre => {
+              if (genre && typeof genre === 'string') allGenres.add(genre);
+            });
+          }
+        });
+        genres = [...allGenres].sort();
+
         if (genres.length === 0) {
           showToast('No genres found in movies', 'error');
           return;
         }
-        
+
         genreFilter.innerHTML = '<option value="">All Genres</option>';
         genres.forEach(genre => {
           const option = document.createElement('option');
@@ -857,10 +967,8 @@
     async function loadYears() {
       if (years.length > 0) return;
       try {
-        const q = query(collection(db, 'movies'), orderBy('releaseYear', 'desc'));
-        const querySnapshot = await getDocs(q);
-        years = [...new Set(querySnapshot.docs.map(doc => doc.data().releaseYear))].sort((a, b) => b - a);
-        
+        years = [...new Set(allMovies.map(movie => movie.releaseYear))].filter(y => y).sort((a, b) => b - a);
+
         years.forEach(year => {
           if (year) {
             const option = document.createElement('option');
@@ -880,7 +988,7 @@
       const genre = genreFilter.value;
       const year = yearFilter.value;
       const rating = ratingFilter.value;
-      
+
       if (searchQuery || genre || year || rating) {
         searchMovies(searchQuery);
       } else {
@@ -894,57 +1002,38 @@
 
     async function searchMovies(searchQuery) {
       showLoading();
-      
+
       try {
-        const genre = genreFilter.value;
-        const year = yearFilter.value;
-        const rating = ratingFilter.value;
-        
-        let q = query(collection(db, 'movies'), limit(50));
-        
+        let results = [...allMovies];
+
         if (searchQuery) {
           const searchQueryUpper = searchQuery.toUpperCase();
-          q = query(
-            q,
-            where('title', '>=', searchQueryUpper),
-            where('title', '<=', searchQueryUpper + '\uf8ff'),
-            orderBy('title')
+          results = results.filter(movie =>
+            movie.title && movie.title.toUpperCase().includes(searchQueryUpper)
           );
         }
-        
+
+        const genre = genreFilter.value;
         if (genre) {
-          q = query(q, where('genres', 'array-contains', genre));
+          results = results.filter(movie =>
+            movie.genres && Array.isArray(movie.genres) && movie.genres.includes(genre)
+          );
         }
-        
+
+        const year = yearFilter.value;
         if (year) {
-          q = query(q, where('releaseYear', '==', parseInt(year)));
+          results = results.filter(movie => movie.releaseYear === parseInt(year));
         }
-        
+
+        const rating = ratingFilter.value;
         if (rating) {
-          q = query(q, where('rating', '>=', parseFloat(rating)));
+          results = results.filter(movie => movie.rating >= parseFloat(rating));
         }
-        
-        // Ensure at least one orderBy for composite queries
-        if (!searchQuery && (genre || year || rating)) {
-          q = query(q, orderBy('title'));
-        }
-        
-        const querySnapshot = await getDocs(q);
-        movies = querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data(),
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
-        }));
-        
-        // Fallback for title search if no results
-        if (movies.length === 0 && searchQuery) {
-          const allMovies = await getDocs(query(collection(db, 'movies'), limit(50)));
-          movies = allMovies.docs
-            .map(doc => ({ id: doc.id, ...doc.data(), timestamp: doc.data().dateAdded?.toDate() || new Date() }))
-            .filter(movie => movie.title.toUpperCase().includes(searchQuery.toUpperCase()));
-        }
-        
-        displayResults(movies);
+
+        // Sort by views (popularity)
+        results.sort((a, b) => (b.views || 0) - (a.views || 0));
+
+        displayResults(results);
         searchQueryCache = { searchQuery, genre, year, rating };
       } catch (error) {
         console.error('Error searching movies:', error);
@@ -962,10 +1051,10 @@
         resultsCount.textContent = '0 results found';
         return;
       }
-      
+
       noResults.style.display = 'none';
       resultsCount.textContent = `${results.length} ${results.length === 1 ? 'result' : 'results'} found`;
-      
+
       searchResults.innerHTML = results.map(movie => renderMovieCard(movie)).join('');
       attachMovieCardEvents();
     }
@@ -973,8 +1062,11 @@
     function renderMovieCard(movie) {
       const inWatchlist = currentUser && watchlist.includes(movie.id);
       const timeSince = formatTimeSince(movie.timestamp);
+      const umusobanuziText = movie.umusobanuzi || (movie.source === 'cullo' ? getRandomUmusobanuzi() : null);
+      const sourceBadge = umusobanuziText ? `<span class="umusobanuzi" style="position: absolute; top: 8px; left: 8px; background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; z-index: 10;">${umusobanuziText}</span>` : '';
       return `
-        <div class="movie-card" data-movie-id="${movie.id}">
+        <div class="movie-card" data-movie-id="${movie.id}" data-movie-source="${movie.source || 'kinaflix'}">
+          ${sourceBadge}
           <img src="${movie.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
                alt="${movie.title}" class="movie-poster" />
           <div class="movie-info">
@@ -993,7 +1085,7 @@
                 ${movie.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
               </div>
             ` : ''}
-            <button class="overlay-btn" data-movie-id="${movie.id}">
+            <button class="overlay-btn" data-movie-id="${movie.id}" data-movie-source="${movie.source || 'kinaflix'}">
               <i class="fas fa-play"></i> Watch Now
             </button>
             ${currentUser ? `
@@ -1011,20 +1103,21 @@
     function attachMovieCardEvents() {
       document.querySelectorAll('.movie-card, .overlay-btn:not(.watchlist-btn)').forEach(element => {
         element.addEventListener('click', async (e) => {
-          const movieId = element.getAttribute('data-movie-id') || 
-                         element.closest('.movie-card')?.getAttribute('data-movie-id');
+          const movieId = element.getAttribute('data-movie-id') ||
+            element.closest('.movie-card')?.getAttribute('data-movie-id');
+          const movieSource = element.getAttribute('data-movie-source') ||
+            element.closest('.movie-card')?.getAttribute('data-movie-source') || 'kinaflix';
           if (movieId) {
             await countView(movieId);
-            const movieRef = doc(db, 'movies', movieId);
-            const movieSnap = await getDoc(movieRef);
-            if (movieSnap.exists()) {
-              updateUserPreferences(movieSnap.data().genres || []);
+            const movie = allMovies.find(m => m.id === movieId);
+            if (movie) {
+              updateUserPreferences(movie.genres || []);
             }
-            window.location.href = `https://kinaflix-fawn.vercel.app/see.html?id=${movieId}`;
+            window.location.href = `https://kinaflix-fawn.vercel.app/see.html?id=${movieId}&source=${movieSource}`;
           }
         });
       });
-      
+
       document.querySelectorAll('.watchlist-btn').forEach(button => {
         button.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -1035,9 +1128,8 @@
             return;
           }
           try {
-            const userRef = doc(db, 'users', currentUser.uid);
-            const movieRef = doc(db, 'movies', movieId);
-            const movieSnap = await getDoc(movieRef);
+            const userRef = doc(db1, 'users', currentUser.uid);
+            const movie = allMovies.find(m => m.id === movieId);
             if (watchlist.includes(movieId)) {
               await updateDoc(userRef, {
                 watchlist: arrayRemove(movieId)
@@ -1054,8 +1146,8 @@
               showToast('Added to watchlist', 'success');
               button.classList.add('in-watchlist');
               button.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
-              if (movieSnap.exists()) {
-                updateUserPreferences(movieSnap.data().genres || []);
+              if (movie) {
+                updateUserPreferences(movie.genres || []);
               }
             }
           } catch (error) {
@@ -1068,7 +1160,7 @@
 
     async function countView(movieId) {
       try {
-        const movieRef = doc(db, 'movies', movieId);
+        const movieRef = doc(db1, 'movies', movieId);
         await updateDoc(movieRef, {
           views: increment(1)
         });
@@ -1081,22 +1173,22 @@
       if (!timestamp) return '';
       const now = new Date();
       const seconds = Math.floor((now - timestamp) / 1000);
-      
+
       let interval = Math.floor(seconds / 31536000);
       if (interval >= 1) return `${interval} year${interval === 1 ? '' : 's'} ago`;
-      
+
       interval = Math.floor(seconds / 2592000);
       if (interval >= 1) return `${interval} month${interval === 1 ? '' : 's'} ago`;
-      
+
       interval = Math.floor(seconds / 86400);
       if (interval >= 1) return `${interval} day${interval === 1 ? '' : 's'} ago`;
-      
+
       interval = Math.floor(seconds / 3600);
       if (interval >= 1) return `${interval} hour${interval === 1 ? '' : 's'} ago`;
-      
+
       interval = Math.floor(seconds / 60);
       if (interval >= 1) return `${interval} minute${interval === 1 ? '' : 's'} ago`;
-      
+
       return `${Math.floor(seconds)} second${seconds === 1 ? '' : 's'} ago`;
     }
 
@@ -1114,7 +1206,7 @@
       toast.textContent = message;
       toast.className = 'toast';
       toast.classList.add(type, 'show');
-      
+
       setTimeout(() => {
         toast.classList.remove('show');
       }, 3000);
@@ -1128,7 +1220,7 @@
         const userId = user ? user.uid : `anonymous_${Math.random().toString(36).substr(2, 9)}`;
         const isAuthenticated = !!user;
 
-        addDoc(collection(db, 'page_visits'), {
+        addDoc(collection(db1, 'page_visits'), {
           page: 'search.html',
           userId: userId,
           isAuthenticated: isAuthenticated,
@@ -1142,7 +1234,7 @@
 
         window.addEventListener('beforeunload', () => {
           const duration = (Date.now() - startTime) / 1000;
-          addDoc(collection(db, 'page_visits'), {
+          addDoc(collection(db1, 'page_visits'), {
             page: 'search.html',
             userId: userId,
             isAuthenticated: isAuthenticated,
@@ -1158,4 +1250,5 @@
     }
   </script>
 </body>
+
 </html>
