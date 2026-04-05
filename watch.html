@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="google-adsense-account" content="ca-pub-6280599021277554">
@@ -8,17 +9,17 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
-<meta property="og:title" content="Am Wathing..." />
-<meta property="og:description" content="Vayo turebane filme ngewe nyigeze kure." />
-<meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
-<meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
-<meta property="og:type" content="entertainment" />
+  <meta property="og:title" content="Am Wathing..." />
+  <meta property="og:description" content="Vayo turebane filme ngewe nyigeze kure." />
+  <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+  <meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
+  <meta property="og:type" content="entertainment" />
 
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Am Wathing..." />
-<meta name="twitter:description" content="Vayo turebane filme ngewe nyigeze kure." />
-<meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Am Wathing..." />
+  <meta name="twitter:description" content="Vayo turebane filme ngewe nyigeze kure." />
+  <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
 
   <style>
     :root {
@@ -60,6 +61,7 @@
     }
 
     .video-container iframe,
+    .video-container video,
     .video-container div[id^="rumble_"] {
       width: 100%;
       height: 100%;
@@ -88,6 +90,16 @@
       animation: spin 1s linear infinite;
     }
 
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
     .ad-notification {
       position: fixed;
       top: 20px;
@@ -106,8 +118,13 @@
     }
 
     @keyframes slideIn {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
+      from {
+        transform: translateX(100%);
+      }
+
+      to {
+        transform: translateX(0);
+      }
     }
 
     .ad-notification img {
@@ -149,6 +166,7 @@
     }
   </style>
 </head>
+
 <body>
   <a href="#" class="button back-button is-rounded" id="back-button">
     <span class="icon">
@@ -168,25 +186,301 @@
 
   <script type="module">
     // Configuration
-    const AD_DISPLAY_DURATION = 7000; // 7 seconds
-    const INITIAL_AD_DELAY = 60000;   // 1 minute for first ad
-    const AD_INTERVAL = 420000;       // 7 minutes for subsequent ads
-    const RUMBLE_CHANNEL_ID = 'u4m9tqz'; // Using the channel ID from your working example
+    const RUMBLE_CHANNEL_ID = 'u4m9tqz';
+
+    // Function to detect video type from URL
+    function detectVideoType(url) {
+      if (!url) return 'unknown';
+      const urlLower = url.toLowerCase();
+      if (urlLower.includes('drive.google.com') || urlLower.includes('gdrive')) {
+        return 'googledrive';
+      }
+      if (urlLower.includes('rumble.com')) {
+        return 'rumble';
+      }
+      if (urlLower.includes('archive.org') || urlLower.includes('ia800') || urlLower.includes('ia600') || urlLower.match(/\.archive\.org/)) {
+        return 'archive';
+      }
+      if (urlLower.match(/\.(mp4|webm|mkv|mov|avi)$/i)) {
+        return 'direct';
+      }
+      return 'unknown';
+    }
+
+    // Function to extract Google Drive file ID
+    function extractGoogleDriveId(url) {
+      const patterns = [
+        /\/d\/([a-zA-Z0-9_-]+)/,
+        /id=([a-zA-Z0-9_-]+)/,
+        /file\/d\/([a-zA-Z0-9_-]+)/
+      ];
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) return match[1];
+      }
+      return null;
+    }
+
+    // Function to extract Rumble video ID
+    function extractRumbleId(url) {
+      const patterns = [
+        /rumble\.com\/(?:embed\/)?([a-zA-Z0-9_-]+)/,
+        /v([a-zA-Z0-9]+)/,
+        /video\/([a-zA-Z0-9_-]+)/
+      ];
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) return match[1];
+      }
+      return null;
+    }
+
+    // Function to extract Internet Archive identifier from various URL formats
+    function extractArchiveIdentifier(url) {
+      // For direct file URLs like: https://ia600100.us.archive.org/35/items/genius-c-junior-giti/Genius_C_Junior_Giti.mp4
+      const directMatch = url.match(/\/items\/([^\/]+)\//);
+      if (directMatch && directMatch[1]) return directMatch[1];
+
+      // For details page URLs: https://archive.org/details/identifier
+      const detailsMatch = url.match(/\/details\/([^\/?#]+)/);
+      if (detailsMatch && detailsMatch[1]) return detailsMatch[1];
+
+      // For download URLs
+      const downloadMatch = url.match(/\/download\/([^\/?#]+)/);
+      if (downloadMatch && downloadMatch[1]) return downloadMatch[1];
+
+      return null;
+    }
+
+    // Function to get direct video URL from Internet Archive (handles the URL directly)
+    function getArchiveDirectUrl(url) {
+      // If it's already a direct MP4 link, use it as is
+      if (url.match(/\.(mp4|webm|mkv|mov|avi)$/i)) {
+        return url;
+      }
+
+      const identifier = extractArchiveIdentifier(url);
+      if (identifier) {
+        return `https://archive.org/download/${identifier}/${identifier}.mp4`;
+      }
+      return null;
+    }
+
+    // FIXED: Enhanced Internet Archive Player - handles both direct MP4 and details pages
+    function initArchivePlayer(videoUrl, loadingOverlay) {
+      return new Promise((resolve) => {
+        const container = document.getElementById('video-container');
+        const directUrl = getArchiveDirectUrl(videoUrl);
+
+        if (directUrl) {
+          console.log('✓ Movie loaded: Playing Internet Archive video');
+          container.innerHTML = `
+            <video 
+              controls 
+              autoplay 
+              style="width:100%;height:100%;background:#000;">
+              <source src="${directUrl}" type="video/mp4">
+              <p>Your browser doesn't support HTML5 video. <a href="${directUrl}" target="_blank">Download the video</a></p>
+            </video>
+          `;
+
+          const video = container.querySelector('video');
+          if (video && loadingOverlay) {
+            video.addEventListener('canplay', () => {
+              loadingOverlay.style.display = 'none';
+              resolve();
+            });
+            video.addEventListener('loadeddata', () => {
+              loadingOverlay.style.display = 'none';
+              resolve();
+            });
+            video.addEventListener('error', () => {
+              console.log('Error loading direct video, trying embed fallback');
+              // Fallback to embed player
+              const identifier = extractArchiveIdentifier(videoUrl);
+              if (identifier) {
+                container.innerHTML = `
+                  <iframe 
+                    src="https://archive.org/embed/${identifier}" 
+                    frameborder="0" 
+                    allowfullscreen
+                    style="width:100%;height:100%;">
+                  </iframe>
+                `;
+              }
+              loadingOverlay.style.display = 'none';
+              resolve();
+            });
+            // Timeout fallback
+            setTimeout(() => {
+              if (loadingOverlay.style.display !== 'none') {
+                loadingOverlay.style.display = 'none';
+                resolve();
+              }
+            }, 8000);
+          }
+        } else {
+          // Fallback to embed player
+          const identifier = extractArchiveIdentifier(videoUrl);
+          if (identifier) {
+            console.log('✓ Movie loaded: Using Archive.org embed player');
+            container.innerHTML = `
+              <iframe 
+                src="https://archive.org/embed/${identifier}" 
+                frameborder="0" 
+                allowfullscreen
+                style="width:100%;height:100%;">
+              </iframe>
+            `;
+          } else {
+            container.innerHTML = `
+              <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;color:#e50914;">
+                <i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:20px;"></i>
+                <p>Unable to play this Internet Archive video.</p>
+                <a href="${videoUrl}" target="_blank" style="color:#e50914;margin-top:10px;">Open directly</a>
+              </div>
+            `;
+          }
+          setTimeout(() => {
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
+            resolve();
+          }, 3000);
+        }
+      });
+    }
+
+    // Function to initialize Rumble player
+    function initRumblePlayer(videoId, loadingOverlay) {
+      return new Promise((resolve) => {
+        const divId = `rumble_${videoId}`;
+        const container = document.getElementById('video-container');
+        container.innerHTML = `<div id="${divId}" style="width:100%;height:100%;"></div>`;
+
+        // Load Rumble embed script
+        !function (r, u, m, b, l, e) {
+          r._Rumble = b;
+          r[b] || (r[b] = function () {
+            (r[b]._ = r[b]._ || []).push(arguments);
+            if (r[b]._.length == 1) {
+              l = u.createElement(m),
+                e = u.getElementsByTagName(m)[0],
+                l.async = 1,
+                l.src = "https://rumble.com/embedJS/" + RUMBLE_CHANNEL_ID +
+                (arguments[1].video ? '.' + arguments[1].video : '') +
+                "/?url=" + encodeURIComponent(location.href) +
+                "&args=" + encodeURIComponent(JSON.stringify([].slice.apply(arguments))),
+                e.parentNode.insertBefore(l, e)
+            }
+          })
+        }(window, document, "script", "Rumble");
+
+        // Initialize Rumble player
+        Rumble("play", { video: videoId, div: divId });
+
+        setTimeout(() => {
+          if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+          }
+          resolve();
+        }, 5000);
+      });
+    }
+
+    // Function to initialize Google Drive player
+    function initGoogleDrivePlayer(fileId, loadingOverlay) {
+      return new Promise((resolve) => {
+        const container = document.getElementById('video-container');
+        container.innerHTML = `
+          <iframe 
+            src="https://drive.google.com/file/d/${fileId}/preview" 
+            frameborder="0" 
+            allow="autoplay; fullscreen; encrypted-media" 
+            allowfullscreen>
+          </iframe>
+        `;
+
+        const iframe = container.querySelector('iframe');
+        if (iframe && loadingOverlay) {
+          iframe.onload = () => {
+            loadingOverlay.style.display = 'none';
+            resolve();
+          };
+          setTimeout(() => {
+            if (loadingOverlay.style.display !== 'none') {
+              loadingOverlay.style.display = 'none';
+              resolve();
+            }
+          }, 8000);
+        } else {
+          setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+            resolve();
+          }, 3000);
+        }
+      });
+    }
+
+    // Function to initialize direct video file
+    function initDirectVideoPlayer(videoUrl, loadingOverlay) {
+      return new Promise((resolve) => {
+        const container = document.getElementById('video-container');
+        console.log('✓ Movie loaded: Playing direct video');
+        container.innerHTML = `
+          <video 
+            controls 
+            autoplay 
+            style="width:100%;height:100%;background:#000;">
+            <source src="${videoUrl}" type="video/mp4">
+            <p>Your browser doesn't support HTML5 video.</p>
+          </video>
+        `;
+
+        const video = container.querySelector('video');
+        if (video && loadingOverlay) {
+          video.addEventListener('canplay', () => {
+            loadingOverlay.style.display = 'none';
+            resolve();
+          });
+          video.addEventListener('loadeddata', () => {
+            loadingOverlay.style.display = 'none';
+            resolve();
+          });
+          video.addEventListener('error', () => {
+            loadingOverlay.style.display = 'none';
+            resolve();
+          });
+          setTimeout(() => {
+            if (loadingOverlay.style.display !== 'none') {
+              loadingOverlay.style.display = 'none';
+              resolve();
+            }
+          }, 8000);
+        } else {
+          setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+            resolve();
+          }, 3000);
+        }
+      });
+    }
 
     // Core player functionality
     const initPlayer = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('movieId');
-        
-        if (!movieId) {
-          throw new Error("Invalid movie ID");
+        let streamingLink = urlParams.get('streamingLink');
+
+        if (!movieId && !streamingLink) {
+          throw new Error("Invalid movie ID or streaming link");
         }
 
-        // Update back button href with movieId
+        // Update back button href
         const backButton = document.getElementById('back-button');
-        if (backButton) {
+        if (backButton && movieId) {
           backButton.href = `see.html?id=${movieId}`;
+        } else if (backButton) {
+          backButton.href = 'index.html';
         }
 
         // Show loading immediately
@@ -194,108 +488,139 @@
         if (loadingOverlay) {
           loadingOverlay.style.display = 'flex';
         }
-        
-        // Load movie data to get streaming link
-        const movieData = await loadMovieData(movieId);
-        const streamingLink = movieData.googleDriveLink || urlParams.get('streamingLink');
+
+        // If streamingLink is not provided directly, load from Firestore
+        if (!streamingLink && movieId) {
+          const movieData = await loadMovieData(movieId);
+          streamingLink = movieData.googleDriveLink || movieData.streamingLink || movieData.videoUrl;
+        }
+
         if (!streamingLink) {
           throw new Error("No streaming link available for this movie");
         }
 
+        // Decode the streaming link
+        const decodedLink = decodeURIComponent(streamingLink);
+        const videoType = detectVideoType(decodedLink);
+
         // Initialize video player based on link type
-        const videoContainer = document.getElementById('video-container');
-        if (!videoContainer) {
-          throw new Error("Video container not found");
+        if (videoType === 'googledrive') {
+          const fileId = extractGoogleDriveId(decodedLink);
+          if (!fileId) throw new Error("Invalid Google Drive link format");
+          await initGoogleDrivePlayer(fileId, loadingOverlay);
         }
-        
-        if (streamingLink.includes('drive.google.com')) {
-          const googleDriveMatch = streamingLink.match(/\/d\/(.+?)\//);
-          if (!googleDriveMatch) throw new Error("Invalid Google Drive link format");
-          videoContainer.innerHTML = `
-            <iframe src="https://drive.google.com/file/d/${googleDriveMatch[1]}/preview" 
-                    frameborder="0" 
-                    allow="autoplay; fullscreen; encrypted-media" 
-                    allowfullscreen>
+        else if (videoType === 'rumble') {
+          const videoId = extractRumbleId(decodedLink);
+          if (!videoId) throw new Error("Invalid Rumble link format");
+          await initRumblePlayer(videoId, loadingOverlay);
+        }
+        else if (videoType === 'archive') {
+          await initArchivePlayer(decodedLink, loadingOverlay);
+        }
+        else if (videoType === 'direct') {
+          await initDirectVideoPlayer(decodedLink, loadingOverlay);
+        }
+        else {
+          // Try to handle as generic iframe
+          const container = document.getElementById('video-container');
+          container.innerHTML = `
+            <iframe 
+              src="${decodedLink}" 
+              frameborder="0" 
+              allow="autoplay; fullscreen; encrypted-media" 
+              allowfullscreen>
             </iframe>
           `;
-        } else if (streamingLink.includes('rumble.com')) {
-          const rumbleMatch = streamingLink.match(/v([a-zA-Z0-9]+)/);
-          if (!rumbleMatch) throw new Error("Invalid Rumble link format");
-          const videoId = rumbleMatch[0]; // e.g., v6tg1dx
-          const divId = `rumble_${videoId}`;
-          videoContainer.innerHTML = `<div id="${divId}"></div>`;
-
-          // Load Rumble embed script
-          !function(r,u,m,b,l,e){
-            r._Rumble = b;
-            r[b] || (r[b] = function(){
-              (r[b]._ = r[b]._ || []).push(arguments);
-              if (r[b]._.length == 1) {
-                l = u.createElement(m),
-                e = u.getElementsByTagName(m)[0],
-                l.async = 1,
-                l.src = "https://rumble.com/embedJS/" + RUMBLE_CHANNEL_ID + 
-                        (arguments[1].video ? '.' + arguments[1].video : '') +
-                        "/?url=" + encodeURIComponent(location.href) +
-                        "&args=" + encodeURIComponent(JSON.stringify([].slice.apply(arguments))),
-                e.parentNode.insertBefore(l, e)
-              }
-            })
-          }(window, document, "script", "Rumble");
-
-          // Initialize Rumble player
-          Rumble("play", { video: videoId, div: divId });
-
-          // Hide loading after a timeout (Rumble doesn't provide onload)
           setTimeout(() => {
-            if (loadingOverlay) {
-              loadingOverlay.style.display = 'none';
-            }
-          }, 5000); // Adjust timeout as needed
-        } else {
-          throw new Error("Unsupported streaming link type");
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
+          }, 5000);
         }
 
-        // Load movie data to set page title
-        document.title = `${movieData.title} | KINAFLIX`;
-        
-        // Hide loading when Google Drive video loads
-        const iframe = videoContainer.querySelector('iframe');
-        if (iframe && loadingOverlay) {
-          iframe.onload = () => {
-            loadingOverlay.style.display = 'none';
-          };
+        // Set page title if movieId exists
+        if (movieId) {
+          try {
+            const movieData = await loadMovieData(movieId);
+            document.title = `${movieData.title} | KINAFLIX`;
+          } catch (e) {
+            document.title = `Watching | KINAFLIX`;
+          }
+        } else {
+          document.title = `Watching | KINAFLIX`;
         }
-        
-        // Removed initAdSystem() call as requested
-        
+
       } catch (error) {
         showError(error.message);
       }
     };
 
-    // Load movie data from Firestore
+    // Load movie data from Firestore (both databases)
     const loadMovieData = async (movieId) => {
       const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js');
       const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js');
-      
-      const app = initializeApp({
+
+      // Primary Firebase config (Kinaflix)
+      const firebaseConfig1 = {
         apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
         authDomain: "kinaflix.firebaseapp.com",
         projectId: "kinaflix",
         storageBucket: "kinaflix.appspot.com",
         messagingSenderId: "318239806217",
         appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
-      });
-      
-      const db = getFirestore(app);
-      const docSnap = await getDoc(doc(db, 'movies', movieId));
-      
-      if (!docSnap.exists()) {
-        throw new Error('Movie not found');
+      };
+
+      // Secondary Firebase config (CULLO Movies)
+      const firebaseConfig2 = {
+        apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
+        authDomain: "cullo-movies-6813f.firebaseapp.com",
+        projectId: "cullo-movies-6813f",
+        messagingSenderId: "12310118231",
+        appId: "1:12310118231:web:34682f354027fd19758812"
+      };
+
+      // Try to load from Kinaflix first
+      const app1 = initializeApp(firebaseConfig1, "kinaflix");
+      const db1 = getFirestore(app1);
+      let docSnap = await getDoc(doc(db1, 'movies', movieId));
+
+      if (docSnap.exists()) {
+        return docSnap.data();
       }
-      
-      return docSnap.data();
+
+      // If not found, try CULLO Movies
+      try {
+        const app2 = initializeApp(firebaseConfig2, "cullo");
+        const db2 = getFirestore(app2);
+
+        // Try movies collection first
+        docSnap = await getDoc(doc(db2, 'movies', movieId));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          return {
+            title: data.title,
+            googleDriveLink: data.videoUrl || data.googleDriveLink,
+            streamingLink: data.videoUrl || data.streamingLink,
+            videoUrl: data.videoUrl
+          };
+        }
+
+        // Try series collection
+        docSnap = await getDoc(doc(db2, 'series', movieId));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const firstSeason = data.seasons?.[0];
+          const firstEpisode = firstSeason?.episodes?.[0];
+          return {
+            title: data.title,
+            googleDriveLink: firstEpisode?.videoUrl || data.videoUrl,
+            streamingLink: firstEpisode?.videoUrl || data.videoUrl,
+            videoUrl: firstEpisode?.videoUrl || data.videoUrl
+          };
+        }
+      } catch (e) {
+        console.log('CULLO database not accessible:', e);
+      }
+
+      throw new Error('Movie not found in any database');
     };
 
     const showError = (message) => {
@@ -315,7 +640,7 @@
         loadingOverlay.style.display = 'none';
       }
       document.title = `Error | KINAFLIX`;
-      
+
       if (!document.querySelector('.fa-arrow-left')) {
         const faScript = document.createElement('script');
         faScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js';
@@ -333,4 +658,5 @@
   <!-- Subscription Checker Script -->
   <script src="js/subscription-checker.js"></script>
 </body>
+
 </html>
