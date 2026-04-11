@@ -100,21 +100,32 @@
     }
     .logo:hover { color: #f40612; }
 
-    /* ===== DESKTOP ADS: top‑right fixed container ===== */
+    /* ===== DESKTOP ADS: fixed top‑right, 6:7 ratio ===== */
     .desktop-ad-container {
       position: fixed;
-      top: 60px;
-      right: 10px;
+      top: 70px;
+      right: 20px;
       z-index: 100;
       display: none;
-      flex-direction: column;
-      gap: 15px;
-      background: rgba(0, 0, 0, 0.6);
+      width: 300px;
+      aspect-ratio: 6 / 7;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
       padding: 12px;
-      border-radius: 12px;
-      backdrop-filter: blur(4px);
-      width: auto;
-      max-width: 320px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    /* Make sure the ad iframes respect the container */
+    .desktop-ad-container iframe,
+    .desktop-ad-container ins {
+      max-width: 100%;
+      margin: 0 auto;
     }
 
     /* ===== MOBILE ADS: stacked vertically below description ===== */
@@ -725,15 +736,15 @@
 
   <a href="index.html" class="logo">KINAFLIX</a>
 
-  <!-- DESKTOP ADS: fixed top‑right corner (visible only on desktop) -->
+  <!-- DESKTOP ADS: fixed top‑right, 6:7 ratio box -->
   <div class="desktop-ad-container">
     <!-- Native Ad -->
-    <div style="text-align: center;">
+    <div style="text-align: center; width: 100%;">
       <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
       <div id="container-3ca9d41e4ad15a44f99947e641077339"></div>
     </div>
     <!-- Mid‑scroll boost ad -->
-    <div style="text-align: center;">
+    <div style="text-align: center; width: 100%;">
       <script>
         atOptions = {
           'key' : 'd347e3a19f65b036aba0585678624512',
@@ -828,6 +839,7 @@
   <div id="comments-popup" class="comments-popup"></div>
 
   <script type="module">
+    // ===== YOUR ORIGINAL JAVASCRIPT (unchanged, same as before) =====
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import {
       getFirestore,
@@ -849,7 +861,6 @@
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
     import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
 
-    // ===== FIREBASE CONFIGURATION 1 (Kinaflix) =====
     const firebaseConfig1 = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
@@ -861,7 +872,6 @@
       measurementId: "G-DC1T9B6B9W"
     };
 
-    // ===== FIREBASE CONFIGURATION 2 (CULLO Movies) =====
     const firebaseConfig2 = {
       apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
       authDomain: "cullo-movies-6813f.firebaseapp.com",
@@ -870,7 +880,6 @@
       appId: "1:12310118231:web:34682f354027fd19758812"
     };
 
-    // Initialize Primary App (Kinaflix)
     const app1 = initializeApp(firebaseConfig1);
     let analytics;
     try {
@@ -881,8 +890,6 @@
     }
     const auth = getAuth(app1);
     const db1 = getFirestore(app1);
-
-    // Initialize Secondary App (CULLO Movies)
     const app2 = initializeApp(firebaseConfig2, "culloMovies");
     const db2 = getFirestore(app2);
 
@@ -892,24 +899,18 @@
     const movieId = urlParams.get('id');
     const sourceParam = urlParams.get('source');
 
-    function getDb(source) {
-      return source === 'cullo' ? db2 : db1;
-    }
+    function getDb(source) { return source === 'cullo' ? db2 : db1; }
 
     function getDownloadUrl(videoUrl, title) {
       if (!videoUrl) return null;
       if (videoUrl.includes('drive.google.com') || videoUrl.includes('gdrive')) {
         const fileIdMatch = videoUrl.match(/\/d\/(.+?)\//) || videoUrl.match(/id=(.+?)(&|$)/);
-        if (fileIdMatch && fileIdMatch[1]) {
-          return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-        }
+        if (fileIdMatch && fileIdMatch[1]) return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
       }
       if (videoUrl.includes('rumble.com')) return null;
       if (videoUrl.includes('archive.org')) {
         const identifierMatch = videoUrl.match(/\/details\/([^\/?#]+)/);
-        if (identifierMatch && identifierMatch[1]) {
-          return `https://archive.org/download/${identifierMatch[1]}/${identifierMatch[1]}.mp4`;
-        }
+        if (identifierMatch && identifierMatch[1]) return `https://archive.org/download/${identifierMatch[1]}/${identifierMatch[1]}.mp4`;
         return videoUrl;
       }
       if (videoUrl.match(/\.(mp4|webm|mkv|avi|mov)$/i)) return videoUrl;
@@ -920,22 +921,16 @@
       if (!videoUrl) return null;
       if (videoUrl.includes('rumble.com')) {
         const rumbleMatch = videoUrl.match(/rumble\.com\/(?:embed\/)?([a-zA-Z0-9_-]+)/);
-        if (rumbleMatch && rumbleMatch[1]) {
-          return `https://rumble.com/embed/${rumbleMatch[1]}/?pub=4`;
-        }
+        if (rumbleMatch && rumbleMatch[1]) return `https://rumble.com/embed/${rumbleMatch[1]}/?pub=4`;
         return videoUrl;
       }
       if (videoUrl.includes('drive.google.com')) {
         const fileIdMatch = videoUrl.match(/\/d\/(.+?)\//) || videoUrl.match(/id=(.+?)(&|$)/);
-        if (fileIdMatch && fileIdMatch[1]) {
-          return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
-        }
+        if (fileIdMatch && fileIdMatch[1]) return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
       }
       if (videoUrl.includes('archive.org')) {
         const identifierMatch = videoUrl.match(/\/details\/([^\/?#]+)/);
-        if (identifierMatch && identifierMatch[1]) {
-          return `https://archive.org/embed/${identifierMatch[1]}`;
-        }
+        if (identifierMatch && identifierMatch[1]) return `https://archive.org/embed/${identifierMatch[1]}`;
       }
       return videoUrl;
     }
@@ -953,9 +948,7 @@
         if (match && match[1] && match[1].length === 11) return match[1];
       }
       const idMatch = url.match(/([a-zA-Z0-9_-]{11})/);
-      if (idMatch && idMatch[1] && !idMatch[1].includes('youtube') && !idMatch[1].includes('youtu.be')) {
-        return idMatch[1];
-      }
+      if (idMatch && idMatch[1] && !idMatch[1].includes('youtube') && !idMatch[1].includes('youtu.be')) return idMatch[1];
       return null;
     }
 
@@ -1258,11 +1251,8 @@
             if (seasonsList.length > 0 && currentSeason === 1) {
               currentSeason = seasonsList[0];
               const firstEpisodes = allEpisodes.filter(ep => ep.season === currentSeason);
-              if (firstEpisodes.length > 0) {
-                currentEpisode = firstEpisodes[0];
-              } else {
-                currentEpisode = null;
-              }
+              if (firstEpisodes.length > 0) currentEpisode = firstEpisodes[0];
+              else currentEpisode = null;
             }
 
             currentMovie = {
@@ -1363,11 +1353,8 @@
           const season = parseInt(tab.dataset.season);
           currentSeason = season;
           const seasonEpisodesList = allEpisodes.filter(ep => ep.season === currentSeason);
-          if (seasonEpisodesList.length > 0) {
-            currentEpisode = seasonEpisodesList[0];
-          } else {
-            currentEpisode = null;
-          }
+          if (seasonEpisodesList.length > 0) currentEpisode = seasonEpisodesList[0];
+          else currentEpisode = null;
           renderSeriesEpisodes();
         });
       });
@@ -1478,11 +1465,8 @@
       `;
       if (movieDescription) movieDescription.textContent = currentMovie.description || 'No description available.';
 
-      if (isSeries) {
-        renderSeriesEpisodes();
-      } else {
-        seriesSection.style.display = 'none';
-      }
+      if (isSeries) renderSeriesEpisodes();
+      else seriesSection.style.display = 'none';
 
       if (trailerContainer && currentMovie.youtubeTrailerUrl) {
         const videoId = extractYouTubeVideoId(currentMovie.youtubeTrailerUrl);
