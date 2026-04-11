@@ -165,45 +165,6 @@
       margin-left: 5px;
     }
 
-    /* Ad container styles */
-    .ad-container-below-player {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 50;
-      background: transparent;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      max-width: 100%;
-      padding: 10px;
-      pointer-events: none;
-    }
-
-    .ad-container-below-player > * {
-      pointer-events: auto;
-    }
-
-    .ad-container-below-description {
-      position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 50;
-      background: transparent;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      max-width: 100%;
-      padding: 5px;
-      pointer-events: none;
-    }
-
-    .ad-container-below-description > * {
-      pointer-events: auto;
-    }
-
     /* Social bar container */
     .social-bar-container {
       position: fixed;
@@ -215,20 +176,6 @@
 
     .social-bar-container > * {
       pointer-events: auto;
-    }
-
-    /* Responsive ad adjustments */
-    @media (max-width: 768px) {
-      .ad-container-below-player {
-        bottom: 70px;
-        width: 100%;
-        padding: 5px;
-      }
-      
-      .ad-container-below-description {
-        bottom: 5px;
-        width: 100%;
-      }
     }
   </style>
 </head>
@@ -243,26 +190,6 @@
 
   <!-- Ad Container for Google Ads -->
   <div class="ad-container" id="ad-top" style="text-align: center; margin: 10px 0;"></div>
-
-  <!-- Ad Unit 1: Below Video Player (Main Revenue Zone) -->
-  <div class="ad-container-below-player" id="ad-below-player">
-    <script>
-      atOptions = {
-        'key' : 'd347e3a19f65b036aba0585678624512',
-        'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
-        'params' : {}
-      };
-    </script>
-    <script src="https://www.highperformanceformat.com/d347e3a19f65b036aba0585678624512/invoke.js"></script>
-  </div>
-
-  <!-- Ad Unit 2: Below Description -->
-  <div class="ad-container-below-description" id="ad-below-description">
-    <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
-    <div id="container-3ca9d41e4ad15a44f99947e641077339"></div>
-  </div>
 
   <!-- Social Bar (Ad Unit 4) -->
   <div class="social-bar-container" id="social-bar">
