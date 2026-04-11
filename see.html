@@ -19,7 +19,7 @@
   <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
-    /* ===== YOUR ORIGINAL CSS (unchanged) ===== */
+    /* Your existing CSS - keep exactly as before */
     :root {
       --primary: #e50914;
       --dark: #141414;
@@ -68,8 +68,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .back-button {
@@ -86,7 +91,10 @@
       gap: 0.5rem;
       text-decoration: none;
     }
-    .back-button:hover { color: #f40612; }
+
+    .back-button:hover {
+      color: #f40612;
+    }
 
     .logo {
       position: absolute;
@@ -98,66 +106,11 @@
       text-decoration: none;
       z-index: 10;
     }
-    .logo:hover { color: #f40612; }
 
-    /* ===== DESKTOP ADS: fixed top‑right, 6:7 ratio ===== */
-    .desktop-ad-container {
-      position: fixed;
-      top: 70px;
-      right: 20px;
-      z-index: 100;
-      display: none;
-      width: 300px;
-      aspect-ratio: 6 / 7;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      border-radius: 16px;
-      padding: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      overflow-y: auto;
+    .logo:hover {
+      color: #f40612;
     }
 
-    /* Make sure the ad iframes respect the container */
-    .desktop-ad-container iframe,
-    .desktop-ad-container ins {
-      max-width: 100%;
-      margin: 0 auto;
-    }
-
-    /* ===== MOBILE ADS: stacked vertically below description ===== */
-    .mobile-ads-vertical {
-      display: none;
-      flex-direction: column;
-      gap: 15px;
-      margin: 15px 0;
-      width: 100%;
-    }
-
-    /* Desktop (min-width: 768px) */
-    @media (min-width: 768px) {
-      .desktop-ad-container {
-        display: flex;
-      }
-      .mobile-ads-vertical {
-        display: none;
-      }
-    }
-
-    /* Mobile (max-width: 767px) */
-    @media (max-width: 767px) {
-      .desktop-ad-container {
-        display: none;
-      }
-      .mobile-ads-vertical {
-        display: flex;
-      }
-    }
-
-    /* ===== REST OF YOUR ORIGINAL CSS (no changes) ===== */
     .player-section {
       position: relative;
       width: 100%;
@@ -188,7 +141,10 @@
       box-shadow: 0 40px 80px rgba(0, 0, 0, 0.95), 0 20px 40px rgba(0, 0, 0, 0.8);
       transition: filter 0.3s ease, transform 0.3s ease;
     }
-    .player-image:hover { transform: scale(1.02); }
+
+    .player-image:hover {
+      transform: scale(1.02);
+    }
 
     .player-container::after {
       content: '';
@@ -267,6 +223,7 @@
       width: 40px;
       height: 40px;
     }
+
     .action-btn i {
       font-size: 1.2rem;
       line-height: 40px;
@@ -274,26 +231,43 @@
       width: 100%;
       margin-left: 12px;
     }
+
     .action-btn:hover {
       background: rgba(255, 255, 255, 0.2);
       border-color: rgba(255, 255, 255, 0.5);
       transform: translateY(-2px);
     }
+
     .action-btn.play {
       background: var(--primary);
       border: none;
     }
-    .action-btn.play:hover { background: #f40612; transform: translateY(-2px); }
+
+    .action-btn.play:hover {
+      background: #f40612;
+      transform: translateY(-2px);
+    }
+
     .action-btn.download {
       background: var(--primary);
       border: none;
     }
-    .action-btn.download:hover { background: #f40612; transform: translateY(-2px); }
+
+    .action-btn.download:hover {
+      background: #f40612;
+      transform: translateY(-2px);
+    }
+
     .action-btn.whatsapp {
       background: var(--primary);
       border: none;
     }
-    .action-btn.whatsapp:hover { background: #f40612; transform: translateY(-2px); }
+
+    .action-btn.whatsapp:hover {
+      background: #f40612;
+      transform: translateY(-2px);
+    }
+
     .action-btn.watchlist-added {
       background: rgba(0, 255, 0, 0.2);
       border: 1px solid rgba(0, 255, 0, 0.4);
@@ -305,11 +279,13 @@
       background: var(--dark-gray);
       display: none;
     }
+
     .series-title {
       font-size: 1.3rem;
       color: var(--primary);
       margin-bottom: 1rem;
     }
+
     .season-tabs {
       display: flex;
       gap: 0.5rem;
@@ -318,6 +294,7 @@
       padding-bottom: 0.5rem;
       flex-wrap: wrap;
     }
+
     .season-tab {
       background: #333;
       color: white;
@@ -328,7 +305,11 @@
       font-size: 0.9rem;
       transition: all 0.3s;
     }
-    .season-tab.active { background: var(--primary); }
+
+    .season-tab.active {
+      background: var(--primary);
+    }
+
     .episodes-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -337,6 +318,7 @@
       overflow-y: auto;
       padding: 0.5rem;
     }
+
     .episode-card {
       background: #2a2a2a;
       border-radius: 8px;
@@ -346,16 +328,23 @@
       transition: all 0.3s;
       position: relative;
     }
-    .episode-card:hover { background: var(--primary); transform: translateY(-3px); }
+
+    .episode-card:hover {
+      background: var(--primary);
+      transform: translateY(-3px);
+    }
+
     .episode-card.active {
       background: var(--primary);
       border: 2px solid #ff6b6b;
     }
+
     .episode-number {
       font-size: 1rem;
       font-weight: bold;
       margin-bottom: 0.3rem;
     }
+
     .episode-title {
       font-size: 0.7rem;
       color: #ccc;
@@ -363,7 +352,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .episode-card:hover .episode-title { color: #fff; }
+
+    .episode-card:hover .episode-title {
+      color: #fff;
+    }
+
     .premium-badge {
       position: absolute;
       top: 5px;
@@ -374,6 +367,7 @@
       padding: 2px 5px;
       border-radius: 4px;
     }
+
     .coming-soon-badge {
       position: absolute;
       bottom: 5px;
@@ -384,6 +378,7 @@
       padding: 2px 5px;
       border-radius: 4px;
     }
+
     .playing-bars {
       display: flex;
       gap: 2px;
@@ -391,6 +386,7 @@
       justify-content: center;
       height: 20px;
     }
+
     .playing-bars span {
       width: 3px;
       height: 8px;
@@ -398,11 +394,25 @@
       border-radius: 1px;
       animation: wave 1s infinite ease-in-out;
     }
-    .playing-bars span:nth-child(2) { animation-delay: 0.15s; }
-    .playing-bars span:nth-child(3) { animation-delay: 0.3s; }
+
+    .playing-bars span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .playing-bars span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
     @keyframes wave {
-      0%, 100% { height: 8px; }
-      50% { height: 16px; }
+
+      0%,
+      100% {
+        height: 8px;
+      }
+
+      50% {
+        height: 16px;
+      }
     }
 
     .popular-movies-section {
@@ -410,12 +420,15 @@
       background: var(--dark-gray);
       display: none;
     }
+
     .popular-movies-title {
       font-size: 1.3rem;
       color: var(--primary);
       margin-bottom: 1rem;
     }
-    .series-movies, .popular-movies-grid {
+
+    .series-movies,
+    .popular-movies-grid {
       display: flex;
       overflow-x: auto;
       gap: 0.5rem;
@@ -425,17 +438,25 @@
       position: relative;
       touch-action: pan-x;
     }
-    .series-movies::-webkit-scrollbar, .popular-movies-grid::-webkit-scrollbar {
+
+    .series-movies::-webkit-scrollbar,
+    .popular-movies-grid::-webkit-scrollbar {
       height: 6px;
     }
-    .series-movies::-webkit-scrollbar-track, .popular-movies-grid::-webkit-scrollbar-track {
+
+    .series-movies::-webkit-scrollbar-track,
+    .popular-movies-grid::-webkit-scrollbar-track {
       background: var(--dark-gray);
     }
-    .series-movies::-webkit-scrollbar-thumb, .popular-movies-grid::-webkit-scrollbar-thumb {
+
+    .series-movies::-webkit-scrollbar-thumb,
+    .popular-movies-grid::-webkit-scrollbar-thumb {
       background: var(--primary);
       border-radius: 4px;
     }
-    .series-movie-card, .popular-movie-card {
+
+    .series-movie-card,
+    .popular-movie-card {
       flex: 0 0 auto;
       width: 120px;
       background: rgba(255, 255, 255, 0.1);
@@ -444,18 +465,27 @@
       cursor: pointer;
       transition: transform 0.3s ease;
     }
-    .series-movie-card:hover, .popular-movie-card:hover { transform: translateY(-5px); }
-    .series-movie-poster, .popular-movie-poster {
+
+    .series-movie-card:hover,
+    .popular-movie-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .series-movie-poster,
+    .popular-movie-poster {
       width: 100%;
       height: 160px;
       object-fit: cover;
     }
-    .series-movie-title, .popular-movie-title {
+
+    .series-movie-title,
+    .popular-movie-title {
       padding: 0.5rem;
       font-size: 0.8rem;
       text-align: center;
       color: var(--light);
     }
+
     .scroll-slider {
       width: 100%;
       margin-bottom: 1rem;
@@ -467,7 +497,11 @@
       opacity: 0.7;
       transition: opacity 0.2s;
     }
-    .scroll-slider:hover { opacity: 1; }
+
+    .scroll-slider:hover {
+      opacity: 1;
+    }
+
     .scroll-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
@@ -478,6 +512,7 @@
       border-radius: 50%;
       position: relative;
     }
+
     .scroll-slider::-webkit-slider-thumb::after {
       content: '';
       position: absolute;
@@ -491,8 +526,12 @@
       opacity: 0.5;
       transition: opacity 0.2s;
     }
+
     .scroll-slider::-webkit-slider-thumb:hover::after,
-    .scroll-slider::-webkit-slider-thumb:active::after { opacity: 1; }
+    .scroll-slider::-webkit-slider-thumb:active::after {
+      opacity: 1;
+    }
+
     .scroll-slider::-moz-range-thumb {
       width: 20px;
       height: 20px;
@@ -501,6 +540,7 @@
       border-radius: 50%;
       position: relative;
     }
+
     .scroll-slider::-moz-range-thumb::after {
       content: '';
       position: absolute;
@@ -514,8 +554,11 @@
       opacity: 0.5;
       transition: opacity 0.2s;
     }
+
     .scroll-slider::-moz-range-thumb:hover::after,
-    .scroll-slider::-moz-range-thumb:active::after { opacity: 1; }
+    .scroll-slider::-moz-range-thumb:active::after {
+      opacity: 1;
+    }
 
     .content-section {
       display: flex;
@@ -524,18 +567,24 @@
       gap: 1rem;
       background: var(--dark-gray);
     }
-    .trailer-section { width: 100%; }
+
+    .trailer-section {
+      width: 100%;
+    }
+
     .trailer-title {
       font-size: 1.3rem;
       color: var(--primary);
       margin-bottom: 1rem;
     }
+
     .trailer-container {
       position: relative;
       padding-bottom: 56.25%;
       height: 0;
       overflow: hidden;
     }
+
     .trailer-container iframe {
       position: absolute;
       top: 0;
@@ -544,13 +593,21 @@
       height: 100%;
       border: none;
     }
-    .comments-section { width: 100%; }
+
+    .comments-section {
+      width: 100%;
+    }
+
     .comments-title {
       font-size: 1.3rem;
       color: var(--light);
       margin-bottom: 1rem;
     }
-    .comments-form { margin-bottom: 1rem; }
+
+    .comments-form {
+      margin-bottom: 1rem;
+    }
+
     .comments-form textarea {
       width: 100%;
       padding: 0.5rem;
@@ -562,6 +619,7 @@
       min-height: 80px;
       margin-bottom: 0.5rem;
     }
+
     .comments-form button {
       background: var(--primary);
       color: white;
@@ -570,19 +628,31 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    .comments-form button:hover { background: #f40612; }
+
+    .comments-form button:hover {
+      background: #f40612;
+    }
+
     .comments-list {
       max-height: 300px;
       overflow-y: auto;
     }
+
     .comment {
       background: rgba(0, 0, 0, 0.5);
       padding: 0.5rem 1rem;
       border-radius: 4px;
       margin-bottom: 0.5rem;
     }
-    .comment .user { font-weight: bold; color: var(--primary); }
-    .comment .text { margin-top: 0.2rem; }
+
+    .comment .user {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .comment .text {
+      margin-top: 0.2rem;
+    }
 
     .toast {
       position: fixed;
@@ -600,10 +670,23 @@
       max-width: 300px;
       font-size: 0.9rem;
     }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { background: #4CAF50; }
-    .toast.error { background: #f44336; }
-    .toast.info { background: #2196F3; }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: #4CAF50;
+    }
+
+    .toast.error {
+      background: #f44336;
+    }
+
+    .toast.info {
+      background: #2196F3;
+    }
 
     footer {
       text-align: center;
@@ -630,7 +713,11 @@
       font-size: 0.95rem;
       line-height: 1.5;
     }
-    .description-popup.show { display: block; }
+
+    .description-popup.show {
+      display: block;
+    }
+
     .comments-popup {
       display: none;
       position: fixed;
@@ -646,7 +733,11 @@
       overflow-y: auto;
       color: var(--light);
     }
-    .comments-popup.show { display: block; }
+
+    .comments-popup.show {
+      display: block;
+    }
+
     .show-all-comments {
       color: var(--primary);
       cursor: pointer;
@@ -654,22 +745,66 @@
       margin-top: 0.5rem;
       font-size: 0.9rem;
     }
-    .show-all-comments:hover { color: #f40612; }
+
+    .show-all-comments:hover {
+      color: #f40612;
+    }
+
     .more-text {
       color: var(--primary);
       cursor: pointer;
     }
-    .more-text:hover { color: #f40612; }
+
+    .more-text:hover {
+      color: #f40612;
+    }
 
     @media (max-width: 767px) {
-      body { overflow: auto; }
-      .player-section { height: auto; min-height: 50vh; }
-      .player-container { flex-direction: column; position: relative; }
-      .player-image { height: 40vh; min-height: 200px; }
-      .back-button, .logo { top: 0.5rem; z-index: 3; background: transparent; backdrop-filter: none; padding: 0.3rem 0.8rem; }
-      .movie-info { position: static; background: transparent; text-align: left; padding: 0.5rem 1rem; }
-      .movie-title { font-size: 1.5rem; margin-bottom: 0.3rem; }
-      .movie-meta { font-size: 0.8rem; margin-bottom: 0.3rem; }
+      body {
+        overflow: auto;
+      }
+
+      .player-section {
+        height: auto;
+        min-height: 50vh;
+      }
+
+      .player-container {
+        flex-direction: column;
+        position: relative;
+      }
+
+      .player-image {
+        height: 40vh;
+        min-height: 200px;
+      }
+
+      .back-button,
+      .logo {
+        top: 0.5rem;
+        z-index: 3;
+        background: transparent;
+        backdrop-filter: none;
+        padding: 0.3rem 0.8rem;
+      }
+
+      .movie-info {
+        position: static;
+        background: transparent;
+        text-align: left;
+        padding: 0.5rem 1rem;
+      }
+
+      .movie-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .movie-meta {
+        font-size: 0.8rem;
+        margin-bottom: 0.3rem;
+      }
+
       .movie-description {
         font-size: 0.85rem;
         display: -webkit-box;
@@ -681,7 +816,14 @@
         position: relative;
         max-height: 3.6em;
       }
-      .movie-description::after { content: 'more'; color: var(--primary); position: relative; cursor: pointer; }
+
+      .movie-description::after {
+        content: 'more';
+        color: var(--primary);
+        position: relative;
+        cursor: pointer;
+      }
+
       .movie-description::before {
         content: '';
         position: absolute;
@@ -691,35 +833,142 @@
         height: 1.2em;
         background: linear-gradient(to left, var(--dark), transparent);
       }
-      .movie-description:hover::after { color: #f40612; }
-      .action-buttons { justify-content: center; gap: 0.3rem; margin: 0.5rem 0; }
-      .action-btn { padding: 0; font-size: 0; width: 40px; height: 40px; justify-content: center; align-items: center; }
-      .action-btn i { font-size: 1.2rem; line-height: 40px; text-align: center; width: 100%; margin-left: 12px; }
-      .series-section, .popular-movies-section { display: block; }
-      .comments-list { max-height: none; }
-      .comment:nth-child(n+6) { display: none; }
+
+      .movie-description:hover::after {
+        color: #f40612;
+      }
+
+      .action-buttons {
+        justify-content: center;
+        gap: 0.3rem;
+        margin: 0.5rem 0;
+      }
+
+      .action-btn {
+        padding: 0;
+        font-size: 0;
+        width: 40px;
+        height: 40px;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .action-btn i {
+        font-size: 1.2rem;
+        line-height: 40px;
+        text-align: center;
+        width: 100%;
+        margin-left: 12px;
+      }
+
+      .series-section,
+      .popular-movies-section {
+        display: block;
+      }
+
+      .comments-list {
+        max-height: none;
+      }
+
+      .comment:nth-child(n+6) {
+        display: none;
+      }
     }
 
     @media (min-width: 768px) {
-      .player-section { height: 80vh; }
-      .player-container { flex-direction: row; align-items: center; }
-      .player-image { flex: 1; height: auto; min-height: 100%; filter: brightness(40%); box-shadow: none; }
-      .movie-info { max-width: 50%; position: absolute; top: 50%; left: 2rem; transform: translateY(-50%); background: transparent; }
-      .movie-title { font-size: 3rem; }
-      .movie-description { font-size: 1.1rem; }
-      .action-buttons { gap: 0.5rem; }
-      .action-btn { padding: 0.6rem 1.2rem; font-size: 1rem; border-radius: 25px; width: auto; height: auto; justify-content: center; align-items: center; }
-      .action-btn i { font-size: 1rem; line-height: normal; margin-left: 6px; width: auto; }
-      .back-button { position: fixed; top: 1rem; left: 1rem; background-color: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 25px; }
-      .back-button:hover { background-color: #f40612; color: white; }
-      .series-section, .popular-movies-section { display: block; }
-      .content-section { flex-direction: row; }
-      .trailer-section, .comments-section { width: 50%; }
+      .player-section {
+        height: 80vh;
+      }
+
+      .player-container {
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .player-image {
+        flex: 1;
+        height: auto;
+        min-height: 100%;
+        filter: brightness(40%);
+        box-shadow: none;
+      }
+
+      .movie-info {
+        max-width: 50%;
+        position: absolute;
+        top: 50%;
+        left: 2rem;
+        transform: translateY(-50%);
+        background: transparent;
+      }
+
+      .movie-title {
+        font-size: 3rem;
+      }
+
+      .movie-description {
+        font-size: 1.1rem;
+      }
+
+      .action-buttons {
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        border-radius: 25px;
+        width: auto;
+        height: auto;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .action-btn i {
+        font-size: 1rem;
+        line-height: normal;
+        margin-left: 6px;
+        width: auto;
+      }
+
+      .back-button {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        background-color: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+      }
+
+      .back-button:hover {
+        background-color: #f40612;
+        color: white;
+      }
+
+      .series-section,
+      .popular-movies-section {
+        display: block;
+      }
+
+      .content-section {
+        flex-direction: row;
+      }
+
+      .trailer-section,
+      .comments-section {
+        width: 50%;
+      }
     }
 
     @media (min-width: 1024px) {
-      .player-section { height: 90vh; }
-      .movie-info { max-width: 40%; }
+      .player-section {
+        height: 90vh;
+      }
+
+      .movie-info {
+        max-width: 40%;
+      }
     }
   </style>
 </head>
@@ -736,28 +985,6 @@
 
   <a href="index.html" class="logo">KINAFLIX</a>
 
-  <!-- DESKTOP ADS: fixed top‑right, 6:7 ratio box -->
-  <div class="desktop-ad-container">
-    <!-- Native Ad -->
-    <div style="text-align: center; width: 100%;">
-      <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
-      <div id="container-3ca9d41e4ad15a44f99947e641077339"></div>
-    </div>
-    <!-- Mid‑scroll boost ad -->
-    <div style="text-align: center; width: 100%;">
-      <script>
-        atOptions = {
-          'key' : 'd347e3a19f65b036aba0585678624512',
-          'format' : 'iframe',
-          'height' : 250,
-          'width' : 300,
-          'params' : {}
-        };
-      </script>
-      <script src="https://www.highperformanceformat.com/d347e3a19f65b036aba0585678624512/invoke.js"></script>
-    </div>
-  </div>
-
   <div id="kinaflix-ad-container" style="text-align:center; margin: 20px 10px;"></div>
 
   <div class="player-section">
@@ -767,34 +994,30 @@
         <h1 class="movie-title" id="movie-title"></h1>
         <div class="movie-meta" id="movie-meta"></div>
         <p class="movie-description" id="movie-description"></p>
-
-        <!-- MOBILE ADS: stacked vertically (visible only on mobile) -->
-        <div class="mobile-ads-vertical">
-          <!-- Native Ad -->
-          <div style="text-align: center;">
-            <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
-            <div id="container-mobile-native"></div>
-          </div>
-          <!-- Mid‑scroll boost ad -->
-          <div style="text-align: center;">
-            <script>
-              atOptions = {
-                'key' : 'd347e3a19f65b036aba0585678624512',
-                'format' : 'iframe',
-                'height' : 250,
-                'width' : 300,
-                'params' : {}
-              };
-            </script>
-            <script src="https://www.highperformanceformat.com/d347e3a19f65b036aba0585678624512/invoke.js"></script>
-          </div>
+        <!-- AD UNIT 1: BELOW DESCRIPTION -->
+        <div style="margin: 20px 0; text-align: center;">
+          <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
+          <div id="container-3ca9d41e4ad15a44f99947e641077339"></div>
         </div>
-
+        <!-- AD UNIT 2: BEFORE PLAY BUTTON (ATTENTION ZONE) -->
+        <div style="margin: 15px 0; text-align: center;">
+          <script>
+            atOptions = {
+              'key' : 'd347e3a19f65b036aba0585678624512',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          </script>
+          <script src="https://www.highperformanceformat.com/d347e3a19f65b036aba0585678624512/invoke.js"></script>
+        </div>
         <div class="action-buttons" id="action-buttons">
           <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
           <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> NZAYIREBA UBUTAHA</button>
           <button class="action-btn download" id="download-btn"><i class="fas fa-download"></i> Download</button>
-          <button class="action-btn whatsapp" id="whatsapp-btn"><i class="fab fa-whatsapp"></i> MENYA UTUGEZWEHO</button>
+          <button class="action-btn whatsapp" id="whatsapp-btn"><i class="fab fa-whatsapp"></i> MENYA
+            UTUGEZWEHO</button>
           <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Sangiza</button>
         </div>
       </div>
@@ -839,7 +1062,6 @@
   <div id="comments-popup" class="comments-popup"></div>
 
   <script type="module">
-    // ===== YOUR ORIGINAL JAVASCRIPT (unchanged, same as before) =====
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import {
       getFirestore,
@@ -861,6 +1083,7 @@
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
     import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
 
+    // ===== FIREBASE CONFIGURATION 1 (Kinaflix) =====
     const firebaseConfig1 = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
@@ -872,6 +1095,7 @@
       measurementId: "G-DC1T9B6B9W"
     };
 
+    // ===== FIREBASE CONFIGURATION 2 (CULLO Movies) =====
     const firebaseConfig2 = {
       apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
       authDomain: "cullo-movies-6813f.firebaseapp.com",
@@ -880,6 +1104,7 @@
       appId: "1:12310118231:web:34682f354027fd19758812"
     };
 
+    // Initialize Primary App (Kinaflix)
     const app1 = initializeApp(firebaseConfig1);
     let analytics;
     try {
@@ -890,6 +1115,8 @@
     }
     const auth = getAuth(app1);
     const db1 = getFirestore(app1);
+
+    // Initialize Secondary App (CULLO Movies)
     const app2 = initializeApp(firebaseConfig2, "culloMovies");
     const db2 = getFirestore(app2);
 
@@ -899,18 +1126,24 @@
     const movieId = urlParams.get('id');
     const sourceParam = urlParams.get('source');
 
-    function getDb(source) { return source === 'cullo' ? db2 : db1; }
+    function getDb(source) {
+      return source === 'cullo' ? db2 : db1;
+    }
 
     function getDownloadUrl(videoUrl, title) {
       if (!videoUrl) return null;
       if (videoUrl.includes('drive.google.com') || videoUrl.includes('gdrive')) {
         const fileIdMatch = videoUrl.match(/\/d\/(.+?)\//) || videoUrl.match(/id=(.+?)(&|$)/);
-        if (fileIdMatch && fileIdMatch[1]) return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+        if (fileIdMatch && fileIdMatch[1]) {
+          return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+        }
       }
       if (videoUrl.includes('rumble.com')) return null;
       if (videoUrl.includes('archive.org')) {
         const identifierMatch = videoUrl.match(/\/details\/([^\/?#]+)/);
-        if (identifierMatch && identifierMatch[1]) return `https://archive.org/download/${identifierMatch[1]}/${identifierMatch[1]}.mp4`;
+        if (identifierMatch && identifierMatch[1]) {
+          return `https://archive.org/download/${identifierMatch[1]}/${identifierMatch[1]}.mp4`;
+        }
         return videoUrl;
       }
       if (videoUrl.match(/\.(mp4|webm|mkv|avi|mov)$/i)) return videoUrl;
@@ -921,16 +1154,22 @@
       if (!videoUrl) return null;
       if (videoUrl.includes('rumble.com')) {
         const rumbleMatch = videoUrl.match(/rumble\.com\/(?:embed\/)?([a-zA-Z0-9_-]+)/);
-        if (rumbleMatch && rumbleMatch[1]) return `https://rumble.com/embed/${rumbleMatch[1]}/?pub=4`;
+        if (rumbleMatch && rumbleMatch[1]) {
+          return `https://rumble.com/embed/${rumbleMatch[1]}/?pub=4`;
+        }
         return videoUrl;
       }
       if (videoUrl.includes('drive.google.com')) {
         const fileIdMatch = videoUrl.match(/\/d\/(.+?)\//) || videoUrl.match(/id=(.+?)(&|$)/);
-        if (fileIdMatch && fileIdMatch[1]) return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+        if (fileIdMatch && fileIdMatch[1]) {
+          return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+        }
       }
       if (videoUrl.includes('archive.org')) {
         const identifierMatch = videoUrl.match(/\/details\/([^\/?#]+)/);
-        if (identifierMatch && identifierMatch[1]) return `https://archive.org/embed/${identifierMatch[1]}`;
+        if (identifierMatch && identifierMatch[1]) {
+          return `https://archive.org/embed/${identifierMatch[1]}`;
+        }
       }
       return videoUrl;
     }
@@ -948,10 +1187,13 @@
         if (match && match[1] && match[1].length === 11) return match[1];
       }
       const idMatch = url.match(/([a-zA-Z0-9_-]{11})/);
-      if (idMatch && idMatch[1] && !idMatch[1].includes('youtube') && !idMatch[1].includes('youtu.be')) return idMatch[1];
+      if (idMatch && idMatch[1] && !idMatch[1].includes('youtube') && !idMatch[1].includes('youtu.be')) {
+        return idMatch[1];
+      }
       return null;
     }
 
+    // Helper: Escape HTML to prevent XSS
     function escapeHtml(text) {
       if (!text) return '';
       const div = document.createElement('div');
@@ -1038,6 +1280,7 @@
           let videoUrl;
           if (isSeries && currentEpisode) {
             videoUrl = currentEpisode.videoUrl;
+            // Extra check: if episode has no videoUrl, show helpful message
             if (!videoUrl) {
               showToast(`Episode ${currentEpisode.number}${currentEpisode.part ? currentEpisode.part : ''} has no streaming link yet. Coming soon!`, 'info');
               return;
@@ -1184,9 +1427,11 @@
         isSeries = false;
 
         if (currentSource === 'cullo') {
+          // First try movies collection
           const movieRef = doc(db, 'movies', movieId);
           movieSnap = await getDoc(movieRef);
           if (!movieSnap.exists()) {
+            // Then try series collection
             const seriesRef = doc(db, 'series', movieId);
             movieSnap = await getDoc(seriesRef);
             if (movieSnap.exists()) isSeries = true;
@@ -1220,6 +1465,7 @@
         const data = movieSnap.data();
 
         if (currentSource === 'cullo') {
+          // Check if this is a series (has seasons array OR isSeries flag)
           if (isSeries || (data.seasons && Array.isArray(data.seasons) && data.seasons.length > 0)) {
             isSeries = true;
             seriesData = data;
@@ -1230,7 +1476,12 @@
               data.seasons.forEach((season, idx) => {
                 const seasonNum = season.number || idx + 1;
                 if (!seasonsList.includes(seasonNum)) seasonsList.push(seasonNum);
+
                 const episodesArray = season.episodes || [];
+                if (episodesArray.length === 0) {
+                  console.warn(`Season ${seasonNum} has no episodes`);
+                }
+
                 episodesArray.forEach(ep => {
                   allEpisodes.push({
                     id: ep.id || `${movieId}_s${seasonNum}_e${ep.number}`,
@@ -1238,7 +1489,7 @@
                     number: ep.number || '?',
                     part: ep.part || null,
                     title: ep.title || `Episode ${ep.number}${ep.part ? ep.part : ''}`,
-                    videoUrl: ep.videoUrl || '',
+                    videoUrl: ep.videoUrl || '',  // May be empty
                     thumbnail: ep.thumbnail || data.thumbnailUrl,
                     isPremium: ep.isPremium || false,
                     duration: ep.duration || '45 min'
@@ -1251,8 +1502,17 @@
             if (seasonsList.length > 0 && currentSeason === 1) {
               currentSeason = seasonsList[0];
               const firstEpisodes = allEpisodes.filter(ep => ep.season === currentSeason);
-              if (firstEpisodes.length > 0) currentEpisode = firstEpisodes[0];
-              else currentEpisode = null;
+              if (firstEpisodes.length > 0) {
+                currentEpisode = firstEpisodes[0];
+                // If first episode has no videoUrl, log warning but don't break
+                if (!currentEpisode.videoUrl) {
+                  console.log(`First episode of ${data.title} has no streaming link`);
+                }
+              } else {
+                // No episodes in first season
+                console.warn(`Season ${currentSeason} has no episodes`);
+                currentEpisode = null;
+              }
             }
 
             currentMovie = {
@@ -1268,6 +1528,7 @@
               youtubeTrailerUrl: data.trailerUrl || data.youtubeTrailerUrl || ''
             };
           } else {
+            // It's a movie
             isSeries = false;
             currentMovie = {
               id: movieSnap.id,
@@ -1306,9 +1567,11 @@
       }
     }
 
+    // Improved series episode rendering with "Coming Soon" for missing video links
     function renderSeriesEpisodes() {
       if (!isSeries || allEpisodes.length === 0) {
         seriesSection.style.display = 'none';
+        // If it's a series but no episodes, show a message in the series section
         if (isSeries && allEpisodes.length === 0 && seriesSection) {
           seriesSection.style.display = 'block';
           seriesTitle.textContent = currentMovie.title;
@@ -1348,17 +1611,22 @@
         }).join('');
       }
 
+      // Season tab event listeners
       document.querySelectorAll('.season-tab').forEach(tab => {
         tab.addEventListener('click', () => {
           const season = parseInt(tab.dataset.season);
           currentSeason = season;
           const seasonEpisodesList = allEpisodes.filter(ep => ep.season === currentSeason);
-          if (seasonEpisodesList.length > 0) currentEpisode = seasonEpisodesList[0];
-          else currentEpisode = null;
+          if (seasonEpisodesList.length > 0) {
+            currentEpisode = seasonEpisodesList[0];
+          } else {
+            currentEpisode = null;
+          }
           renderSeriesEpisodes();
         });
       });
 
+      // Episode card event listeners
       document.querySelectorAll('.episode-card').forEach(card => {
         card.addEventListener('click', () => {
           const episode = JSON.parse(card.dataset.episode);
@@ -1374,7 +1642,9 @@
           document.querySelectorAll('.episode-card').forEach(c => c.classList.remove('active'));
           card.classList.add('active');
           showToast(`Now playing: Episode ${episode.number}${episode.part ? episode.part : ''} - ${episode.title}`, 'success');
+          // Auto-play if watch button exists (user can also click watch button)
           if (watchNowBtn) {
+            // Trigger watch handler directly
             const videoUrl = episode.videoUrl;
             if (videoUrl) {
               const streamingUrl = getStreamingUrl(videoUrl);
@@ -1465,8 +1735,11 @@
       `;
       if (movieDescription) movieDescription.textContent = currentMovie.description || 'No description available.';
 
-      if (isSeries) renderSeriesEpisodes();
-      else seriesSection.style.display = 'none';
+      if (isSeries) {
+        renderSeriesEpisodes();
+      } else {
+        seriesSection.style.display = 'none';
+      }
 
       if (trailerContainer && currentMovie.youtubeTrailerUrl) {
         const videoId = extractYouTubeVideoId(currentMovie.youtubeTrailerUrl);
