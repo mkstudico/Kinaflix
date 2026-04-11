@@ -276,14 +276,12 @@
       flex-wrap: nowrap;
       gap: 0.5rem;
       overflow-x: hidden;
-      /* Changed from auto to hidden to prevent touch scrolling */
       white-space: nowrap;
       padding: 0.5rem;
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
       overscroll-behavior-x: contain;
       touch-action: none;
-      /* Disable touch scrolling */
     }
 
     .movie-card {
@@ -544,17 +542,15 @@
       font-size: 0.7rem;
     }
 
-    @media (min-width: 769px) {
-      body::before {
-        content: 'Redirecting to desktop version...';
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-size: 1rem;
-        color: var(--text-color);
-        background: var(--background-color);
-      }
+    /* Native ad styling to fit inside movie grid */
+    .native-ad-item {
+      flex: 0 0 auto;
+      width: 300px;
+      margin: 0 4px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      overflow: hidden;
+      scroll-snap-align: start;
     }
 
     @media (max-width: 576px) {
@@ -562,45 +558,48 @@
         width: 90px;
         min-width: 90px;
       }
-
       .movie-poster {
         height: 135px;
       }
-
       .movie-title {
         font-size: 0.7rem;
       }
-
       .movie-meta {
         font-size: 0.6rem;
       }
-
       .view-count,
       .time-indicator {
         font-size: 0.55rem;
       }
-
       .overlay-title {
         font-size: 0.7rem;
       }
-
       .genre-tag {
         font-size: 0.5rem;
       }
-
       .overlay-btn {
         font-size: 0.6rem;
       }
-
       .umusobanuzi {
         font-size: 0.5rem;
       }
-
       .grid-nav-btn {
         width: 25px;
         height: 25px;
         font-size: 0.8rem;
       }
+      .native-ad-item {
+        width: 260px;
+      }
+    }
+
+    /* Mid-scroll boost container styling */
+    .mid-scroll-container {
+      margin: 20px 0;
+      text-align: center;
+      background: #0a0a0a;
+      padding: 10px;
+      border-radius: 8px;
     }
   </style>
 
@@ -636,7 +635,7 @@
     </div>
   </header>
 
-  <!--ADVANCED AD PLACEMENT-->
+  <!--ADVANCED AD PLACEMENT (existing)-->
   <div id="kinaflix-ad-container" style="text-align:center; margin: 20px 10px;"></div>
   <script type="module" src="js/subscription-checker.js"></script>
   <!--End-->
@@ -654,6 +653,9 @@
     </div>
     <p>© 2026 KX | by btem@fficial All rights reserved.</p>
   </footer>
+
+  <!-- SOCIAL BAR (ONCE PER SESSION) -->
+  <script src="https://pl29119196.profitablecpmratenetwork.com/b8/29/4d/b8294df1d7e2c4bdf1c663d5c0ec4f4b.js"></script>
 
   <script type="module">
     // Redirect on video click
@@ -1117,6 +1119,40 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    // ===== NATIVE AD HELPER =====
+    function getNativeAdHTML() {
+      return `
+        <div class="native-ad-item">
+          <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"><\/script>
+          <div id="container-3ca9d41e4ad15a44f99947e641077339"></div>
+        </div>
+      `;
+    }
+
+    // Insert native ads into an array of movie objects (every 6 movies)
+    function injectNativeAds(movieArray) {
+      const result = [];
+      for (let i = 0; i < movieArray.length; i++) {
+        result.push(movieArray[i]);
+        // After every 6th movie (i.e., index 5, 11, 17...), insert ad
+        if ((i + 1) % 6 === 0 && i !== movieArray.length - 1) {
+          result.push({ isAd: true });
+        }
+      }
+      return result;
+    }
+
+    // Render movie grid with possible ad items
+    function renderMovieGridWithAds(items) {
+      return items.map(item => {
+        if (item.isAd) {
+          return getNativeAdHTML();
+        } else {
+          return renderMovieCard(item);
+        }
+      }).join('');
+    }
+
     // ===== UPDATED: Fetch movies from BOTH databases =====
     async function fetchMoviesFromBothDatabases() {
       const allMoviesList = [];
@@ -1355,8 +1391,10 @@
         `;
       }
 
+      // Newest Releases with native ads every 6 movies
       if (newestMovies && newestMovies.length > 0) {
-        const newestRows = chunkArray(newestMovies, 12);
+        const withAds = injectNativeAds(newestMovies);
+        const rows = chunkArray(withAds, 12);
         html += `
           <section class="section">
             <h2 class="section-title">Newest Releases <a href="#" class="view-all" data-sort="newest">See All</a></h2>
@@ -1364,18 +1402,20 @@
               <button class="grid-nav-btn prev" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
               <button class="grid-nav-btn next" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
             </div>
-            ${newestRows.slice(0, 1).map(row => `
+            ${rows.slice(0, 1).map(row => `
               <div class="movies-grid">
-                ${row.map(movie => renderMovieCard(movie)).join('')}
+                ${renderMovieGridWithAds(row)}
               </div>
             `).join('')}
           </section>
         `;
       }
 
+      // Popular Movies with native ads every 6 movies
       const popularMovies = sortMovies([...movies], 'views', 'desc').slice(0, 12);
       if (popularMovies.length > 0) {
-        const popularRows = chunkArray(popularMovies, 12);
+        const withAds = injectNativeAds(popularMovies);
+        const rows = chunkArray(withAds, 12);
         html += `
           <section class="section">
             <h2 class="section-title">Popular Movies <a href="#" class="view-all" data-sort="popular">See All</a></h2>
@@ -1383,20 +1423,37 @@
               <button class="grid-nav-btn prev" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
               <button class="grid-nav-btn next" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
             </div>
-            ${popularRows.slice(0, 1).map(row => `
+            ${rows.slice(0, 1).map(row => `
               <div class="movies-grid">
-                ${row.map(movie => renderMovieCard(movie)).join('')}
+                ${renderMovieGridWithAds(row)}
               </div>
             `).join('')}
           </section>
         `;
       }
 
+      // MID-SCROLL BOOST (high attention placement)
+      html += `
+        <div class="mid-scroll-container">
+          <script>
+            atOptions = {
+              'key' : 'd347e3a19f65b036aba0585678624512',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          <\/script>
+          <script src="https://www.highperformanceformat.com/d347e3a19f65b036aba0585678624512/invoke.js"><\/script>
+        </div>
+      `;
+
+      // Action Movies with native ads
       const actionMovies = shuffleArray(sortMovies(
         movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Action')),
         'views', 'desc'
       ));
-      const actionRows = chunkArray(actionMovies, 12);
+      const actionRows = chunkArray(injectNativeAds(actionMovies), 12);
       if (actionRows.length > 0) {
         html += `
           <section class="section">
@@ -1407,18 +1464,19 @@
             </div>
             ${actionRows.slice(0, 3).map(row => `
               <div class="movies-grid">
-                ${row.map(movie => renderMovieCard(movie)).join('')}
+                ${renderMovieGridWithAds(row)}
               </div>
             `).join('')}
           </section>
         `;
       }
 
+      // Romance & Drama with native ads
       const romanceDramaMovies = shuffleArray(sortMovies(
         movies.filter(movie => Array.isArray(movie.genres) && (movie.genres.includes('Romance') || movie.genres.includes('Drama'))),
         'views', 'desc'
       ));
-      const romanceDramaRows = chunkArray(romanceDramaMovies, 12);
+      const romanceDramaRows = chunkArray(injectNativeAds(romanceDramaMovies), 12);
       if (romanceDramaRows.length > 0) {
         html += `
           <section class="section">
@@ -1429,18 +1487,19 @@
             </div>
             ${romanceDramaRows.slice(0, 2).map(row => `
               <div class="movies-grid">
-                ${row.map(movie => renderMovieCard(movie)).join('')}
+                ${renderMovieGridWithAds(row)}
               </div>
             `).join('')}
           </section>
         `;
       }
 
+      // Horror Movies with native ads
       const horrorMovies = shuffleArray(sortMovies(
         movies.filter(movie => Array.isArray(movie.genres) && movie.genres.includes('Horror')),
         'views', 'desc'
       ));
-      const horrorRows = chunkArray(horrorMovies, 12);
+      const horrorRows = chunkArray(injectNativeAds(horrorMovies), 12);
       if (horrorRows.length > 0) {
         html += `
           <section class="section">
@@ -1451,7 +1510,7 @@
             </div>
             ${horrorRows.slice(0, 1).map(row => `
               <div class="movies-grid">
-                ${row.map(movie => renderMovieCard(movie)).join('')}
+                ${renderMovieGridWithAds(row)}
               </div>
             `).join('')}
           </section>
@@ -1466,9 +1525,10 @@
         </div>
       `;
 
+      // All Movies with native ads
       if (movies.length > 0) {
-        const allMovies = sortMovies([...movies], 'views', 'desc');
-        const allMoviesRows = chunkArray(allMovies, 12);
+        const allMoviesList = sortMovies([...movies], 'views', 'desc');
+        const allMoviesRows = chunkArray(injectNativeAds(allMoviesList), 12);
         html += `
           <section class="section">
             <h2 class="section-title">All Movies</h2>
@@ -1478,7 +1538,7 @@
             </div>
             ${allMoviesRows.slice(0, 5).map(row => `
               <div class="movies-grid">
-                ${row.map(movie => renderMovieCard(movie)).join('')}
+                ${renderMovieGridWithAds(row)}
               </div>
             `).join('')}
           </section>
@@ -1585,7 +1645,8 @@
     }
 
     function renderMovieList(moviesList, title) {
-      const rows = chunkArray(moviesList, 12);
+      const withAds = injectNativeAds(moviesList);
+      const rows = chunkArray(withAds, 12);
       const html = `
         <section class="section">
           <h2 class="section-title">${title}</h2>
@@ -1595,7 +1656,7 @@
           </div>
           ${rows.length > 0 ? rows.map(row => `
             <div class="movies-grid">
-              ${row.map(movie => renderMovieCard(movie)).join('')}
+              ${renderMovieGridWithAds(row)}
             </div>
           `).join('') : '<p>No movies found.</p>'}
         </section>
