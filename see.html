@@ -198,6 +198,64 @@
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     }
 
+    /* NEW: Desktop flex layout for description + ads side by side */
+    .description-with-ads {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .description-text {
+      flex: 1;
+    }
+
+    .desktop-ads-sidebar {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+      min-width: 300px;
+    }
+
+    .mobile-ads-below {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    /* Desktop styles (min-width: 768px) */
+    @media (min-width: 768px) {
+      .description-with-ads {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+      
+      .desktop-ads-sidebar {
+        display: flex;
+      }
+      
+      .mobile-ads-below {
+        display: none;
+      }
+      
+      .action-buttons {
+        margin-top: 1rem;
+      }
+    }
+
+    /* Mobile styles (max-width: 767px) */
+    @media (max-width: 767px) {
+      .desktop-ads-sidebar {
+        display: none;
+      }
+      
+      .mobile-ads-below {
+        display: block;
+      }
+      
+      .description-with-ads {
+        flex-direction: column;
+      }
+    }
+
     .action-buttons {
       display: flex;
       gap: 0.5rem;
@@ -993,17 +1051,55 @@
       <div class="movie-info" id="movie-info">
         <h1 class="movie-title" id="movie-title"></h1>
         <div class="movie-meta" id="movie-meta"></div>
-        <p class="movie-description" id="movie-description"></p>
-
-        <!-- 🧠 UNDER DESCRIPTION (HIGH CTR) - Native Ad placed right here -->
-        <div style="margin: 15px 0; text-align: center;">
-          <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
-          <div id="container-3ca9d41e4ad15a44f99947e641077339"></div>
+        
+        <!-- DESCRIPTION + ADS CONTAINER (Responsive layout) -->
+        <div class="description-with-ads">
+          <!-- Left side: Description text -->
+          <div class="description-text">
+            <p class="movie-description" id="movie-description"></p>
+          </div>
+          
+          <!-- Right side: Desktop ads sidebar (visible only on PC) -->
+          <div class="desktop-ads-sidebar">
+            <!-- Native Ad -->
+            <div style="text-align: center;">
+              <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
+              <div id="container-3ca9d41e4ad15a44f99947e641077339"></div>
+            </div>
+            <!-- Mid-scroll boost ad -->
+            <div style="text-align: center;">
+              <script>
+                atOptions = {
+                  'key' : 'd347e3a19f65b036aba0585678624512',
+                  'format' : 'iframe',
+                  'height' : 250,
+                  'width' : 300,
+                  'params' : {}
+                };
+              </script>
+              <script src="https://www.highperformanceformat.com/d347e3a19f65b036aba0585678624512/invoke.js"></script>
+            </div>
+          </div>
         </div>
-
+        
+        <!-- ACTION BUTTONS -->
         <div class="action-buttons" id="action-buttons">
-          <!-- ▶️ BEFORE PLAY BUTTON (PSYCHOLOGY ZONE) - Ad placed right before the play button -->
-          <div style="width: 100%; margin-bottom: 10px; text-align: center;">
+          <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
+          <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> NZAYIREBA UBUTAHA</button>
+          <button class="action-btn download" id="download-btn"><i class="fas fa-download"></i> Download</button>
+          <button class="action-btn whatsapp" id="whatsapp-btn"><i class="fab fa-whatsapp"></i> MENYA UTUGEZWEHO</button>
+          <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Sangiza</button>
+        </div>
+        
+        <!-- Mobile ads below buttons (visible only on mobile) -->
+        <div class="mobile-ads-below">
+          <!-- Native Ad -->
+          <div style="text-align: center; margin-bottom: 15px;">
+            <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
+            <div id="container-mobile-native"></div>
+          </div>
+          <!-- Mid-scroll boost ad -->
+          <div style="text-align: center;">
             <script>
               atOptions = {
                 'key' : 'd347e3a19f65b036aba0585678624512',
@@ -1015,12 +1111,6 @@
             </script>
             <script src="https://www.highperformanceformat.com/d347e3a19f65b036aba0585678624512/invoke.js"></script>
           </div>
-          <button class="action-btn play" id="watch-now-btn"><i class="fas fa-play"></i> Tangira Kureba</button>
-          <button class="action-btn" id="watchlist-btn"><i class="fas fa-plus"></i> NZAYIREBA UBUTAHA</button>
-          <button class="action-btn download" id="download-btn"><i class="fas fa-download"></i> Download</button>
-          <button class="action-btn whatsapp" id="whatsapp-btn"><i class="fab fa-whatsapp"></i> MENYA
-            UTUGEZWEHO</button>
-          <button class="action-btn" id="share-btn"><i class="fas fa-share"></i> Sangiza</button>
         </div>
       </div>
     </div>
