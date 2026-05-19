@@ -3,8 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="google-adsense-account" content="ca-pub-6280599021277554">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Loading... | KINAFLIX</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -24,7 +23,6 @@
   <style>
     :root {
       --primary: #e50914;
-      --ad-primary: #4285f4;
       --dark: #000000;
       --light: #f5f5f5;
       --gray-text: #888;
@@ -42,7 +40,7 @@
       padding: 0;
       background-color: var(--dark);
       color: var(--light);
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       height: 100vh;
       overflow: hidden;
     }
@@ -204,24 +202,12 @@
       animation: wave 1s infinite ease-in-out;
     }
 
-    .playing-indicator span:nth-child(2) {
-      animation-delay: 0.15s;
-    }
-
-    .playing-indicator span:nth-child(3) {
-      animation-delay: 0.3s;
-    }
+    .playing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+    .playing-indicator span:nth-child(3) { animation-delay: 0.3s; }
 
     @keyframes wave {
-
-      0%,
-      100% {
-        height: 8px;
-      }
-
-      50% {
-        height: 16px;
-      }
+      0%, 100% { height: 8px; }
+      50% { height: 16px; }
     }
 
     .loading-overlay {
@@ -247,13 +233,8 @@
     }
 
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .back-button {
@@ -265,88 +246,14 @@
       color: white;
       border: none;
       transition: all 0.3s ease;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .back-button:hover {
       background-color: #f40612;
       color: white;
-    }
-
-    .ad-notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 300px;
-      height: 50px;
-      background: rgba(0, 0, 0, 0.8);
-      border-left: 3px solid var(--ad-primary);
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      z-index: 200;
-      animation: slideIn 0.3s ease-out;
-      overflow: hidden;
-      cursor: pointer;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-      }
-
-      to {
-        transform: translateX(0);
-      }
-    }
-
-    .ad-notification img {
-      height: 40px;
-      width: 40px;
-      object-fit: cover;
-      margin-right: 10px;
-      border-radius: 4px;
-    }
-
-    .ad-notification-content {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .ad-notification-title {
-      font-size: 12px;
-      font-weight: bold;
-      color: white;
-      margin-bottom: 2px;
-    }
-
-    .ad-notification-description {
-      font-size: 10px;
-      color: var(--gray-text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .ad-notification-close {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    .social-bar-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 60;
-      pointer-events: none;
-    }
-
-    .social-bar-container>* {
-      pointer-events: auto;
+      transform: scale(1.05);
     }
 
     .toast {
@@ -354,15 +261,16 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(100px);
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0,0,0,0.9);
       color: white;
       padding: 0.8rem 1.5rem;
       border-radius: 8px;
       z-index: 1000;
       transition: transform 0.3s ease;
       pointer-events: none;
+      font-size: 0.9rem;
+      white-space: nowrap;
     }
-
     .toast.show {
       transform: translateX(-50%) translateY(0);
     }
@@ -371,57 +279,119 @@
     .episodes-list::-webkit-scrollbar {
       width: 6px;
     }
-
     .episodes-list::-webkit-scrollbar-track {
       background: var(--dark-gray);
     }
-
     .episodes-list::-webkit-scrollbar-thumb {
       background: var(--primary);
       border-radius: 4px;
     }
-
     .season-tabs::-webkit-scrollbar {
       height: 4px;
     }
-
     .season-tabs::-webkit-scrollbar-track {
       background: var(--dark-gray);
     }
-
     .season-tabs::-webkit-scrollbar-thumb {
       background: var(--primary);
       border-radius: 4px;
     }
 
-    /* Mobile responsive */
+    /* Mobile responsive - well flexed */
     @media (max-width: 768px) {
       .main-container {
         flex-direction: column;
       }
-
       .video-wrapper {
         height: 50vh;
+        min-height: 300px;
       }
-
       .series-sidebar {
         width: 100%;
         height: 50vh;
+        min-height: 300px;
       }
-
       .back-button {
         top: 10px;
         left: 10px;
         font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
       }
-
       .back-button span:last-child {
-        display: none;
+        display: inline-block;
       }
+      .toast {
+        font-size: 0.8rem;
+        white-space: normal;
+        text-align: center;
+        max-width: 90%;
+      }
+    }
 
-      .back-button .icon {
-        margin: 0;
+    /* Tablet responsive */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .series-sidebar {
+        width: 280px;
       }
+      .episode-number {
+        min-width: 45px;
+        font-size: 0.8rem;
+      }
+      .episode-title {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* Desktop large screens */
+    @media (min-width: 1440px) {
+      .series-sidebar {
+        width: 360px;
+      }
+      .episode-number {
+        min-width: 55px;
+        font-size: 1rem;
+      }
+      .episode-title {
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Error container styling */
+    .error-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      color: #e50914;
+      text-align: center;
+      padding: 2rem;
+      z-index: 20;
+    }
+    .error-container h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .error-container p {
+      margin-bottom: 1.5rem;
+      color: #ccc;
+    }
+    .error-container a {
+      background: #e50914;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .error-container a:hover {
+      background: #f40612;
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -431,12 +401,6 @@
     <span class="icon"><i class="fas fa-arrow-left"></i></span>
     <span>BACK</span>
   </a>
-
-  <div class="ad-container" id="ad-top" style="text-align: center; margin: 10px 0; display: none;"></div>
-
-  <div class="social-bar-container" id="social-bar">
-    <script src="https://pl29119196.profitablecpmratenetwork.com/b8/29/4d/b8294df1d7e2c4bdf1c663d5c0ec4f4b.js"></script>
-  </div>
 
   <div class="main-container">
     <!-- Video Section -->
@@ -583,7 +547,7 @@
       const divId = `rumble_${videoId}`;
       const container = document.getElementById('video-container');
       container.innerHTML = `<div id="${divId}" style="width:100%;height:100%;"></div>`;
-
+      
       // Load Rumble embed script
       !function (r, u, m, b, l, e) {
         r._Rumble = b;
@@ -591,17 +555,17 @@
           (r[b]._ = r[b]._ || []).push(arguments);
           if (r[b]._.length == 1) {
             l = u.createElement(m),
-              e = u.getElementsByTagName(m)[0],
-              l.async = 1,
-              l.src = "https://rumble.com/embedJS/" + RUMBLE_CHANNEL_ID +
-              (arguments[1].video ? '.' + arguments[1].video : '') +
-              "/?url=" + encodeURIComponent(location.href) +
-              "&args=" + encodeURIComponent(JSON.stringify([].slice.apply(arguments))),
-              e.parentNode.insertBefore(l, e)
+            e = u.getElementsByTagName(m)[0],
+            l.async = 1,
+            l.src = "https://rumble.com/embedJS/" + RUMBLE_CHANNEL_ID +
+            (arguments[1].video ? '.' + arguments[1].video : '') +
+            "/?url=" + encodeURIComponent(location.href) +
+            "&args=" + encodeURIComponent(JSON.stringify([].slice.apply(arguments))),
+            e.parentNode.insertBefore(l, e)
           }
         })
       }(window, document, "script", "Rumble");
-
+      
       Rumble("play", { video: videoId, div: divId });
       setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 5000);
     }
@@ -638,18 +602,18 @@
       try {
         seriesEpisodes = [];
         seasonsList = [];
-
+        
         // FIRST: Check in Kinaflix (db1) - handles seriesId structure
         const kinaflixDoc = await getDoc(doc(db1, 'movies', movieId));
         const kinaflixData = kinaflixDoc.data();
-
+        
         if (kinaflixData && kinaflixData.seriesId) {
           console.log('✓ Series found in Kinaflix with seriesId:', kinaflixData.seriesId);
-
+          
           // Get all episodes in this series
           const seriesQuery = query(collection(db1, 'movies'), where('seriesId', '==', kinaflixData.seriesId), orderBy('releaseYear', 'asc'));
           const seriesSnap = await getDocs(seriesQuery);
-
+          
           let epNum = 1;
           seriesSnap.docs.forEach(docSnap => {
             const epData = docSnap.data();
@@ -665,32 +629,32 @@
             });
             epNum++;
           });
-
+          
           // Get series name
           try {
             const seriesDoc = await getDoc(doc(db1, 'series', kinaflixData.seriesId));
             if (seriesDoc.exists()) currentSeriesTitle = seriesDoc.data().name;
-          } catch (e) { console.log('Could not get series name'); }
-
+          } catch(e) { console.log('Could not get series name'); }
+          
           if (currentSeriesTitle === '') currentSeriesTitle = kinaflixData.title || 'Series';
-
+          
           seasonsList.sort((a, b) => a - b);
           if (seasonsList.length > 0) currentSeason = seasonsList[0];
           return true;
         }
-
+        
         // SECOND: Check in Cullo (db2) - handles seasons structure
         if (source === 'cullo') {
           const culloDoc = await getDoc(doc(db2, 'movies', movieId));
           const culloData = culloDoc.data();
-
+          
           if (culloData && culloData.seasons && Array.isArray(culloData.seasons) && culloData.seasons.length > 0) {
             console.log('✓ Series found in Cullo with seasons structure');
-
+            
             culloData.seasons.forEach((season, idx) => {
               const seasonNum = season.number || idx + 1;
               if (!seasonsList.includes(seasonNum)) seasonsList.push(seasonNum);
-
+              
               if (season.episodes && Array.isArray(season.episodes)) {
                 season.episodes.forEach(ep => {
                   seriesEpisodes.push({
@@ -704,24 +668,24 @@
                 });
               }
             });
-
+            
             currentSeriesTitle = culloData.title || 'Series';
             seasonsList.sort((a, b) => a - b);
             if (seasonsList.length > 0) currentSeason = seasonsList[0];
             return true;
           }
-
+          
           // Also check if it's a series in the series collection
           const culloSeriesDoc = await getDoc(doc(db2, 'series', movieId));
           const culloSeriesData = culloSeriesDoc.data();
-
+          
           if (culloSeriesData && culloSeriesData.seasons && Array.isArray(culloSeriesData.seasons)) {
             console.log('✓ Series found in Cullo series collection');
-
+            
             culloSeriesData.seasons.forEach((season, idx) => {
               const seasonNum = season.number || idx + 1;
               if (!seasonsList.includes(seasonNum)) seasonsList.push(seasonNum);
-
+              
               if (season.episodes && Array.isArray(season.episodes)) {
                 season.episodes.forEach(ep => {
                   seriesEpisodes.push({
@@ -735,26 +699,26 @@
                 });
               }
             });
-
+            
             currentSeriesTitle = culloSeriesData.title || 'Series';
             seasonsList.sort((a, b) => a - b);
             if (seasonsList.length > 0) currentSeason = seasonsList[0];
             return true;
           }
         }
-
+        
         // THIRD: If source is not specified, also check Cullo
         if (source !== 'cullo') {
           const culloDoc = await getDoc(doc(db2, 'movies', movieId));
           const culloData = culloDoc.data();
-
+          
           if (culloData && culloData.seasons && Array.isArray(culloData.seasons) && culloData.seasons.length > 0) {
             console.log('✓ Series found in Cullo (auto-detected)');
-
+            
             culloData.seasons.forEach((season, idx) => {
               const seasonNum = season.number || idx + 1;
               if (!seasonsList.includes(seasonNum)) seasonsList.push(seasonNum);
-
+              
               if (season.episodes && Array.isArray(season.episodes)) {
                 season.episodes.forEach(ep => {
                   seriesEpisodes.push({
@@ -768,17 +732,17 @@
                 });
               }
             });
-
+            
             currentSeriesTitle = culloData.title || 'Series';
             seasonsList.sort((a, b) => a - b);
             if (seasonsList.length > 0) currentSeason = seasonsList[0];
             return true;
           }
         }
-
+        
         console.log('No series data found');
         return false;
-
+        
       } catch (error) {
         console.error('Error loading series:', error);
         return false;
@@ -790,17 +754,17 @@
       const seasonEpisodes = seriesEpisodes.filter(ep => ep.season === currentSeason);
       const seasonTabsDiv = document.getElementById('season-tabs');
       const episodesListDiv = document.getElementById('episodes-list');
-
+      
       document.getElementById('series-title').textContent = currentSeriesTitle || 'Episodes';
-
+      
       if (seasonsList.length > 0) {
-        seasonTabsDiv.innerHTML = seasonsList.map(s =>
+        seasonTabsDiv.innerHTML = seasonsList.map(s => 
           `<button class="season-tab ${s === currentSeason ? 'active' : ''}" data-season="${s}">Season ${s}</button>`
         ).join('');
       } else {
         seasonTabsDiv.innerHTML = '';
       }
-
+      
       if (seasonEpisodes.length === 0) {
         episodesListDiv.innerHTML = '<div style="text-align:center;padding:2rem;color:#666;">No episodes available.</div>';
       } else {
@@ -814,7 +778,7 @@
           </div>`;
         }).join('');
       }
-
+      
       // Add season tab listeners
       document.querySelectorAll('.season-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -822,7 +786,7 @@
           renderEpisodes();
         });
       });
-
+      
       // Add episode item listeners
       document.querySelectorAll('.episode-item').forEach(item => {
         item.addEventListener('click', async () => {
@@ -835,7 +799,7 @@
           renderEpisodes();
           showToast(`Loading: ${ep.title}`);
           await loadAndPlayVideo(ep.videoUrl);
-
+          
           // Update URL without reload
           const newUrl = `${window.location.pathname}?movieId=${ep.id}&source=${ep.source}`;
           window.history.pushState({}, '', newUrl);
@@ -847,10 +811,10 @@
     async function loadAndPlayVideo(streamingLink) {
       const loadingOverlay = document.getElementById('loading-overlay');
       if (loadingOverlay) loadingOverlay.style.display = 'flex';
-
+      
       const decodedLink = decodeURIComponent(streamingLink);
       const videoType = detectVideoType(decodedLink);
-
+      
       if (videoType === 'googledrive') {
         const fileId = extractGoogleDriveId(decodedLink);
         if (fileId) await initGoogleDrivePlayer(fileId, loadingOverlay);
@@ -910,11 +874,11 @@
         let streamingLink = urlParams.get('streamingLink');
         currentSource = urlParams.get('source') || 'kinaflix';
         currentMovieId = movieId;
-
+        
         if (!movieId && !streamingLink) {
           throw new Error("Invalid movie ID or streaming link");
         }
-
+        
         // Set up back button with correct query parameters
         const backButton = document.getElementById('back-button');
         if (backButton && movieId) {
@@ -922,21 +886,21 @@
         } else if (backButton) {
           backButton.href = 'index.html';
         }
-
+        
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) loadingOverlay.style.display = 'flex';
-
+        
         const seriesSidebar = document.getElementById('series-sidebar');
-
+        
         // Check if this is a series (check both databases)
         const isSeries = await loadSeriesData(movieId, currentSource);
-
+        
         if (isSeries && seriesEpisodes.length > 0) {
           console.log('✓ Series detected, showing sidebar with', seriesEpisodes.length, 'episodes');
           // Show sidebar for series
           seriesSidebar.classList.add('visible');
           renderEpisodes();
-
+          
           // Find current episode playing (the one matching the movieId)
           const currentEp = seriesEpisodes.find(ep => ep.id === movieId);
           if (currentEp) {
@@ -965,34 +929,34 @@
           console.log('✓ Regular movie detected, hiding sidebar');
           // Hide sidebar for regular movies
           seriesSidebar.classList.remove('visible');
-
+          
           // Regular movie
           if (!streamingLink && movieId) {
             const movieData = await loadMovieData(movieId, currentSource);
             streamingLink = movieData?.googleDriveLink || movieData?.streamingLink || movieData?.videoUrl;
           }
-
+          
           if (!streamingLink) throw new Error("No streaming link available");
           await loadAndPlayVideo(streamingLink);
         }
-
+        
         // Set page title
         if (movieId) {
           try {
             const movieData = await loadMovieData(movieId, currentSource);
             if (movieData && movieData.title) document.title = `${movieData.title} | KINAFLIX`;
-          } catch (e) { }
+          } catch(e) {}
         }
-
+        
       } catch (error) {
         console.error('Error:', error);
         const container = document.getElementById('video-container');
-        container.innerHTML = `<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#000;color:#e50914;text-align:center;padding:2rem;"><h1>⚠️ Error</h1><p>${error.message}</p><a href="index.html" style="background:#e50914;color:white;padding:0.5rem 1rem;border-radius:4px;text-decoration:none;margin-top:1rem;">Go Back</a></div>`;
+        container.innerHTML = `<div class="error-container"><h1><i class="fas fa-exclamation-triangle"></i> Error</h1><p>${error.message}</p><a href="index.html"><i class="fas fa-home"></i> Go Back Home</a></div>`;
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) loadingOverlay.style.display = 'none';
       }
     };
-
+    
     if (document.readyState === 'complete') {
       initPlayer();
     } else {
@@ -1002,5 +966,3 @@
 </body>
 
 </html>
-
-
