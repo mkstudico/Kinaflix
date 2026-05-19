@@ -4,2478 +4,1590 @@
 <head>
   <script>
     (function () {
-      // Immediate redirect for small screens (phones)
       var isSmallScreen = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isSmallScreen) {
-        window.location.replace('indexp.html');
-      }
+      if (isSmallScreen) window.location.replace('indexp.html');
     })();
   </script>
   <meta charset="UTF-8">
   <meta name="google-adsense-account" content="ca-pub-6280599021277554">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>REBA AGASOBANUYE | KINAFLIX</title>
+  <title>KINAFLIX - Watch Movies Online Free</title>
   <meta name="description" content="Reba filme zisobanuye zirenga 100, kubuntu na Kinaflix aho uri hose.">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print"
-    onload="this.media='all'">
-  <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
-  <meta property="og:title" content="AGASOBANUYE KINAFLIX" />
-  <meta property="og:description" content="Reba movie zisobanuye zirenga +100 kubuntu ukoresheje interneti gusa" />
-  <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
-  <meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
-  <meta property="og:type" content="entertainment" />
+  <link rel="preconnect" href="https://i.ibb.co" crossorigin>
+  <link rel="preconnect" href="https://www.youtube.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://code.iconify.design" crossorigin>
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="AGASOBANUYE KINAFLIX" />
-  <meta name="twitter:description" content="Reba movie zisobanuye zirenga +100 kubuntu ukoresheje interneti gusa" />
-  <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
+  <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+
+  <meta property="og:title" content="AGASOBANUYE KINAFLIX">
+  <meta property="og:description" content="Reba movie zisobanuye zirenga +100 kubuntu ukoresheje interneti gusa">
+  <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png">
+  <meta property="og:url" content="https://kinaflix-fawn.vercel.app/">
+  <meta property="og:type" content="entertainment">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AGASOBANUYE KINAFLIX">
+  <meta name="twitter:description" content="Reba movie zisobanuye zirenga +100 kubuntu ukoresheje interneti gusa">
+  <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png">
 
   <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "KINAFLIX",
-  "url": "https://kinaflix-fawn.vercel.app",
-  "description": "Reba filme zisobanuye zirenga 100, kubuntu na kinaflix aho uri hose.",
-  "inLanguage": "en",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://kinaflix-fawn.vercel.app/search.html?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-</script>
+        {"@context":"https://schema.org","@type":"WebSite","name":"KINAFLIX","url":"https://kinaflix-fawn.vercel.app","description":"Reba filme zisobanuye zirenga 100, kubuntu na kinaflix aho uri hose.","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":"https://kinaflix-fawn.vercel.app/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}
+    </script>
+
   <style>
     :root {
+      --bg: #080808;
+      --surface: #111111;
+      --surface-hover: #1a1a1a;
+      --text: #ffffff;
+      --text-secondary: #888888;
       --primary: #e50914;
-      --primary-dark: #b2070f;
-      --primary-light: #ff3a2d;
-      --dark: #141414;
-      --light: #f4f4f4;
-      --gray: #999;
-      --dark-gray: #222;
-      --sidebar-width: 100px;
-      --shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-      --content-box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-      --whatsapp-green: #25D366;
-      --whatsapp-dark-green: #128C7E;
-      --taskbar-height: 60px;
+      --primary-hover: #ff0a16;
+      --primary-glow: rgba(229, 9, 20, 0.35);
+      --border: rgba(255, 255, 255, 0.05);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.6);
+      --shadow-hover: 0 12px 40px rgba(229, 9, 20, 0.22);
+      --radius: 10px;
+      --transition: 0.2s ease;
     }
 
     * {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
+      box-sizing: border-box
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--dark);
-      color: var(--light);
-      display: flex;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    body.light-mode {
-      background: var(--light);
-      color: var(--dark);
+    ::-webkit-scrollbar {
+      width: 4px
     }
 
-    /* Sidebar Styles */
-    .sidebar {
-      width: var(--sidebar-width);
-      background: var(--dark);
-      height: 100vh;
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #2a2a2a;
+      border-radius: 2px
+    }
+
+    /* Top loading bar */
+    #topLoadBar {
       position: fixed;
-      left: 0;
       top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: var(--primary);
+      z-index: 99999;
+      transition: width 0.4s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    #topLoadBar.active {
+      opacity: 1;
+      width: 90%;
+    }
+
+    #topLoadBar.done {
+      width: 100%;
+      opacity: 0;
+      transition: width 0.2s ease, opacity 0.3s ease 0.2s;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-size: .8rem;
+      z-index: 9998;
+      opacity: 0;
+      transition: all .3s ease;
+      border: 1px solid rgba(255, 255, 255, .1);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    .toast.error {
+      border-color: #e74c3c
+    }
+
+    .toast.success {
+      border-color: #27ae60
+    }
+
+    .topbar {
+      background: rgba(8, 8, 8, .9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
       z-index: 1000;
-      transition: background 0.3s;
-    }
-
-    body.light-mode .sidebar {
-      background: var(--light);
-    }
-
-    .sidebar-content {
-      background: #000;
-      border-radius: 16px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      box-shadow: var(--content-box-shadow);
-      width: 80px;
-      will-change: transform;
+      gap: 20px;
     }
 
     .logo {
-      font-size: 2rem;
+      font-size: 1.5rem;
+      font-weight: 800;
       color: var(--primary);
-      font-weight: bold;
       text-decoration: none;
-      transition: transform 0.2s, color 0.2s;
+      letter-spacing: -.5px;
+      white-space: nowrap;
     }
 
-    .logo:hover {
-      color: var(--primary-light);
-      transform: scale(1.1);
+    .logo span {
+      color: var(--text);
+      font-weight: 400
     }
 
-    .nav-menu {
+    .search-box {
+      flex: 1;
+      max-width: 500px;
+      position: relative
+    }
+
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 50px;
+      height: 42px;
+      transition: var(--transition);
+    }
+
+    .search-wrap:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow)
+    }
+
+    .search-wrap input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: .9rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    .search-wrap input::placeholder {
+      color: var(--text-secondary)
+    }
+
+    .search-clear {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 10px 16px;
+      display: none;
+    }
+
+    .search-clear.show {
+      display: block
+    }
+
+    .search-drop {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-height: 400px;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .8);
+      display: none;
+      z-index: 200;
+    }
+
+    .search-drop.open {
+      display: block
+    }
+
+    .search-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, .03);
+    }
+
+    .search-item:hover {
+      background: var(--surface-hover)
+    }
+
+    .search-thumb {
+      width: 38px;
+      height: 54px;
+      border-radius: 4px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #1a1a1a
+    }
+
+    .search-info {
+      flex: 1;
+      min-width: 0
+    }
+
+    .search-title {
+      font-size: .85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .search-meta {
+      font-size: .7rem;
+      color: var(--text-secondary);
+      margin-top: 3px
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .btn-sm {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, .2);
+      color: var(--text);
+      padding: 7px 16px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: .8rem;
+      font-family: inherit;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .btn-sm:hover {
+      background: rgba(255, 255, 255, .06)
+    }
+
+    .btn-sm.primary {
+      background: var(--primary);
+      border-color: var(--primary)
+    }
+
+    .btn-sm.primary:hover {
+      background: var(--primary-hover)
+    }
+
+    .layout {
+      display: flex;
+      max-width: 1500px;
+      margin: 0 auto;
+      min-height: calc(100vh - 60px)
+    }
+
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 10px;
+      flex: 1
+    }
+
+    .sidebar-link {
+      display: flex;
       align-items: center;
-    }
-
-    .nav-item {
-      color: var(--light);
+      gap: 12px;
+      padding: 9px 14px;
+      color: var(--text-secondary);
       text-decoration: none;
-      font-size: 1.5rem;
-      transition: transform 0.2s, color 0.2s;
-      will-change: transform;
+      font-size: .82rem;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
     }
 
-    body.light-mode .nav-item {
-      color: var(--light);
+    .sidebar-link:hover {
+      background: var(--surface);
+      color: var(--text)
     }
 
-    .nav-item:hover {
+    .sidebar-link.active {
+      background: rgba(229, 9, 20, 0.08);
       color: var(--primary);
-      transform: scale(1.2);
+      font-weight: 600;
+      position: relative;
     }
 
-    .nav-divider {
-      width: 50%;
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute;
+      left: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .sidebar-link .iconify {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0
+    }
+
+    .sidebar-divider {
       height: 1px;
-      background: rgba(255, 255, 255, 0.2);
-      margin: 0.5rem 0;
+      background: var(--border);
+      margin: 8px 14px
+    }
+
+    .sidebar-label {
+      padding: 4px 14px 2px;
+      font-size: .6rem;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--text-secondary);
+      font-weight: 700;
     }
 
     .sidebar-footer {
-      display: flex;
-      justify-content: center;
-    }
-
-    .theme-toggle {
-      background: none;
-      border: none;
-      color: var(--light);
+      margin-top: auto;
+      padding: 14px;
+      border-top: 1px solid var(--border);
+      font-size: .6rem;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.7;
       cursor: pointer;
-      font-size: 1.5rem;
-      transition: transform 0.2s, color 0.2s;
-      will-change: transform;
+      transition: color 0.2s;
     }
 
-    body.light-mode .theme-toggle {
-      color: var(--light);
-    }
-
-    .theme-toggle:hover {
+    .sidebar-footer:hover {
       color: var(--primary);
-      transform: scale(1.2);
     }
 
-    /* Main Content Styles */
-    .main-content {
+    .content {
       flex: 1;
-      margin-left: var(--sidebar-width);
-      transition: margin-left 0.3s;
+      min-width: 0;
+      padding-bottom: 40px
     }
 
-    /* Header Styles */
-    header {
-      background: var(--dark);
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: var(--shadow);
-      transition: background 0.3s;
-      gap: 1rem;
-    }
-
-    body.light-mode header {
-      background: var(--light);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .header-image-box {
-      width: 50px;
-      height: 50px;
-      background: #fff;
-      border: 2px solid var(--primary);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-right: 1rem;
-      cursor: pointer;
-    }
-
-    .header-image-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .header-text {
-      color: var(--light);
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    body.light-mode .header-text {
-      color: var(--dark);
-    }
-
-    /* WhatsApp Button */
-    .whatsapp-btn {
-      background-color: var(--whatsapp-green);
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-decoration: none;
-    }
-
-    .whatsapp-btn:hover {
-      background-color: var(--whatsapp-dark-green);
-    }
-
-    /* PayPal Donation Button Container */
-    .donate-btn-container {
-      display: inline-block;
-    }
-
-    /* Auth Buttons */
-    .auth-buttons {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      margin-left: auto;
-    }
-
-    .auth-btn {
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .login-btn {
-      background: transparent;
-      border: 1px solid var(--light);
-      color: var(--light);
-    }
-
-    body.light-mode .login-btn {
-      border: 1px solid var(--dark);
-      color: var(--dark);
-    }
-
-    .login-btn:hover {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .register-btn {
-      background: var(--primary);
-      border: 1px solid var(--primary);
-      color: white;
-    }
-
-    .register-btn:hover {
-      background: var(--primary-dark);
-    }
-
-    .profile-btn {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--light);
-      border: none;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    body.light-mode .profile-btn {
-      background: rgba(0, 0, 0, 0.1);
-      color: var(--dark);
-    }
-
-    .profile-btn:hover {
-      background: var(--primary);
-      color: white;
-    }
-
-    .logout-btn {
-      background: transparent;
-      border: 1px solid var(--light);
-      color: var(--light);
-    }
-
-    body.light-mode .logout-btn {
-      border: 1px solid var(--dark);
-      color: var(--dark);
-    }
-
-    .logout-btn:hover {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .theme-toggle-header {
-      background: transparent;
-      border: none;
-      color: var(--light);
-      cursor: pointer;
-      font-size: 1.2rem;
-      margin-left: 1rem;
-      transition: color 0.3s;
-    }
-
-    body.light-mode .theme-toggle-header {
-      color: var(--dark);
-    }
-
-    .theme-toggle-header:hover {
-      color: var(--primary);
-    }
-
-    .mobile-menu-btn {
-      display: none;
-      background: none;
-      border: none;
-      color: var(--light);
-      font-size: 1.5rem;
-      cursor: pointer;
-      margin-right: auto;
-    }
-
-    body.light-mode .mobile-menu-btn {
-      color: var(--dark);
-    }
-
-    /* Hero Section */
-    .hero-slideshow {
+    .hero-container {
       position: relative;
-      height: 70vh;
+      width: 100%;
+      height: 72vh;
+      min-height: 480px;
+      max-height: 780px;
       overflow: hidden;
+      cursor: pointer;
+      background: #0d0d0d;
     }
 
     .hero-slide {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5)),
-        var(--hero-background) center/cover no-repeat;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 0 5rem;
+      inset: 0;
       opacity: 0;
-      transition: opacity 1s ease-in-out;
+      transition: opacity 1.2s
     }
 
     .hero-slide.active {
-      opacity: 1;
+      opacity: 1
     }
 
-    .hero-content {
-      max-width: 600px;
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center top;
+      transition: transform 8s ease;
+      background-color: #1a1a2e;
+    }
+
+    .hero-container:hover .hero-slide.active .hero-bg {
+      transform: scale(1.05)
+    }
+
+    .hero-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8, 8, 8, .1) 0%, rgba(8, 8, 8, .3) 30%, rgba(8, 8, 8, .78) 70%, var(--bg) 100%);
+    }
+
+    .hero-gradient-side {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(8, 8, 8, .78) 0%, rgba(8, 8, 8, .3) 40%, transparent 100%);
+    }
+
+    .hero-info {
+      position: absolute;
+      bottom: 14%;
+      left: 6%;
+      max-width: 550px;
+      z-index: 5
+    }
+
+    .hero-info.anim {
+      animation: fadeUp .8s ease
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: #fff;
+      padding: 5px 14px;
+      border-radius: 50px;
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 var(--primary-glow)
+      }
+
+      50% {
+        box-shadow: 0 0 25px 5px var(--primary-glow)
+      }
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 30px rgba(0, 0, 0, .6);
+    }
+
+    .hero-meta-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      font-size: .85rem;
+      color: #ccc
+    }
+
+    .star-icon {
+      color: #fbbf24
+    }
+
+    .hero-desc {
+      font-size: .95rem;
+      color: #bbb;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 12px
+    }
+
+    .btn-hero {
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-size: .95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-play {
+      background: var(--primary);
+      color: #fff
+    }
+
+    .btn-trailer {
+      background: rgba(255, 255, 255, .1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .2);
+      backdrop-filter: blur(10px)
+    }
+
+    .hero-dots {
+      position: absolute;
+      bottom: 8%;
+      right: 6%;
+      display: flex;
+      gap: 8px;
+      z-index: 6
+    }
+
+    .hero-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .25);
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+    }
+
+    .hero-dot.active {
+      background: var(--primary);
+      width: 28px;
+      border-radius: 10px
+    }
+
+    .content-section {
+      padding: 12px 24px;
+      max-width: 1500px;
+      margin: 0 auto
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 4px
+    }
+
+    .section-title-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .section-title-text .s-icon {
+      color: var(--primary)
+    }
+
+    /* Year picker (vertical, right side) */
+    .years-page-container {
+      display: flex;
+      gap: 20px;
+      padding: 20px 24px;
+    }
+
+    .year-picker-column {
+      flex-shrink: 0;
+      width: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 20px;
+    }
+
+    .year-picker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .year-picker:active {
+      cursor: grabbing;
+    }
+
+    .year-slot {
+      text-align: center;
+      font-weight: 550;
+      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      border-radius: 60px;
+      width: 100%;
+      padding: 0.3rem 0.2rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      background: transparent;
+      color: #6b6f78;
+      opacity: 0.55;
+      font-size: 1.8rem;
+    }
+
+    .year-slot.dim {
+      font-size: 1.8rem;
+      color: #6b6f78;
+      opacity: 0.5;
+    }
+
+    .year-slot.selected {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.2);
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    .year-slot.placeholder {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .trailer-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory
+    }
+
+    .trailer-scroll::-webkit-scrollbar {
+      height: 5px
+    }
+
+    .trailer-scroll::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .trailer-scroll::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 3px
+    }
+
+    .trailer-card {
+      flex-shrink: 0;
+      width: 350px;
+      scroll-snap-align: start;
+      transition: var(--transition)
+    }
+
+    .trailer-card:hover {
+      transform: translateY(-4px)
+    }
+
+    .trailer-video-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #000;
+      box-shadow: var(--shadow-card);
+    }
+
+    .trailer-video-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none
+    }
+
+    .trailer-label {
+      margin-top: 8px;
+      font-size: .78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trailer-label span {
+      font-size: .64rem;
+      color: var(--text-secondary);
+      font-weight: 400
+    }
+
+    .poster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .poster-card {
+      cursor: pointer;
+      transition: var(--transition);
+      border-radius: var(--radius);
+      outline: none;
+    }
+
+    .poster-card:hover {
+      transform: translateY(-5px)
+    }
+
+    .poster-img-wrap {
+      position: relative;
+      aspect-ratio: 2/3;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #14141e;
+      box-shadow: var(--shadow-card);
+    }
+
+    .poster-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .5s ease, opacity .3s ease;
+      opacity: 0;
+    }
+
+    .poster-img.loaded {
+      opacity: 1
+    }
+
+    .poster-card:hover .poster-img {
+      transform: scale(1.06)
+    }
+
+    .poster-img-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #444;
+      font-size: .52rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .poster-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, .85);
+      color: #fff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: .56rem;
+      font-weight: 700;
+      text-transform: uppercase;
       z-index: 2;
     }
 
-    .hero-content h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    .poster-badge.series {
+      background: rgba(124, 58, 237, .9)
     }
 
-    .hero-content p {
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
-      color: #ccc;
-      line-height: 1.5;
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .watch-btn,
-    .info-btn {
-      padding: 0.8rem 2rem;
-      font-size: 1.1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: background 0.3s, transform 0.3s;
-      border: none;
-    }
-
-    .watch-btn {
-      background: var(--primary);
-      color: white;
-    }
-
-    .watch-btn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-    }
-
-    .info-btn {
-      background: rgba(109, 109, 110, 0.7);
-      color: white;
-    }
-
-    .info-btn:hover {
-      background: rgba(109, 109, 110, 0.4);
-      transform: translateY(-2px);
-    }
-
-    /* Section Styles */
-    .section {
-      padding: 2rem 5rem;
-      background: var(--dark);
-    }
-
-    body.light-mode .section {
-      background: var(--light);
-    }
-
-    .section-title {
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .section-title small {
-      font-size: 0.9rem;
-      color: var(--gray);
-    }
-
-    .section-title a {
-      color: var(--primary);
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s;
-    }
-
-    .section-title a:hover {
-      color: var(--primary-dark);
-    }
-
-    /* Genre Bar Styles */
-    .genre-bar {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-      scroll-behavior: smooth;
-    }
-
-    .genre-bar a {
-      color: var(--primary);
-      text-decoration: none;
-      font-size: 1rem;
-      white-space: nowrap;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .genre-bar a:hover {
-      background: rgba(229, 9, 20, 0.2);
-      color: var(--primary-dark);
-    }
-
-    /* Movies Grid - Updated with smaller cards */
-    .movies-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 1rem;
-    }
-
-    .movie-card {
-      background: var(--dark-gray);
-      border-radius: 8px;
-      overflow: hidden;
-      transition: transform 0.3s, box-shadow 0.3s;
-      position: relative;
-      cursor: pointer;
-    }
-
-    body.light-mode .movie-card {
-      background: #e0e0e0;
-    }
-
-    .movie-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .movie-poster {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      display: block;
-      transition: opacity 0.3s;
-    }
-
-    .movie-info {
-      padding: 0.6rem;
-    }
-
-    .movie-title {
-      font-size: 0.85rem;
-      margin-bottom: 0.3rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .movie-meta {
-      display: flex;
-      justify-content: space-between;
-      color: var(--gray);
-      font-size: 0.75rem;
-    }
-
-    .movie-rating {
-      color: gold;
-    }
-
-    .view-count {
-      font-size: 0.7rem;
-      color: var(--gray);
-      margin-top: 0.2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-    }
-
-    .time-indicator {
-      font-size: 0.65rem;
-      color: var(--gray);
-      margin-top: 0.2rem;
-    }
-
-    .movie-overlay {
+    .poster-umu {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ccc;
+      padding: 3px 7px;
+      border-radius: 4px;
+      font-size: .54rem;
+      font-weight: 700;
+      z-index: 2;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .poster-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, .92) 0%, rgba(0, 0, 0, .1) 50%, transparent);
+      opacity: 0;
+      transition: opacity .3s ease;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.3s;
-      padding: 0.6rem;
-      text-align: center;
+      justify-content: flex-end;
+      padding: 12px;
+      z-index: 3;
     }
 
-    .movie-card:hover .movie-overlay {
-      opacity: 1;
+    .poster-card:hover .poster-overlay {
+      opacity: 1
     }
 
     .overlay-title {
-      font-size: 0.9rem;
-      margin-bottom: 0.3rem;
-      color: white;
+      font-size: .78rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    .overlay-genres {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.3rem;
-      margin-bottom: 0.6rem;
-      justify-content: center;
+    .overlay-year {
+      font-size: .66rem;
+      color: #ccc
     }
 
-    .genre-tag {
-      background: var(--primary);
-      color: white;
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      font-size: 0.65rem;
-    }
-
-    .overlay-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.3rem 0.7rem;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 0.3rem;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      transition: background 0.3s;
-      font-size: 0.75rem;
-    }
-
-    .overlay-btn:hover {
-      background: var(--primary-dark);
-    }
-
-    .watchlist-btn {
-      background: #333;
-    }
-
-    .watchlist-btn.in-watchlist {
-      background: #4CAF50;
-    }
-
-    .umusobanuzi {
+    .play-circle {
       position: absolute;
-      top: 6px;
-      left: 6px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 0.15rem 0.3rem;
-      border-radius: 4px;
-      font-size: 0.65rem;
-      z-index: 10;
-    }
-
-    /* Watchlist Notification Popup */
-    .watchlist-notification-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 2000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-width: 300px;
-    }
-
-    .watchlist-notification {
-      background: rgba(0, 0, 0, 0.9);
-      border-left: 4px solid var(--primary);
-      border-radius: 4px;
-      padding: 10px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.6);
+      width: 42px;
+      height: 42px;
+      background: var(--primary);
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      transform: translateX(120%);
-      transition: transform 0.3s ease-out;
-      max-width: 100%;
+      justify-content: center;
+      opacity: 0;
+      transition: all .3s ease;
+      z-index: 4;
     }
 
-    .watchlist-notification.show {
-      transform: translateX(0);
+    .poster-card:hover .play-circle {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1)
     }
 
-    .watchlist-notification-poster {
-      width: 50px;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 4px;
+    .play-triangle {
+      width: 0;
+      height: 0;
+      border-left: 11px solid #fff;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      margin-left: 3px;
     }
 
-    .watchlist-notification-content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .watchlist-notification-title {
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-bottom: 5px;
+    .poster-name {
+      margin-top: 7px;
+      padding: 0 2px;
+      font-size: .76rem;
+      font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .5);
     }
 
-    .watchlist-notification-actions {
-      display: flex;
-      gap: 10px;
-    }
+    @media(max-width:1200px) {
+      .trailer-card {
+        width: 290px
+      }
 
-    .watchlist-notification-btn {
-      background: transparent;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 0.8rem;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-
-    .watchlist-notification-btn.close {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .watchlist-notification-btn.close:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .watchlist-notification-btn.remove {
-      background: rgba(255, 0, 0, 0.2);
-    }
-
-    .watchlist-notification-btn.remove:hover {
-      background: rgba(255, 0, 0, 0.3);
-    }
-
-    /* Loading Spinner */
-    .spinner {
-      display: none;
-      width: 40px;
-      height: 40px;
-      margin: 2rem auto;
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--primary);
-      animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
+      .poster-grid {
+        grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+        gap: 12px
       }
     }
 
-    .spinner.active {
-      display: block;
-    }
-
-    /* Footer Styles */
-    footer {
-      background: var(--dark-gray);
-      padding: 3rem 5rem 1rem;
-      color: var(--gray);
-    }
-
-    body.light-mode footer {
-      background: #e0e0e0;
-    }
-
-    .footer-content {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .footer-column h3 {
-      color: var(--light);
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-    }
-
-    body.light-mode .footer-column h3 {
-      color: var(--dark);
-    }
-
-    .footer-column ul {
-      list-style: none;
-    }
-
-    .footer-column li {
-      margin-bottom: 0.5rem;
-    }
-
-    .footer-column a {
-      color: var(--gray);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .footer-column a:hover {
-      color: var(--primary);
-    }
-
-    .social-links {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .social-links a {
-      color: var(--gray);
-      font-size: 1.5rem;
-      transition: color 0.3s;
-    }
-
-    .social-links a:hover {
-      color: var(--primary);
-    }
-
-    .footer-bottom {
-      text-align: center;
-      padding-top: 1rem;
-      border-top: 1px solid var(--dark);
-    }
-
-    body.light-mode .footer-bottom {
-      border-top: 1px solid #ccc;
-    }
-
-    /* Toast Notifications */
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--dark);
-      color: white;
-      padding: 1rem;
-      border-radius: 4px;
-      box-shadow: var(--shadow);
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s;
-      z-index: 1000;
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .toast.success {
-      background: #4CAF50;
-    }
-
-    .toast.error {
-      background: #f44336;
-    }
-
-    /* Responsive Styles */
-    @media (max-width: 1024px) {
-
-      .section,
-      footer {
-        padding: 2rem;
-      }
-
-      .hero-slideshow {
-        padding: 0 2rem;
-      }
-    }
-
-    @media (max-width: 768px) {
+    @media(max-width:1024px) {
       .sidebar {
-        width: 100%;
-        height: var(--taskbar-height);
-        bottom: 0;
-        top: auto;
-        left: 0;
-        flex-direction: row;
+        width: 55px;
+        padding: 12px 0
+      }
+
+      .sidebar-nav {
+        padding: 0 6px;
+        gap: 1px
+      }
+
+      .sidebar-link {
         justify-content: center;
-        align-items: center;
-        background: var(--dark);
-        z-index: 1000;
-        position: fixed;
+        padding: 10px;
+        gap: 0;
+        border-radius: 6px
       }
 
-      body.light-mode .sidebar {
-        background: var(--light);
+      .sidebar-link span,
+      .sidebar-label {
+        display: none
       }
 
-      .sidebar-content {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        max-width: 600px;
-        padding: 0.5rem 1rem;
-        border-radius: 0;
-        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
-        gap: 0.5rem;
-      }
-
-      .nav-menu {
-        flex-direction: row;
-        gap: 1rem;
-        justify-content: center;
-        flex-grow: 1;
-      }
-
-      .nav-item {
-        font-size: 1.2rem;
-        padding: 0.5rem;
-      }
-
-      .nav-divider {
-        width: 1px;
-        height: 20px;
-        margin: 0 0.5rem;
-        background: rgba(255, 255, 255, 0.2);
+      .sidebar-link.active::before {
+        left: -6px;
+        height: 16px
       }
 
       .sidebar-footer {
-        margin-left: auto;
+        font-size: .5rem;
+        padding: 8px 4px
       }
 
-      .theme-toggle {
-        font-size: 1.2rem;
-        padding: 0.5rem;
+      .hero-container {
+        height: 55vh
       }
 
-      .logo {
-        font-size: 1.5rem;
-        padding: 0.5rem;
-      }
-
-      .main-content {
-        margin-left: 0;
-        padding-bottom: var(--taskbar-height);
-      }
-
-      .mobile-menu-btn {
-        display: none;
-      }
-
-      .footer-content {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .hero-slideshow {
-        height: 60vh;
-        padding: 0 1rem;
-      }
-
-      .hero-slide {
-        padding: 0 1rem;
-      }
-
-      .hero-content h1 {
-        font-size: 2.5rem;
-      }
-
-      .hero-content p {
-        font-size: 1rem;
-      }
-
-      .watch-btn,
-      .info-btn {
-        padding: 0.6rem 1.5rem;
-        font-size: 1rem;
-      }
-
-      /* Mobile notification adjustments */
-      .watchlist-notification-container {
-        top: 70px;
-        right: 10px;
-        max-width: calc(100% - 20px);
-      }
-
-      .watchlist-notification {
-        padding: 8px;
-        gap: 8px;
-      }
-
-      .watchlist-notification-poster {
-        width: 40px;
-        height: 60px;
-      }
-
-      .watchlist-notification-title {
-        font-size: 0.8rem;
-      }
-
-      .watchlist-notification-actions {
-        gap: 5px;
-      }
-
-      .watchlist-notification-btn {
-        font-size: 0.7rem;
-        padding: 3px 6px;
-      }
-
-      .header-image-box {
-        width: 40px;
-        height: 40px;
-      }
-
-      .header-text {
-        font-size: 1rem;
+      .hero-info {
+        bottom: 10%;
+        left: 4%;
+        max-width: 400px
       }
     }
 
-    @media (max-width: 576px) {
-
-      .section,
-      footer {
-        padding: 1rem;
+    @media(max-width:768px) {
+      .sidebar {
+        display: none
       }
 
-      .hero-slideshow {
-        padding: 0 1rem;
-        height: 50vh;
+      .topbar {
+        padding: 0 12px;
+        height: 52px;
+        gap: 8px
       }
 
-      .hero-slide {
-        padding: 0 1rem;
+      .hero-container {
+        height: 42vh;
+        min-height: 300px
       }
 
-      .hero-content h1 {
-        font-size: 2rem;
+      .hero-info {
+        bottom: 8%;
+        left: 14px;
+        right: 14px;
+        max-width: 100%
       }
 
-      .hero-content p {
-        font-size: 0.9rem;
+      .hero-title {
+        font-size: 1.4rem
       }
 
-      .movies-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 0.8rem;
+      .btn-hero {
+        padding: 10px 18px;
+        font-size: .8rem
       }
 
-      .movie-poster {
-        height: 180px;
+      .trailer-card {
+        width: 250px
       }
 
-      .movie-title {
-        font-size: 0.8rem;
+      .poster-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px
       }
 
-      .movie-meta {
-        font-size: 0.7rem;
+      .poster-name {
+        font-size: .66rem
       }
 
-      .view-count {
-        font-size: 0.65rem;
+      .poster-overlay {
+        display: none
       }
 
-      .time-indicator {
-        font-size: 0.6rem;
+      .play-circle {
+        width: 30px;
+        height: 30px
       }
 
-      .overlay-title {
-        font-size: 0.85rem;
+      .play-triangle {
+        border-left-width: 8px;
+        border-top-width: 5px;
+        border-bottom-width: 5px
+      }
+    }
+
+    @media(max-width:420px) {
+      .poster-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px
       }
 
-      .genre-tag {
-        font-size: 0.6rem;
-        padding: 0.1rem 0.3rem;
+      .hero-container {
+        height: 36vh
       }
 
-      .overlay-btn {
-        padding: 0.25rem 0.6rem;
-        font-size: 0.7rem;
-      }
-
-      .umusobanuzi {
-        top: 5px;
-        left: 5px;
-        padding: 0.1rem 0.2rem;
-        font-size: 0.6rem;
-      }
-
-      .footer-content {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar-content {
-        padding: 0.5rem;
-      }
-
-      .nav-item {
-        font-size: 1rem;
-      }
-
-      .theme-toggle {
-        font-size: 1rem;
-      }
-
-      .logo {
-        font-size: 1.2rem;
-      }
-
-      .nav-divider {
-        height: 16px;
-        margin: 0 0.3rem;
-      }
-
-      .genre-bar {
-        gap: 0.5rem;
-      }
-
-      .genre-bar a {
-        font-size: 0.9rem;
-        padding: 0.3rem 0.7rem;
+      .trailer-card {
+        width: 210px
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="sidebar">
-    <div class="sidebar-content">
-      <a href="pass.html" class="logo">KX</a>
-      <nav class="nav-menu">
-        <a href="#" class="nav-item active" data-page="home"><i class="fas fa-home"></i></a>
-        <hr class="nav-divider">
-        <a href="#" class="nav-item" data-page="new-releases"><i class="fas fa-film"></i></a>
-        <hr class="nav-divider">
-        <video id="videoButton" width="40" height="40" autoplay muted loop style="border-radius: 50%; cursor: pointer;">
-          <source src="nav.mp4" type="video/mp4">
-        </video>
-        <hr class="nav-divider">
-        <a href="#" class="nav-item" data-page="searching"><i class="fas fa-search"></i></a>
-        <hr class="nav-divider">
-        <a href="#" class="nav-item" data-page="profile"><i class="fas fa-user"></i></a>
+
+  <div id="topLoadBar"></div>
+
+  <div class="toast" id="toast"></div>
+
+  <header class="topbar">
+    <a href="/" class="logo" id="logoHome">KINA<span>FLIX</span></a>
+    <div class="search-box" id="searchBox">
+      <div class="search-wrap">
+        <span class="iconify" data-icon="mdi:search"
+          style="margin-left:16px;color:var(--text-secondary);font-size:1.1rem"></span>
+        <input type="text" id="searchInput" placeholder="Search movies..." autocomplete="off">
+        <button class="search-clear" id="searchClear"><span class="iconify" data-icon="mdi:close"
+            style="font-size:1.1rem"></span></button>
+      </div>
+      <div class="search-drop" id="searchDrop"></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-sm" onclick="window.location.href='login.html'">Sign In</button>
+      <button class="btn-sm primary" onclick="window.location.href='register.html'">Register</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-nav">
+        <a class="sidebar-link active" data-page="home">
+          <span class="iconify" data-icon="mdi:home"></span> <span>Home</span>
+        </a>
+        <a class="sidebar-link" data-page="trending">
+          <span class="iconify" data-icon="mdi:fire"></span> <span>Trending</span>
+        </a>
+        <a class="sidebar-link" data-page="latest">
+          <span class="iconify" data-icon="mdi:clock-outline"></span> <span>Latest</span>
+        </a>
+        <a class="sidebar-link" data-page="movies">
+          <span class="iconify" data-icon="mdi:filmstrip"></span> <span>Movies</span>
+        </a>
+        <a class="sidebar-link" data-page="series">
+          <span class="iconify" data-icon="mdi:television"></span> <span>Series</span>
+        </a>
+        <a class="sidebar-link" data-page="random">
+          <span class="iconify" data-icon="mdi:dice-5"></span> <span>Shyuha shyuha!</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <a class="sidebar-link" data-page="yearsPage">
+          <span class="iconify" data-icon="mdi:calendar-month"></span> <span>YEARS</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Genres</div>
+        <a class="sidebar-link" data-page="genre" data-genre="Action"><span class="iconify"
+            data-icon="mdi:lightning-bolt"></span> <span>Action</span></a>
+        <a class="sidebar-link" data-page="genre" data-genre="Drama"><span class="iconify"
+            data-icon="mdi:drama-masks"></span> <span>Drama</span></a>
+        <a class="sidebar-link" data-page="genre" data-genre="Comedy"><span class="iconify"
+            data-icon="mdi:emoticon-happy"></span> <span>Comedy</span></a>
+        <a class="sidebar-link" data-page="genre" data-genre="Horror"><span class="iconify"
+            data-icon="mdi:ghost"></span> <span>Horror</span></a>
+        <a class="sidebar-link" data-page="genre" data-genre="Thriller"><span class="iconify"
+            data-icon="mdi:skull"></span> <span>Thriller</span></a>
+        <a class="sidebar-link" data-page="genre" data-genre="Romance"><span class="iconify"
+            data-icon="mdi:heart"></span> <span>Romance</span></a>
       </nav>
-      <hr class="nav-divider">
-      <div class="sidebar-footer">
-        <button class="theme-toggle"><i class="fas fa-moon"></i></button>
-      </div>
-    </div>
-  </div>
+      <div class="sidebar-footer" id="sidebarFooter">© 2026 KINAFLIX<br>Made by PIReactive<br>All rights reserved.</div>
+    </aside>
 
-  <div class="main-content">
-    <header>
-      <div class="header-image-box">
-        <img src="https://i.ibb.co/DDGR4b6Q/KINAFLIX-1.png" alt="Download app" style="cursor:pointer;"
-          onclick="window.open('https://installkx.vercel.app/', '_blank')">
+    <main class="content" id="mainContent">
+      <div class="loading-inline">
+        <div class="spinner-sm"></div>
       </div>
-      <div class="header-text" onclick="window.location.href='https://lnk.bio/camao'"><i>Click to see</i><br>CAMAO</div>
-      <a href="https://chat.whatsapp.com/LE4EmPz8OZA0Pj5XejYv8c" target="_blank" class="whatsapp-btn">
-        <i class="fab fa-whatsapp"></i> JOIN US
-      </a>
-      <div class="donate-btn-container">
-        <div id="donate-button"></div>
-      </div>
-      <div class="auth-buttons" id="auth-buttons">
-        <button class="auth-btn login-btn">Login</button>
-        <button class="auth-btn register-btn">Register</button>
-        <button class="theme-toggle-header"><i class="fas fa-moon"></i></button>
-      </div>
-    </header>
-
-    <!-- TOP HEADER BANNER AD (HIGH VISIBILITY) - Placed right after header for maximum CPM -->
-    <div style="text-align: center; margin: 20px auto; background: rgba(0,0,0,0.2); border-radius: 8px;">
-      <script>
-        atOptions = {
-          'key' : '3793134a6f21ef5967c0c6021e08a20d',
-          'format' : 'iframe',
-          'height' : 90,
-          'width' : 728,
-          'params' : {}
-        };
-      </script>
-      <script src="https://www.highperformanceformat.com/3793134a6f21ef5967c0c6021e08a20d/invoke.js"></script>
-    </div>
-
-    <!--ADVANCED AD PLACEMENT-->
-    <div id="kinaflix-ad-container" style="text-align:center; margin: 20px 10px;"></div>
-    <script type="module" src="js/subscription-checker.js"></script>
-    <!--End-->
-
-    <main id="main-content">
-      <div class="spinner active" id="loading-spinner"></div>
     </main>
-
-    <footer>
-      <div class="footer-content">
-        <div class="footer-column">
-          <h3>Navigation</h3>
-          <ul>
-            <li><a href="#" class="footer-link" data-page="for-you">For You</a></li>
-          </ul>
-        </div>
-        <div class="footer-column">
-          <h3>Legal</h3>
-          <ul>
-            <li><a href="policy.html">Policy</a></li>
-          </ul>
-        </div>
-        <div class="footer-column">
-          <h3>Account</h3>
-          <ul>
-            <li><a href="#" class="footer-link" data-page="history">History</a></li>
-          </ul>
-        </div>
-        <div class="footer-column">
-          <h3>Connect With Us</h3>
-          <div class="social-links">
-            <a href="https://www.youtube.com/@kinaflix"><i class="fab fa-youtube"></i></a>
-            <a href="https://www.instagram.com/kinaflix/"><i class="fab fa-instagram"></i></a>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>© 2026 KINAFLIX | Made by btem@fficial | All rights reserved.</p>
-      </div>
-    </footer>
   </div>
 
-  <!-- Watchlist Notifications Container -->
-  <div class="watchlist-notification-container" id="watchlist-notifications"></div>
-
-  <!-- PayPal Donation Button Script -->
-  <script src="https://www.paypalobjects.com/donate/sdk/donate-sdk.js" charset="UTF-8"></script>
-  <script>
-    PayPal.Donation.Button({
-      env: 'production',
-      hosted_button_id: 'KPKNJ4Y5V7TBC',
-      image: {
-        src: 'https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif',
-        alt: 'Donate with PayPal button',
-        title: 'PayPal - The safer, easier way to pay online!',
-      }
-    }).render('#donate-button');
-  </script>
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DC1T9B6B9W"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'G-DC1T9B6B9W');
-
-    // Mobile detection and redirection
-    document.addEventListener('DOMContentLoaded', () => {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-      if (isMobile) {
-        window.location.href = 'indexp.html';
-      }
-    });
   </script>
 
-  <!-- Keyboard Shortcuts Blocker - Only F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S -->
-  <script>
-    document.addEventListener('keydown', function (e) {
-      const key = e.key;
-      const ctrl = e.ctrlKey;
-      const shift = e.shiftKey;
-
-      if (key === 'F12' ||
-        (ctrl && shift && (key === 'I' || key === 'J' || key === 'C')) ||
-        (ctrl && (key === 'u' || key === 'U' || key === 's' || key === 'S'))) {
-        e.preventDefault();
-        return false;
-      }
-    });
-  </script>
-
-  <script defer type="module">
-    // Redirect on video click
-    document.getElementById('videoButton').onclick = function () {
-      window.location.href = 'reels.html';
-    };
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, getDocs, query, where, orderBy, limit, updateDoc, arrayUnion, arrayRemove, increment, startAfter } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
 
-    // ===== FIREBASE CONFIGURATION 1 (Kinaflix) =====
-    const firebaseConfig1 = {
-      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
-      authDomain: "kinaflix.firebaseapp.com",
-      projectId: "kinaflix",
-      storageBucket: "kinaflix.appspot.com",
-      messagingSenderId: "318239806217",
-      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8",
-      measurementId: "G-DC1T9B6B9W"
-    };
+    const topBar = document.getElementById('topLoadBar');
+    function startLoading() { topBar.classList.add('active'); topBar.classList.remove('done'); }
+    function finishLoading() { topBar.classList.add('done'); setTimeout(() => topBar.classList.remove('active', 'done'), 500); }
 
-    // ===== FIREBASE CONFIGURATION 2 (CULLO Movies - Secondary Database) =====
-    const firebaseConfig2 = {
-      apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
-      authDomain: "cullo-movies-6813f.firebaseapp.com",
-      projectId: "cullo-movies-6813f",
-      messagingSenderId: "12310118231",
-      appId: "1:12310118231:web:34682f354027fd19758812"
-    };
+    const toast = document.getElementById('toast');
+    let toastTimer;
+    function showToast(msg, type = '') {
+      clearTimeout(toastTimer);
+      toast.textContent = msg; toast.className = 'toast show ' + type;
+      toastTimer = setTimeout(() => toast.classList.remove('show', 'error', 'success'), 4000);
+    }
 
-    // Initialize Primary App (Kinaflix)
-    const app1 = initializeApp(firebaseConfig1);
-    const analytics = getAnalytics(app1);
-    const auth = getAuth(app1);
-    const db1 = getFirestore(app1);
+    const fb1 = { apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k", authDomain: "kinaflix.firebaseapp.com", projectId: "kinaflix", storageBucket: "kinaflix.appspot.com", messagingSenderId: "318239806217", appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8" };
+    const fb2 = { apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk", authDomain: "cullo-movies-6813f.firebaseapp.com", projectId: "cullo-movies-6813f", messagingSenderId: "12310118231", appId: "1:12310118231:web:34682f354027fd19758812" };
 
-    // Initialize Secondary App (CULLO Movies)
-    const app2 = initializeApp(firebaseConfig2, "culloMovies");
-    const db2 = getFirestore(app2);
+    let db1, db2, db2ok = true;
+    try { const a1 = initializeApp(fb1); db1 = getFirestore(a1) } catch (e) { }
+    try { const a2 = initializeApp(fb2, "culloMovies"); db2 = getFirestore(a2) } catch (e) { db2ok = false }
 
-    const mainContent = document.getElementById('main-content');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    document.body.appendChild(toast);
-    const authButtons = document.getElementById('auth-buttons');
-    const watchlistNotifications = document.getElementById('watchlist-notifications');
+    let allMovies = [], validMovies = [], errorMovies = [], allForSearch = [];
+    let currentPage = 'home', heroInterval = null, heroMovies = [];
+    const GENRES = ['Action', 'Drama', 'Comedy', 'Horror', 'Thriller', 'Romance'];
+    const umuNames = ['ROCKY', 'GITI', 'SANKARA', 'GAHEZA'];
+    const rndUmu = () => umuNames[Math.floor(Math.random() * umuNames.length)];
+    const CURRENT_YEAR = new Date().getFullYear();
 
-    let currentUser = null;
-    let movies = [];
-    let genres = [];
-    let featuredMovies = [];
-    let watchHistory = [];
-    let watchlist = [];
-    let lastViewTimestamps = {};
-    let allYears = [];
-    let slideInterval = null;
-    let themeToggleTimeout = null;
-    let lastAddedMovieId = null;
+    function shuffle(a) { const r = [...a]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[r[i], r[j]] = [r[j], r[i]] } return r }
+    function normTitle(t) {
+      if (!t) return '';
+      t = t.replace(/\s*[-–]\s*Part\s*[B-Z2-9]/gi, '').replace(/\s*Part\s*[B-Z2-9]/gi, '');
+      t = t.replace(/\s+[A-Z]$/, '').trim();
+      return t;
+    }
+    function titleBase(t) { return normTitle(t).toLowerCase().replace(/[^a-z0-9]/g, '') }
+    function escHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML }
+    function hasErrors(m) { return !m.year || m.year === 0 || !m.poster || m.poster.length < 8 || !m.title || m.title === 'Untitled' }
 
-    // List of umusobanuzi names for random selection
-    const umusobanuziNames = ['ROCKY', 'GITI', 'SANKARA', 'GAHEZA'];
+    function sortByYearDesc(arr) {
+      return [...arr].sort((a, b) => (b.year || 0) - (a.year || 0));
+    }
 
-    const cache = {
-      movies: null,
-      genres: null,
-      featured: null,
-      expiry: 5 * 60 * 1000
-    };
+    async function fetchAll() {
+      const list = [];
+      try {
+        const q1 = query(collection(db1, 'movies'), orderBy('releaseYear', 'desc'));
+        const s1 = await getDocs(q1);
+        s1.docs.forEach(doc => {
+          const d = doc.data();
+          list.push({
+            id: doc.id, source: 'kinaflix', title: d.title || 'Untitled',
+            description: d.description || '', poster: d.coverImageUrl || '',
+            genres: (Array.isArray(d.genres) ? d.genres : []).filter(g => GENRES.includes(g)),
+            year: typeof d.releaseYear === 'number' ? d.releaseYear : 0,
+            rating: d.rating || 0, views: typeof d.views === 'number' ? d.views : 0,
+            umusobanuzi: d.umusobanuzi || null,
+            youtubeTrailerUrl: d.youtubeTrailerUrl || null,
+            googleDriveLink: d.googleDriveLink || null,
+            timestamp: d.dateAdded?.toDate?.() || new Date(), type: 'movie'
+          });
+        });
+      } catch (e) { showToast('Failed to load Kinaflix DB', 'error') }
+      if (db2ok) try {
+        const s2 = await getDocs(collection(db2, 'movies'));
+        s2.docs.forEach(doc => {
+          const d = doc.data();
+          let g = []; if (Array.isArray(d.genre)) g = d.genre; else if (typeof d.genre === 'string' && d.genre.trim()) g = [d.genre.trim()];
+          g = g.filter(x => GENRES.includes(x));
+          list.push({
+            id: doc.id, source: 'cullo', title: d.title || 'Untitled',
+            description: d.description || '', poster: d.posterUrl || d.thumbnailUrl || '',
+            genres: g, year: d.year || d.releaseYear || 0,
+            rating: d.rating || 0, views: typeof d.views === 'number' ? d.views : 0,
+            umusobanuzi: rndUmu(), youtubeTrailerUrl: null,
+            googleDriveLink: d.videoUrl || null,
+            timestamp: d.createdAt?.toDate?.() || new Date(), type: 'movie'
+          });
+        });
+      } catch (e) { db2ok = false; showToast('Cullo movies unavailable', 'error') }
+      if (db2ok) try {
+        const s3 = await getDocs(collection(db2, 'series'));
+        s3.docs.forEach(doc => {
+          const d = doc.data();
+          let g = []; if (Array.isArray(d.genre)) g = d.genre; else if (typeof d.genre === 'string' && d.genre.trim()) g = [d.genre.trim()];
+          g = g.filter(x => GENRES.includes(x));
+          list.push({
+            id: doc.id, source: 'cullo', title: d.title || 'Untitled Series',
+            description: d.description || '', poster: d.posterUrl || d.thumbnailUrl || '',
+            genres: g, year: d.year || d.releaseYear || 0,
+            rating: d.rating || 0, views: typeof d.views === 'number' ? d.views : 0,
+            umusobanuzi: rndUmu(), youtubeTrailerUrl: null,
+            googleDriveLink: null, timestamp: d.createdAt?.toDate?.() || new Date(),
+            type: 'series', seasons: d.seasons || []
+          });
+        });
+      } catch (e) { }
+      const seen = new Map(), u = [];
+      for (const m of list) { if (!seen.has(m.id)) { seen.set(m.id, m); u.push(m) } }
+      return u;
+    }
 
-    // No Internet Overlay
-    const noInternetOverlay = document.createElement('div');
-    noInternetOverlay.id = 'no-internet-overlay';
-    noInternetOverlay.style.cssText = `
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: black;
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    text-align: center;
-  `;
-    noInternetOverlay.innerHTML = `
-    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
-    <h2 style="color: white;">Connection Error</h2>
-    <p style="color: white;">Remember to support btem@fficial</p>
-  `;
-    document.body.appendChild(noInternetOverlay);
+    function dedupeParts(movies) {
+      const seen = new Map(), r = [];
+      for (const m of movies) { const b = titleBase(m.title); if (!seen.has(b)) { seen.set(b, m); r.push(m) } }
+      return r;
+    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initAuth();
-      initUI();
-      checkInternetConnection();
-      setInterval(checkInternetConnection, 5000);
-      loadHomePage();
-      loadWatchHistoryFromCookies();
-      setupIntersectionObserver();
+    function dedupeForFeatured(movies) {
+      const map = new Map();
+      for (const m of movies) { const base = titleBase(m.title); if (!map.has(base)) map.set(base, m); }
+      return Array.from(map.values());
+    }
+
+    function getGridCols() {
+      const w = window.innerWidth;
+      if (w <= 420) return 2; if (w <= 768) return 3; if (w <= 1200) return 4; return 6;
+    }
+
+    function renderCard(m) {
+      const poster = m.poster || '', year = m.year || '—';
+      const tl = m.type === 'series' ? 'Series' : 'Movie', tc = m.type === 'series' ? 'series' : '';
+      const st = escHtml(m.title), su = m.umusobanuzi ? escHtml(m.umusobanuzi) : '';
+      return `<div class="poster-card" data-id="${m.id}" data-source="${m.source}" data-type="${m.type}" tabindex="0">
+                <div class="poster-img-wrap">
+                    ${poster ? `<img src="${poster}" alt="${st}" class="poster-img" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">` : `<img src="" alt="" class="poster-img" style="display:none">`}
+                    <div class="poster-img-fallback" style="${poster ? 'display:none' : 'display:flex'}">${st.substring(0, 28)}</div>
+                    <span class="poster-badge ${tc}">${tl}</span>
+                    ${su ? `<span class="poster-umu">${su}</span>` : ''}
+                    <div class="play-circle"><div class="play-triangle"></div></div>
+                    <div class="poster-overlay"><div class="overlay-title">${st}</div><div class="overlay-year">${year}${m.rating ? ' · ★ ' + parseFloat(m.rating).toFixed(1) : ''}</div></div>
+                </div>
+                <div class="poster-name" title="${st}">${st}</div>
+            </div>`;
+    }
+
+    function renderGrid(container, movies) {
+      if (!movies || movies.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-secondary)">No movies found</div>';
+        return;
+      }
+      container.innerHTML = movies.map(m => renderCard(m)).join('');
+      container.querySelectorAll('.poster-card').forEach(card => {
+        const go = () => {
+          const id = card.dataset.id, s = card.dataset.source;
+          if (!id) { showToast('Missing movie ID', 'error'); return }
+          window.location.href = `see.html?id=${id}&source=${s}`;
+        };
+        card.addEventListener('click', go);
+        card.addEventListener('keydown', e => { if (e.key === 'Enter') go() });
+      });
+    }
+
+    function buildSection(title, icon, movies, maxRows, cols) {
+      if (!movies || movies.length === 0) return '';
+      const maxItems = maxRows * cols;
+      const deduped = dedupeParts(movies);
+      const sorted = sortByYearDesc(deduped);
+      const display = sorted.slice(0, maxItems);
+      return `<section class="content-section">
+                <div class="section-header"><h2 class="section-title-text"><span class="s-icon">${icon}</span> ${title}</h2></div>
+                <div class="poster-grid">${display.map(m => renderCard(m)).join('')}</div>
+            </section>`;
+    }
+
+    // Updated buildTrailers: uses the latest movies (same as the "Latest" section) and no title
+    function buildTrailers(latestMovies) {
+      // latestMovies is the array used for the "Latest" section (already sorted and deduped)
+      const withTrailer = latestMovies.filter(m => m.youtubeTrailerUrl && m.youtubeTrailerUrl.length > 10);
+      if (withTrailer.length === 0) return '';
+      const display = withTrailer.slice(0, 10);
+      let html = '<section class="content-section"><div class="trailer-scroll">';
+      for (const m of display) {
+        let vid = ''; const u = m.youtubeTrailerUrl;
+        if (u.includes('youtube.com/watch?v=')) vid = u.split('v=')[1]?.split('&')[0];
+        else if (u.includes('youtu.be/')) vid = u.split('youtu.be/')[1]?.split('?')[0];
+        else if (u.includes('youtube.com/embed/')) vid = u.split('embed/')[1]?.split('?')[0];
+        if (!vid) continue;
+        html += `<div class="trailer-card"><div class="trailer-video-wrap"><iframe src="https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1" allowfullscreen loading="lazy" sandbox="allow-scripts allow-same-origin allow-presentation"></iframe></div><div class="trailer-label">${escHtml(m.title)} <span>· ${m.year || '—'}</span></div></div>`;
+      }
+      html += '</div></section>';
+      return html;
+    }
+
+    function buildHero(movies) {
+      const candidates = movies.filter(m => m.poster && m.type === 'movie');
+      const dedupedFeatured = dedupeForFeatured(candidates);
+      heroMovies = sortByYearDesc(dedupedFeatured).slice(0, 10);
+      if (heroMovies.length === 0) return '<div class="hero-container" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e);"><div style="text-align:center;opacity:.4;"><span class="iconify" data-icon="mdi:filmstrip" style="font-size:3rem"></span><h2>No Featured Movies</h2></div></div>';
+      let slides = '', dots = '';
+      heroMovies.forEach((m, i) => {
+        const st = escHtml(m.title), sd = escHtml((m.description || 'Watch on KINAFLIX.').substring(0, 200));
+        const sg = (m.genres && m.genres.length > 0) ? escHtml(m.genres[0]) : '—';
+        const rt = m.rating ? parseFloat(m.rating).toFixed(1) : '—';
+        slides += `<div class="hero-slide${i === 0 ? ' active' : ''}" data-index="${i}"><div class="hero-bg" style="${m.poster ? `background-image:url('${m.poster}')` : ''}"></div><div class="hero-gradient"></div><div class="hero-gradient-side"></div><div class="hero-info${i === 0 ? ' anim' : ''}" data-info="${i}"><div class="hero-badge">▶ Featured #${i + 1}</div><h1 class="hero-title">${st}</h1><div class="hero-meta-row"><span><span class="star-icon">★</span> ${rt}</span><span>📅 ${m.year || '—'}</span><span>🏷 ${sg}</span></div><p class="hero-desc">${sd}...</p><div class="hero-btns"><button class="btn-hero btn-play" data-id="${m.id}" data-source="${m.source}">▶ Watch Now</button><button class="btn-hero btn-trailer" data-trailer="${m.youtubeTrailerUrl || ''}">🎬 Trailer</button></div></div></div>`;
+        dots += `<button class="hero-dot${i === 0 ? ' active' : ''}" data-index="${i}"></button>`;
+      });
+      return `<div class="hero-container" id="heroContainer">${slides}<div class="hero-dots">${dots}</div></div>`;
+    }
+
+    function startHeroSlideshow() {
+      if (heroInterval) clearInterval(heroInterval);
+      if (heroMovies.length <= 1) return;
+      let cur = 0;
+      heroInterval = setInterval(() => { cur = (cur + 1) % heroMovies.length; switchSlide(cur) }, 6000);
+    }
+    function switchSlide(idx) {
+      document.querySelectorAll('.hero-slide').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.hero-dot').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.hero-info').forEach(i => i.classList.remove('anim'));
+      const sl = document.querySelector(`.hero-slide[data-index="${idx}"]`);
+      const dt = document.querySelector(`.hero-dot[data-index="${idx}"]`);
+      const inf = document.querySelector(`.hero-info[data-info="${idx}"]`);
+      if (sl) sl.classList.add('active'); if (dt) dt.classList.add('active');
+      if (inf) setTimeout(() => inf.classList.add('anim'), 50);
+    }
+    function setupHeroEvents() {
+      const c = document.getElementById('heroContainer'); if (!c) return;
+      c.querySelectorAll('.hero-dot').forEach(dot => { dot.addEventListener('click', e => { e.stopPropagation(); switchSlide(parseInt(dot.dataset.index)); resetHeroTimer() }) });
+      c.querySelectorAll('.btn-play').forEach(btn => { btn.addEventListener('click', e => { e.stopPropagation(); const id = btn.dataset.id, s = btn.dataset.source; if (!id) { showToast('Missing movie ID', 'error'); return } window.location.href = `see.html?id=${id}&source=${s}` }) });
+      c.querySelectorAll('.btn-trailer').forEach(btn => { btn.addEventListener('click', e => { e.stopPropagation(); const tr = btn.dataset.trailer; if (tr && tr.length > 5) openTrailerModal(tr); }) });
+      c.addEventListener('click', e => { if (e.target.closest('button')) return; const sl = c.querySelector('.hero-slide.active'); if (sl) { const btn = sl.querySelector('.btn-play'); if (btn) btn.click() } });
+    }
+    function resetHeroTimer() { if (heroInterval) { clearInterval(heroInterval) } heroInterval = setInterval(() => { const cur = [...document.querySelectorAll('.hero-dot')].findIndex(d => d.classList.contains('active')); switchSlide((cur + 1) % heroMovies.length) }, 6000); }
+    function openTrailerModal(url) {
+      let vid = '';
+      if (url.includes('youtube.com/watch?v=')) vid = url.split('v=')[1]?.split('&')[0];
+      else if (url.includes('youtu.be/')) vid = url.split('youtu.be/')[1]?.split('?')[0];
+      else if (url.includes('youtube.com/embed/')) vid = url.split('embed/')[1]?.split('?')[0];
+      if (!vid) return;
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.94);display:flex;align-items:center;justify-content:center;cursor:pointer;';
+      modal.innerHTML = `<div style="position:relative;width:92%;max-width:880px;aspect-ratio:16/9;cursor:default;" onclick="event.stopPropagation()"><button style="position:absolute;top:-36px;right:0;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;" onclick="this.closest('[style*=fixed]').remove()">✕</button><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vid}?autoplay=1&rel=0" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen style="border-radius:12px;"></iframe></div>`;
+      modal.addEventListener('click', () => modal.remove());
+      document.body.appendChild(modal);
+    }
+
+    // ===== VERTICAL YEAR PICKER for YEARS page =====
+    function buildYearsPage() {
+      startLoading();
+      const years = [...new Set(validMovies.map(m => m.year).filter(y => y > 0))].sort((a, b) => b - a);
+      if (years.length === 0) {
+        document.getElementById('mainContent').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary)">No movies found.</div>';
+        finishLoading(); return;
+      }
+      const initialYear = years.includes(CURRENT_YEAR) ? CURRENT_YEAR : years[0];
+      let html = `<div class="years-page-container">
+                <div class="year-picker-column">
+                    <div class="year-picker" id="yearPicker"></div>
+                </div>
+                <div style="flex:1" id="yearMoviesContainer"></div>
+            </div>`;
+      document.getElementById('mainContent').innerHTML = html;
+      const yearPicker = document.getElementById('yearPicker');
+      const yearMoviesContainer = document.getElementById('yearMoviesContainer');
+      let selectedYear = initialYear;
+      function renderPicker() {
+        const idx = years.indexOf(selectedYear);
+        const prev = idx > 0 ? years[idx - 1] : null;
+        const next = idx < years.length - 1 ? years[idx + 1] : null;
+        yearPicker.innerHTML = '';
+        if (next !== null) {
+          const top = document.createElement('div');
+          top.className = 'year-slot dim'; top.dataset.year = next; top.textContent = next;
+          yearPicker.appendChild(top);
+        } else {
+          const top = document.createElement('div');
+          top.className = 'year-slot placeholder'; top.dataset.year = 'null'; top.textContent = '';
+          yearPicker.appendChild(top);
+        }
+        const mid = document.createElement('div');
+        mid.className = 'year-slot selected'; mid.dataset.year = selectedYear; mid.textContent = selectedYear;
+        yearPicker.appendChild(mid);
+        if (prev !== null) {
+          const bot = document.createElement('div');
+          bot.className = 'year-slot dim'; bot.dataset.year = prev; bot.textContent = prev;
+          yearPicker.appendChild(bot);
+        } else {
+          const bot = document.createElement('div');
+          bot.className = 'year-slot placeholder'; bot.dataset.year = 'null'; bot.textContent = '';
+          yearPicker.appendChild(bot);
+        }
+      }
+      function loadMovies(year) {
+        const yearMovies = sortByYearDesc(validMovies.filter(m => m.year === year));
+        const deduped = dedupeParts(yearMovies);
+        const shuffled = shuffle(deduped);
+        yearMoviesContainer.innerHTML = `<section class="content-section"><div class="poster-grid"></div></section>`;
+        const grid = yearMoviesContainer.querySelector('.poster-grid');
+        if (grid) renderGrid(grid, shuffled);
+      }
+      function setYear(y) {
+        if (y === selectedYear) return;
+        selectedYear = y;
+        renderPicker();
+        loadMovies(y);
+      }
+      // wheel event with passive: false because we need preventDefault
+      yearPicker.addEventListener('wheel', e => {
+        e.preventDefault();
+        const idx = years.indexOf(selectedYear);
+        if (e.deltaY > 0) {
+          if (idx > 0) setYear(years[idx - 1]);
+        } else {
+          if (idx < years.length - 1) setYear(years[idx + 1]);
+        }
+      }, { passive: false });
+      yearPicker.addEventListener('click', e => {
+        const slot = e.target.closest('.year-slot');
+        if (!slot) return;
+        const y = slot.dataset.year;
+        if (y === 'null' || !y) return;
+        setYear(parseInt(y));
+      });
+      yearPicker.addEventListener('dragstart', e => e.preventDefault());
+      renderPicker();
+      loadMovies(selectedYear);
+      finishLoading();
+    }
+
+    function buildHomePage() {
+      startLoading();
+      const cols = getGridCols();
+      const onlyMovies = validMovies.filter(m => m.type === 'movie');
+      const seriesList = validMovies.filter(m => m.type === 'series');
+      const trending = [...validMovies].sort((a, b) => (b.views || 0) - (a.views || 0));
+      const latestRaw = [...onlyMovies].sort((a, b) => b.timestamp - a.timestamp);
+      const latest = sortByYearDesc(latestRaw);
+      const recent = latest;
+
+      let html = buildHero(validMovies);
+      // Pass the "latest" array (which is used for the Latest section) to buildTrailers
+      html += buildTrailers(latest);
+      html += buildSection('Latest', '🆕', latest, 2, cols);
+      html += buildSection('Trending Now', '🔥', trending, 2, cols);
+      html += buildSection('Recent', '🕐', recent, 3, cols);
+      html += buildSection('Series', '📺', seriesList, 3, cols);
+      GENRES.forEach(genre => {
+        const gm = validMovies.filter(m => m.genres && m.genres.includes(genre));
+        if (gm.length > 0) html += buildSection(`${genre} Agasobanuye`, '🏷', gm, 3, cols);
+      });
+      html += buildSection('Others Agasobanuye', '📋', validMovies, 999, cols);
+      document.getElementById('mainContent').innerHTML = html;
+
+      // Attach event listeners to all poster cards
+      document.querySelectorAll('.poster-card').forEach(card => {
+        const go = () => {
+          const id = card.dataset.id, s = card.dataset.source;
+          if (!id) { showToast('Missing movie ID', 'error'); return }
+          window.location.href = `see.html?id=${id}&source=${s}`;
+        };
+        card.addEventListener('click', go);
+        card.addEventListener('keydown', e => { if (e.key === 'Enter') go() });
+      });
+
+      startHeroSlideshow(); setupHeroEvents();
+      finishLoading();
+    }
+
+    function buildNonHome(title, movies) {
+      startLoading();
+      const sorted = sortByYearDesc(movies);
+      const deduped = dedupeParts(sorted);
+      const shuffled = shuffle(deduped);
+      let html = `<h1 class="page-title-center" style="padding:30px 20px 10px;font-size:1.7rem;font-weight:800">${title}</h1><section class="content-section"><div class="poster-grid"></div></section>`;
+      document.getElementById('mainContent').innerHTML = html;
+      const grid = document.querySelector('.poster-grid'); if (grid) renderGrid(grid, shuffled);
+      finishLoading();
+    }
+
+    function navigateTo(page, extra = null) {
+      if (heroInterval) { clearInterval(heroInterval); heroInterval = null }
+      currentPage = page;
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      try {
+        switch (page) {
+          case 'home': document.querySelector('.sidebar-link[data-page="home"]')?.classList.add('active'); buildHomePage(); break;
+          case 'trending': document.querySelector('.sidebar-link[data-page="trending"]')?.classList.add('active'); buildNonHome('Trending Now', [...validMovies].sort((a, b) => (b.views || 0) - (a.views || 0))); break;
+          case 'latest': document.querySelector('.sidebar-link[data-page="latest"]')?.classList.add('active'); buildNonHome('Latest Releases', sortByYearDesc(validMovies.filter(m => m.type === 'movie').sort((a, b) => b.timestamp - a.timestamp))); break;
+          case 'movies': document.querySelector('.sidebar-link[data-page="movies"]')?.classList.add('active'); buildNonHome('Movies', validMovies.filter(m => m.type === 'movie')); break;
+          case 'series': document.querySelector('.sidebar-link[data-page="series"]')?.classList.add('active'); buildNonHome('Series', validMovies.filter(m => m.type === 'series')); break;
+          case 'random': document.querySelector('.sidebar-link[data-page="random"]')?.classList.add('active'); buildNonHome('Shyuha shyuha!', errorMovies); break;
+          case 'yearsPage': document.querySelector('.sidebar-link[data-page="yearsPage"]')?.classList.add('active'); buildYearsPage(); break;
+          case 'genre':
+            const gm = validMovies.filter(m => m.genres && m.genres.includes(extra));
+            document.querySelector(`.sidebar-link[data-genre="${extra}"]`)?.classList.add('active');
+            buildNonHome(`${extra} Movies`, gm); break;
+        }
+      } catch (e) { console.error(e); showToast('Error loading page', 'error'); finishLoading() }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setupSearch() {
+      const input = document.getElementById('searchInput'), clearBtn = document.getElementById('searchClear'), drop = document.getElementById('searchDrop');
+      if (!input || !drop) return; let timeout;
+      input.addEventListener('input', () => {
+        const q = input.value.trim(); q.length > 0 ? clearBtn.classList.add('show') : clearBtn.classList.remove('show');
+        if (!q) { drop.classList.remove('open'); return }
+        clearTimeout(timeout); timeout = setTimeout(() => {
+          const query = q.toLowerCase();
+          const results = dedupeParts(allForSearch.filter(m => (m.title && m.title.toLowerCase().includes(query)) || (m.genres && m.genres.some(g => g.toLowerCase().includes(query))) || (m.umusobanuzi && m.umusobanuzi.toLowerCase().includes(query)) || (m.year && String(m.year).includes(query)))).slice(0, 8);
+          drop.innerHTML = results.length === 0 ? '<div class="search-empty">No results</div>' : results.map(m => `<div class="search-item" data-id="${m.id}" data-source="${m.source}">${m.poster ? `<img src="${m.poster}" class="search-thumb" onerror="this.style.display='none'">` : ''}<div class="search-info"><div class="search-title">${escHtml(m.title)}</div><div class="search-meta">${m.year || '—'} · ${m.type} · ★ ${m.rating ? parseFloat(m.rating).toFixed(1) : '—'}</div></div></div>`).join('');
+          drop.classList.add('open');
+          drop.querySelectorAll('.search-item').forEach(item => { item.addEventListener('click', () => { const id = item.dataset.id, s = item.dataset.source; drop.classList.remove('open'); input.value = ''; clearBtn.classList.remove('show'); window.location.href = `see.html?id=${id}&source=${s}` }) });
+        }, 250);
+      });
+      clearBtn.addEventListener('click', () => { input.value = ''; clearBtn.classList.remove('show'); drop.classList.remove('open'); input.focus() });
+      document.addEventListener('click', e => { if (!document.getElementById('searchBox').contains(e.target)) drop.classList.remove('open') }, { passive: true });
+      input.addEventListener('keydown', e => { if (e.key === 'Escape') { drop.classList.remove('open'); input.blur() } });
+    }
+
+    function setupSidebar() {
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', () => {
+          const page = link.dataset.page, genre = link.dataset.genre;
+          if (page === 'genre' && genre) navigateTo('genre', genre);
+          else navigateTo(page)
+        }, { passive: true })
+      });
+      document.getElementById('logoHome').addEventListener('click', e => { e.preventDefault(); navigateTo('home') });
+    }
+
+    // Make footer clickable to open PIReactive
+    document.getElementById('sidebarFooter').addEventListener('click', () => {
+      window.open('https://pireactive.vercel.app/', '_blank');
     });
 
-    function initAuth() {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          currentUser = user;
-          updateAuthUI(user);
-          await loadUserData(user.uid);
-          if (watchlist.length > 0) {
-            showWatchlistNotifications();
-          }
+    document.addEventListener('keydown', function (e) { if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S'))) { e.preventDefault(); return false } });
+
+    async function init() {
+      try {
+        const cached = sessionStorage.getItem('kflix_v12'), cacheTime = sessionStorage.getItem('kflix_time_v12');
+        if (cached && cacheTime && (Date.now() - parseInt(cacheTime)) < 5 * 60 * 1000) {
+          allMovies = JSON.parse(cached);
         } else {
-          currentUser = null;
-          updateAuthUI(null);
+          allMovies = await fetchAll();
+          try { sessionStorage.setItem('kflix_v12', JSON.stringify(allMovies)); sessionStorage.setItem('kflix_time_v12', Date.now().toString()) } catch (e) { }
         }
-      });
-    }
+        validMovies = allMovies.filter(m => !hasErrors(m));
+        errorMovies = allMovies.filter(m => hasErrors(m));
+        allForSearch = [...validMovies, ...errorMovies];
+        validMovies = sortByYearDesc(validMovies);
+        errorMovies = sortByYearDesc(errorMovies);
 
-    function initUI() {
-      const themeToggles = document.querySelectorAll('.theme-toggle, .theme-toggle-header');
-      themeToggles.forEach(toggle => toggle.addEventListener('click', () => {
-        clearTimeout(themeToggleTimeout);
-        themeToggleTimeout = setTimeout(toggleTheme, 100);
-      }));
-
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-        document.querySelectorAll('.theme-toggle i, .theme-toggle-header i').forEach(icon => {
-          icon.classList.remove('fa-moon');
-          icon.classList.add('fa-sun');
-        });
-      }
-
-      document.addEventListener('click', (e) => {
-        const link = e.target.closest('.nav-item, .footer-link, .genre-bar a');
-        if (link) {
-          if (link.classList.contains('genre-bar')) {
-            const genre = link.textContent.trim();
-            localStorage.setItem('selectedGenre', genre);
-            window.location.href = 'genre.html';
-            return;
-          }
-          e.preventDefault();
-          const page = link.getAttribute('data-page');
-          navigateTo(page);
-          if (link.classList.contains('nav-item')) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            link.classList.add('active');
-          }
+        if (validMovies.length === 0 && errorMovies.length === 0) {
+          document.getElementById('mainContent').innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center"><div style="font-size:4rem">🎬</div><h2>No Movies Found</h2><button onclick="location.reload()" style="margin-top:20px;background:var(--primary);color:#fff;border:none;padding:10px 24px;border-radius:50px;cursor:pointer;font-weight:600">Retry</button></div>';
+          finishLoading(); return;
         }
-      });
+        setupSidebar(); setupSearch();
+        navigateTo('home');
+      } catch (e) { console.error(e); showToast('Failed to load', 'error'); }
     }
 
-    async function showWatchlistNotifications() {
-      if (!currentUser || watchlist.length === 0) return;
-
-      watchlistNotifications.innerHTML = '';
-      const uniqueMovies = new Map();
-      const notificationPromises = watchlist.map(movieId =>
-        getDoc(doc(db1, 'movies', movieId)).then(docSnap =>
-          docSnap.exists() ? {
-            id: docSnap.id,
-            title: docSnap.data().title,
-            coverImageUrl: docSnap.data().coverImageUrl
-          } : null
-        )
-      );
-
-      const notificationMovies = (await Promise.all(notificationPromises)).filter(Boolean);
-      notificationMovies.forEach(movie => uniqueMovies.set(movie.id, movie));
-
-      for (const movie of uniqueMovies.values()) {
-        const notification = createWatchlistNotification(movie);
-        watchlistNotifications.appendChild(notification);
-        setTimeout(() => notification.classList.add('show'), 50);
-      }
-    }
-
-    function createWatchlistNotification(movie) {
-      const notification = document.createElement('div');
-      notification.className = 'watchlist-notification';
-      notification.dataset.movieId = movie.id;
-
-      notification.innerHTML = `
-      <img src="${movie.coverImageUrl || 'https://via.placeholder.com/50x70?text=No+Image'}" 
-           alt="${movie.title}" class="watchlist-notification-poster">
-      <div class="watchlist-notification-content">
-        <div class="watchlist-notification-title">${movie.title}</div>
-        <div class="watchlist-notification-actions">
-          <button class="watchlist-notification-btn remove" title="Remove from watchlist">
-            <i class="fas fa-trash"></i> Remove
-          </button>
-          <button class="watchlist-notification-btn close" title="Close">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-      </div>
-    `;
-
-      notification.querySelector('.close').addEventListener('click', () => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-      });
-
-      notification.querySelector('.remove').addEventListener('click', async () => {
-        try {
-          const userRef = doc(db1, 'users', currentUser.uid);
-          await updateDoc(userRef, { watchlist: arrayRemove(movie.id) });
-          watchlist = watchlist.filter(id => id !== movie.id);
-          showToast('Removed from watchlist', 'success');
-          notification.classList.remove('show');
-          setTimeout(() => notification.remove(), 300);
-          watchlistNotifications.innerHTML = '';
-          if (watchlist.length > 0) showWatchlistNotifications();
-        } catch (error) {
-          showToast('Error removing from watchlist: ' + error.message, 'error');
-        }
-      });
-
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.classList.remove('show');
-          setTimeout(() => notification.remove(), 300);
-        }
-      }, 8000);
-
-      return notification;
-    }
-
-    function navigateTo(page) {
-      showLoading();
-      switch (page) {
-        case 'home':
-          loadHomePage();
-          break;
-        case 'new-releases':
-          loadAllMovies('latest');
-          break;
-        case 'searching':
-          window.location.href = 'search.html';
-          break;
-        case 'profile':
-          if (currentUser) {
-            window.location.href = 'profile.html';
-          } else {
-            window.location.href = 'login.html';
-          }
-          break;
-        case 'for-you':
-          loadForYou();
-          break;
-        case 'watchlist':
-          loadWatchlist();
-          break;
-        case 'history':
-          loadHistory();
-          break;
-        default:
-          loadHomePage();
-      }
-    }
-
-    function updateAuthUI(user) {
-      if (user) {
-        authButtons.innerHTML = `
-        <button class="auth-btn profile-btn"><i class="fas fa-user"></i> ${user.displayName || 'Profile'}</button>
-        <button class="auth-btn logout-btn">Logout</button>
-        <button class="theme-toggle-header"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
-      `;
-        document.querySelector('.logout-btn').addEventListener('click', () => {
-          signOut(auth).then(() => showToast('Logged out successfully', 'success')).catch(error => showToast(error.message, 'error'));
-        });
-        document.querySelector('.profile-btn').addEventListener('click', () => window.location.href = 'profile.html');
-        document.querySelector('.theme-toggle-header').addEventListener('click', () => {
-          clearTimeout(themeToggleTimeout);
-          themeToggleTimeout = setTimeout(toggleTheme, 100);
-        });
-      } else {
-        authButtons.innerHTML = `
-        <button class="auth-btn login-btn">Login</button>
-        <button class="auth-btn register-btn">Register</button>
-        <button class="theme-toggle-header"><i class="fas ${document.body.classList.contains('light-mode') ? 'fa-sun' : 'fa-moon'}"></i></button>
-      `;
-        document.querySelector('.login-btn').addEventListener('click', () => window.location.href = 'login.html');
-        document.querySelector('.register-btn').addEventListener('click', () => window.location.href = 'register.html');
-        document.querySelector('.theme-toggle-header').addEventListener('click', () => {
-          clearTimeout(themeToggleTimeout);
-          themeToggleTimeout = setTimeout(toggleTheme, 100);
-        });
-      }
-    }
-
-    function toggleTheme() {
-      document.body.classList.toggle('light-mode');
-      const icons = document.querySelectorAll('.theme-toggle i, .theme-toggle-header i');
-      if (document.body.classList.contains('light-mode')) {
-        icons.forEach(icon => {
-          icon.classList.remove('fa-moon');
-          icon.classList.add('fa-sun');
-        });
-        localStorage.setItem('theme', 'light');
-      } else {
-        icons.forEach(icon => {
-          icon.classList.remove('fa-sun');
-          icon.classList.add('fa-moon');
-        });
-        localStorage.setItem('theme', 'dark');
-      }
-    }
-
-    function showToast(message, type = 'info') {
-      toast.textContent = message;
-      toast.className = 'toast';
-      toast.classList.add(type, 'show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    // Function to get random umusobanuzi name
-    function getRandomUmusobanuzi() {
-      return umusobanuziNames[Math.floor(Math.random() * umusobanuziNames.length)];
-    }
-
-    // ===== UPDATED: Fetch movies from BOTH databases =====
-    async function fetchMoviesFromBothDatabases() {
-      const allMoviesList = [];
-
-      try {
-        // Fetch from Kinaflix database (db1)
-        const q1 = query(collection(db1, 'movies'), orderBy('releaseYear', 'desc'));
-        const querySnapshot1 = await getDocs(q1);
-        const kinaflixMovies = querySnapshot1.docs.map(doc => ({
-          id: doc.id,
-          source: 'kinaflix',
-          ...doc.data(),
-          genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
-          releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
-          views: typeof doc.data().views === 'number' ? doc.data().views : 0,
-          timestamp: doc.data().dateAdded?.toDate() || new Date(),
-          seriesId: doc.data().seriesId || null,
-          umusobanuzi: doc.data().umusobanuzi || null
-        }));
-        allMoviesList.push(...kinaflixMovies);
-      } catch (error) {
-        console.error('Error fetching from Kinaflix database:', error);
-      }
-
-      try {
-        // Fetch from CULLO Movies database (db2)
-        const moviesCollection2 = collection(db2, 'movies');
-        const querySnapshot2 = await getDocs(moviesCollection2);
-        const culloMovies = querySnapshot2.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            source: 'cullo',
-            title: data.title || 'Untitled',
-            description: data.description || '',
-            coverImageUrl: data.thumbnailUrl || data.posterUrl || 'https://via.placeholder.com/300x450?text=No+Image',
-            posterUrl: data.posterUrl || data.thumbnailUrl || '',
-            thumbnailUrl: data.thumbnailUrl || data.posterUrl || '',
-            genres: Array.isArray(data.genre) ? data.genre : (data.genres ? (Array.isArray(data.genres) ? data.genres : []) : []),
-            releaseYear: data.year || data.releaseYear || 2024,
-            rating: data.rating || 7.0,
-            views: data.views || 0,
-            duration: data.duration || '120 min',
-            isPremium: false,
-            videoUrl: data.videoUrl || '',
-            timestamp: data.createdAt?.toDate ? data.createdAt.toDate() : (data.dateAdded?.toDate ? data.dateAdded.toDate() : new Date()),
-            seriesId: data.seriesId || null,
-            umusobanuzi: getRandomUmusobanuzi() // Assign random umusobanuzi for CULLO movies
-          };
-        });
-        allMoviesList.push(...culloMovies);
-      } catch (error) {
-        console.error('Error fetching from CULLO Movies database:', error);
-      }
-
-      // Remove duplicates based on title similarity
-      const uniqueMovies = [];
-      const titleMap = new Map();
-      for (const movie of allMoviesList) {
-        const normalizedTitle = movie.title?.toLowerCase().trim().replace(/[^\w\s]/g, '');
-        if (!titleMap.has(normalizedTitle)) {
-          titleMap.set(normalizedTitle, movie);
-          uniqueMovies.push(movie);
-        }
-      }
-
-      // Silent console log - only show total
-      console.log(`✓ All movies loaded (Total: ${uniqueMovies.length})`);
-      return uniqueMovies;
-    }
-
-    // ===== UPDATED: Fetch genres from BOTH databases =====
-    async function fetchGenresFromBothDatabases() {
-      const allGenres = new Set();
-
-      try {
-        // From Kinaflix
-        const q = query(collection(db1, 'genres'), orderBy('name'));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.docs.forEach(doc => {
-          const genreName = doc.data().name;
-          if (genreName) allGenres.add(genreName);
-        });
-      } catch (error) {
-        console.error('Error fetching genres from Kinaflix:', error);
-      }
-
-      try {
-        // From CULLO Movies - extract genres from movies
-        const moviesCollection = collection(db2, 'movies');
-        const querySnapshot = await getDocs(moviesCollection);
-        querySnapshot.docs.forEach(doc => {
-          const data = doc.data();
-          const genres = data.genre || data.genres || [];
-          if (Array.isArray(genres)) {
-            genres.forEach(genre => {
-              if (genre && typeof genre === 'string') allGenres.add(genre);
-            });
-          } else if (typeof genres === 'string') {
-            allGenres.add(genres);
-          }
-        });
-      } catch (error) {
-        console.error('Error fetching genres from CULLO Movies:', error);
-      }
-
-      return Array.from(allGenres).sort();
-    }
-
-    // ===== UPDATED: Fetch featured movies from BOTH databases =====
-    async function fetchFeaturedMoviesFromBothDatabases() {
-      const featuredList = [];
-
-      try {
-        // From Kinaflix
-        const q1 = query(collection(db1, 'movies'), orderBy('releaseYear', 'desc'), limit(5));
-        const querySnapshot1 = await getDocs(q1);
-        const kinaflixFeatured = querySnapshot1.docs.map(doc => ({
-          id: doc.id,
-          source: 'kinaflix',
-          ...doc.data(),
-          genres: Array.isArray(doc.data().genres) ? doc.data().genres : [],
-          releaseYear: typeof doc.data().releaseYear === 'number' ? doc.data().releaseYear : 0,
-          timestamp: doc.data().dateAdded?.toDate() || new Date()
-        }));
-        featuredList.push(...kinaflixFeatured);
-      } catch (error) {
-        console.error('Error fetching featured from Kinaflix:', error);
-      }
-
-      try {
-        // From CULLO Movies - get top 5 by year
-        const moviesCollection = collection(db2, 'movies');
-        const querySnapshot2 = await getDocs(moviesCollection);
-        const culloMovies = querySnapshot2.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            source: 'cullo',
-            title: data.title || 'Untitled',
-            description: data.description || '',
-            coverImageUrl: data.thumbnailUrl || data.posterUrl || 'https://via.placeholder.com/1920x1080?text=No+Image',
-            posterUrl: data.posterUrl || data.thumbnailUrl || '',
-            thumbnailUrl: data.thumbnailUrl || data.posterUrl || '',
-            genres: Array.isArray(data.genre) ? data.genre : (data.genres ? (Array.isArray(data.genres) ? data.genres : []) : []),
-            releaseYear: data.year || data.releaseYear || 2024,
-            rating: data.rating || 7.0,
-            isPremium: false,
-            videoUrl: data.videoUrl || ''
-          };
-        });
-        const sortedCullo = culloMovies.sort((a, b) => (b.releaseYear || 0) - (a.releaseYear || 0)).slice(0, 5);
-        featuredList.push(...sortedCullo);
-      } catch (error) {
-        console.error('Error fetching featured from CULLO Movies:', error);
-      }
-
-      return featuredList.slice(0, 5);
-    }
-
-    // ===== UPDATED: Fetch newest movies from BOTH databases =====
-    async function fetchNewestMoviesFromBothDatabases() {
-      const allMoviesList = await fetchMoviesFromBothDatabases();
-      const sortedByDate = [...allMoviesList].sort((a, b) => b.timestamp - a.timestamp);
-
-      // Apply series grouping logic to avoid duplicates from same series
-      const seriesGroups = new Map();
-      for (const movie of sortedByDate) {
-        const seriesKey = movie.seriesId || getTitlePrefix(movie.title);
-        if (!seriesGroups.has(seriesKey)) {
-          seriesGroups.set(seriesKey, []);
-        }
-        seriesGroups.get(seriesKey).push(movie);
-      }
-
-      const uniqueMovies = [];
-      for (const group of seriesGroups.values()) {
-        const selectedMovies = [];
-        for (let i = 0; i < Math.min(3, group.length); i++) {
-          const randomIndex = Math.floor(Math.random() * group.length);
-          selectedMovies.push(group[randomIndex]);
-          group.splice(randomIndex, 1);
-        }
-        uniqueMovies.push(...selectedMovies);
-        if (uniqueMovies.length >= 10) break;
-      }
-
-      return uniqueMovies.slice(0, 10);
-    }
-
-    // ===== NEW: Load recommendation movies (10 items) based on user preferences =====
-    async function loadRecommendationMovies() {
-      // If user logged in and has watch history, use favorite genres
-      if (currentUser && watchHistory.length > 0) {
-        const watchedIds = new Set(watchHistory);
-        const favoriteGenre = getFavoriteGenre();
-        // Recommend movies from favorite genre not watched, then fallback to popular/random
-        let recs = movies.filter(movie =>
-          !watchedIds.has(movie.id) &&
-          Array.isArray(movie.genres) &&
-          movie.genres.includes(favoriteGenre)
-        );
-        if (recs.length < 10) {
-          const additional = movies.filter(movie =>
-            !watchedIds.has(movie.id) &&
-            Array.isArray(movie.genres) &&
-            movie.genres.some(g => g !== favoriteGenre)
-          );
-          recs = [...recs, ...additional];
-        }
-        recs = sortMovies(recs, 'views', 'desc');
-        return recs.slice(0, 10);
-      } else {
-        // Not logged in or no history: return popular movies (by views)
-        const popular = sortMovies([...movies], 'views', 'desc');
-        return popular.slice(0, 10);
-      }
-    }
-
-    async function loadHomePage() {
-      showLoading();
-      try {
-        const [moviesData, genresData, featuredData, newestData, recommendations] = await Promise.all([
-          fetchMoviesFromBothDatabases(),
-          fetchGenresFromBothDatabases(),
-          fetchFeaturedMoviesFromBothDatabases(),
-          fetchNewestMoviesFromBothDatabases(),
-          loadRecommendationMovies()
-        ]);
-        movies = moviesData;
-        genres = genresData;
-        featuredMovies = featuredData;
-        allYears = [...new Set(movies.map(movie => movie.releaseYear))].sort((a, b) => b - a);
-        renderHomePage(newestData, recommendations);
-        startSlideshow();
-        hideLoading();
-      } catch (error) {
-        console.error('Error loading home page:', error);
-        showToast('Error loading content: ' + error.message, 'error');
-        hideLoading();
-      }
-    }
-
-    function getTitlePrefix(title) {
-      if (!title) return '';
-      const words = title.split(' ').slice(0, Math.ceil(title.split(' ').length * 0.7));
-      return words.join(' ').toLowerCase().replace(/[^a-z0-9]/g, '');
-    }
-
-    function startSlideshow() {
-      if (!featuredMovies.length) return;
-      let currentSlide = 0;
-
-      function showSlide(index) {
-        const slides = document.querySelectorAll('.hero-slide');
-        if (!slides.length) return;
-        slides.forEach((slide, i) => {
-          slide.classList.toggle('active', i === index);
-        });
-        currentSlide = index;
-      }
-
-      function nextSlide() {
-        requestAnimationFrame(() => {
-          const nextIndex = (currentSlide + 1) % featuredMovies.length;
-          showSlide(nextIndex);
-        });
-      }
-
-      showSlide(0);
-      if (slideInterval) clearInterval(slideInterval);
-      slideInterval = setInterval(nextSlide, 15000);
-
-      document.querySelectorAll('.hero-slide').forEach(slide => {
-        slide.addEventListener('mouseenter', () => clearInterval(slideInterval));
-        slide.addEventListener('mouseleave', () => slideInterval = setInterval(nextSlide, 15000));
-      });
-    }
-
-    async function renderHomePage(newestMovies, recommendations) {
-      let sortField = 'releaseYear';
-      let sortOrder = 'desc';
-      if (currentUser) {
-        const userRef = doc(db1, 'users', currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const preferences = userSnap.data().displayPreferences || {};
-          sortField = preferences.sortField || 'releaseYear';
-          sortOrder = preferences.sortOrder || 'desc';
-        }
-      }
-
-      let html = newestMovies.length > 0 ? `
-      <section class="hero-slideshow">
-        ${newestMovies.slice(0, 3).map(movie => `
-          <div class="hero-slide" style="--hero-background: url('${movie.coverImageUrl || 'https://via.placeholder.com/1920x1080?text=Newest+Release'}')">
-            <div class="hero-content">
-              <h1>${escapeHtml(movie.title)}</h1>
-              <p>${escapeHtml(movie.description?.substring(0, 150) || 'No description available.')}...</p>
-              <div class="hero-buttons">
-                <button class="watch-btn" data-movie-id="${movie.id}" data-movie-source="${movie.source || 'kinaflix'}"><i class="fas fa-play"></i> Watch Now</button>
-                <button class="info-btn" data-movie-id="${movie.id}" data-movie-source="${movie.source || 'kinaflix'}"><i class="fas fa-info-circle"></i> More Info</button>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </section>
-    ` : '';
-
-      if (newestMovies && newestMovies.length > 0) {
-        html += `
-          <section class="section">
-            <h2 class="section-title">Newest Releases <a href="#" class="view-all" data-sort="newest">See All</a></h2>
-            <div class="movies-grid">
-              ${newestMovies.map(movie => renderMovieCard(movie)).slice(0, 10).join('')}
-            </div>
-          </section>
-        `;
-      }
-
-      if (watchHistory.length > 0) {
-        const forYouMovies = await loadForYouMovies();
-        if (forYouMovies.length > 0) {
-          html += `
-              <section class="section">
-                <h2 class="section-title">For You <small>(Based on your preferences)</small></h2>
-                <div class="movies-grid">
-                  ${forYouMovies.map(movie => renderMovieCard(movie)).slice(0, 12).join('')}
-                </div>
-              </section>
-            `;
-        }
-      }
-
-      if (movies.length > 0) {
-        const popularMovies = sortMovies([...movies], 'views', 'desc').slice(0, 10);
-        html += `
-          <section class="section">
-            <h2 class="section-title">Popular Movies <a href="#" class="view-all" data-sort="popular">See All</a></h2>
-            <div class="movies-grid">
-              ${popularMovies.map(movie => renderMovieCard(movie)).join('')}
-            </div>
-          </section>
-        `;
-      }
-
-      // ===== NEW: Recommendations Section (always shown) =====
-      if (recommendations && recommendations.length > 0) {
-        html += `
-          <section class="section">
-            <h2 class="section-title">Recommendations <small>For you</small></h2>
-            <div class="movies-grid">
-              ${recommendations.map(movie => renderMovieCard(movie)).slice(0, 10).join('')}
-            </div>
-          </section>
-        `;
-      }
-
-      html += `
-      <div class="genre-bar">
-        ${['<b>Action</b>', '<b>Adventure</b>', '<b>Animation</b>', '<b>Comedy</b>', '<b>Crime</b>', '<b>Drama</b>', '<b>Horror</b>', '<b>Romance</b>', '<b>Adult</b>', '<b>War</b>', '<b>Thriller</b>', '<b>Indian</b>', '<b>Sci-Fi</b>', '<b>Sport</b>'].map(genre => `
-          <a href="#" class="genre-bar" data-genre="${genre.replace(/<b>|<\/b>/g, '')}">${genre}</a>
-        `).join('')}
-      </div>
-    `;
-
-      if (movies.length > 0) {
-        const allMovies = sortMovies([...movies], 'releaseYear', 'desc');
-        html += `
-          <section class="section">
-            <h2 class="section-title">All Movies</h2>
-            <div class="movies-grid">
-              ${allMovies.map(movie => renderMovieCard(movie)).join('')}
-            </div>
-          </section>
-        `;
-      }
-
-      mainContent.innerHTML = html;
-      attachMovieCardEvents();
-      document.querySelectorAll('.view-all').forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const sort = link.getAttribute('data-sort');
-          const genre = link.getAttribute('data-genre');
-          if (genre) loadMoviesByGenre(genre);
-          else if (sort) loadAllMovies(sort);
-        });
-      });
-    }
-
-    async function loadForYouMovies() {
-      if (!currentUser || watchHistory.length === 0) {
-        return sortMovies([...movies], 'views', 'desc').slice(0, 12);
-      }
-
-      const watchedIds = new Set(watchHistory);
-      const favoriteGenre = getFavoriteGenre();
-      let candidateMovies = movies.filter(movie =>
-        !watchedIds.has(movie.id) &&
-        Array.isArray(movie.genres) &&
-        movie.genres.includes(favoriteGenre)
-      );
-
-      if (candidateMovies.length < 12) {
-        const additionalMovies = movies.filter(movie =>
-          !watchedIds.has(movie.id) &&
-          Array.isArray(movie.genres) &&
-          movie.genres.some(g => g !== favoriteGenre)
-        );
-        candidateMovies = [...candidateMovies, ...additionalMovies];
-      }
-
-      candidateMovies = sortMovies(candidateMovies, 'views', 'desc');
-      return candidateMovies.slice(0, 12);
-    }
-
-    function sortMovies(moviesArray, field, order) {
-      const sorted = [...moviesArray];
-      const isAsc = order === 'asc';
-      switch (field) {
-        case 'title': sorted.sort((a, b) => isAsc ? (a.title || '').localeCompare(b.title || '') : (b.title || '').localeCompare(a.title || '')); break;
-        case 'rating': sorted.sort((a, b) => isAsc ? (a.rating || 0) - (b.rating || 0) : (b.rating || 0) - (a.rating || 0)); break;
-        case 'releaseYear': sorted.sort((a, b) => isAsc ? (a.releaseYear || 0) - (b.releaseYear || 0) : (b.releaseYear || 0) - (a.releaseYear || 0)); break;
-        case 'views': sorted.sort((a, b) => isAsc ? (a.views || 0) - (b.views || 0) : (b.views || 0) - (a.views || 0)); break;
-        case 'dateAdded': sorted.sort((a, b) => isAsc ? a.timestamp - b.timestamp : b.timestamp - a.timestamp); break;
-        default: sorted.sort((a, b) => isAsc ? (a.releaseYear || 0) - (b.releaseYear || 0) : (b.releaseYear || 0) - (a.releaseYear || 0));
-      }
-      return sorted;
-    }
-
-    function formatTimeSince(timestamp) {
-      const now = new Date();
-      const seconds = Math.floor((now - timestamp) / 1000);
-      let interval = Math.floor(seconds / 31536000);
-      if (interval >= 1) return `${interval} year${interval === 1 ? '' : 's'} ago`;
-      interval = Math.floor(seconds / 2592000);
-      if (interval >= 1) return `${interval} month${interval === 1 ? '' : 's'} ago`;
-      interval = Math.floor(seconds / 86400);
-      if (interval >= 1) return `${interval} day${interval === 1 ? '' : 's'} ago`;
-      interval = Math.floor(seconds / 3600);
-      if (interval >= 1) return `${interval} hour${interval === 1 ? '' : 's'} ago`;
-      interval = Math.floor(seconds / 60);
-      if (interval >= 1) return `${interval} minute${interval === 1 ? '' : 's'} ago`;
-      return `${Math.floor(seconds)} second${seconds === 1 ? '' : 's'} ago`;
-    }
-
-    function getFavoriteGenre() {
-      const genreCounts = {};
-      let maxCount = 0;
-      let favoriteGenre = genres[0] || 'Action';
-      watchHistory.forEach(movieId => {
-        const movie = movies.find(m => m.id === movieId);
-        if (movie && Array.isArray(movie.genres)) {
-          movie.genres.forEach(genre => {
-            genreCounts[genre] = (genreCounts[genre] || 0) + 1;
-            if (genreCounts[genre] > maxCount) {
-              maxCount = genreCounts[genre];
-              favoriteGenre = genre;
-            }
-          });
-        }
-      });
-      return favoriteGenre;
-    }
-
-    async function loadForYou() {
-      showLoading();
-      try {
-        const forYouMovies = await loadForYouMovies();
-        renderMovieList(forYouMovies, 'For You (Recommended)');
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading recommendations: ' + error.message, 'error');
-        hideLoading();
-      }
-    }
-
-    function renderMovieCard(movie) {
-      const inWatchlist = currentUser && watchlist.includes(movie.id);
-      const timeSince = formatTimeSince(movie.timestamp);
-      // Use existing umusobanuzi or generate random for CULLO movies
-      const umusobanuziText = movie.umusobanuzi || (movie.source === 'cullo' ? getRandomUmusobanuzi() : null);
-      const sourceBadge = umusobanuziText ? `<span class="umusobanuzi">${umusobanuziText}</span>` : '';
-      return `
-      <div class="movie-card" data-movie-id="${movie.id}" data-movie-source="${movie.source || 'kinaflix'}">
-        ${sourceBadge}
-        <img src="${movie.coverImageUrl || 'https://via.placeholder.com/300x450?text=No+Image'}" 
-             alt="${movie.title}" class="movie-poster" loading="lazy">
-        <div class="movie-info">
-          <h3 class="movie-title">${escapeHtml(movie.title)} (${movie.releaseYear || 'N/A'})</h3>
-          <div class="movie-meta">
-            <span>${movie.releaseYear || 'N/A'}</span>
-            ${movie.rating ? `<span class="movie-rating"><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
-          </div>
-          ${movie.views ? `<div class="view-count"><i class="fas fa-eye"></i> ${movie.views}</div>` : ''}
-          <div class="time-indicator">${timeSince}</div>
-        </div>
-        <div class="movie-overlay">
-          <h3 class="overlay-title">${escapeHtml(movie.title)}</h3>
-          ${Array.isArray(movie.genres) && movie.genres.length ? `
-            <div class="overlay-genres">
-              ${movie.genres.map(genre => `<span class="genre-tag">${escapeHtml(genre)}</span>`).join('')}
-            </div>
-          ` : ''}
-          <p>${escapeHtml(movie.description?.substring(0, 80) || 'No description available')}...</p>
-          <button class="overlay-btn" data-movie-id="${movie.id}" data-movie-source="${movie.source || 'kinaflix'}"><i class="fas fa-play"></i> Watch Now</button>
-          ${currentUser ? `
-            <button class="overlay-btn watchlist-btn ${inWatchlist ? 'in-watchlist' : ''}" 
-                    data-movie-id="${movie.id}">
-              <i class="fas ${inWatchlist ? 'fa-check' : 'fa-plus'}"></i> 
-              ${inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
-            </button>
-          ` : ''}
-        </div>
-      </div>
-    `;
-    }
-
-    function attachMovieCardEvents() {
-      mainContent.addEventListener('click', async (e) => {
-        const target = e.target.closest('.movie-card, .watch-btn, .info-btn, .overlay-btn:not(.watchlist-btn), .watchlist-btn');
-        if (!target) return;
-        if (target.classList.contains('watchlist-btn')) {
-          e.stopPropagation();
-          const movieId = target.getAttribute('data-movie-id');
-          if (!currentUser) {
-            showToast('Please login to use watchlist', 'error');
-            window.location.href = 'login.html';
-            return;
-          }
-          try {
-            const userRef = doc(db1, 'users', currentUser.uid);
-            if (watchlist.includes(movieId)) {
-              await updateDoc(userRef, { watchlist: arrayRemove(movieId) });
-              watchlist = watchlist.filter(id => id !== movieId);
-              showToast('Removed from watchlist', 'success');
-              target.classList.remove('in-watchlist');
-              target.innerHTML = `<i class="fas fa-plus"></i> Add to Watchlist`;
-            } else {
-              await updateDoc(userRef, { watchlist: arrayUnion(movieId) });
-              watchlist.push(movieId);
-              showToast('Added to watchlist', 'success');
-              target.classList.add('in-watchlist');
-              target.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
-
-              if (movieId !== lastAddedMovieId) {
-                lastAddedMovieId = movieId;
-                const movieDoc = await getDoc(doc(db1, 'movies', movieId));
-                if (movieDoc.exists()) {
-                  const movie = {
-                    id: movieDoc.id,
-                    title: movieDoc.data().title,
-                    coverImageUrl: movieDoc.data().coverImageUrl
-                  };
-                  const notification = createWatchlistNotification(movie);
-                  watchlistNotifications.appendChild(notification);
-                  setTimeout(() => notification.classList.add('show'), 50);
-                  setTimeout(() => lastAddedMovieId = null, 2000);
-                }
-              }
-            }
-            watchlistNotifications.innerHTML = '';
-            if (watchlist.length > 0) showWatchlistNotifications();
-          } catch (error) {
-            showToast('Error updating watchlist: ' + error.message, 'error');
-          }
-        } else {
-          const movieId = target.getAttribute('data-movie-id') || target.closest('.movie-card')?.getAttribute('data-movie-id');
-          const movieSource = target.getAttribute('data-movie-source') || target.closest('.movie-card')?.getAttribute('data-movie-source') || 'kinaflix';
-          if (movieId) {
-            await countView(movieId);
-            if (currentUser) {
-              const userRef = doc(db1, 'users', currentUser.uid);
-              if (!watchHistory.includes(movieId)) {
-                watchHistory.unshift(movieId);
-                watchHistory = watchHistory.slice(0, 50);
-                await updateDoc(userRef, { history: watchHistory });
-                saveWatchHistoryToCookies(watchHistory);
-              }
-            }
-            window.location.href = `see.html?id=${movieId}&source=${movieSource}`;
-          }
-        }
-      });
-    }
-
-    async function countView(movieId) {
-      const now = Date.now();
-      const lastViewTime = lastViewTimestamps[movieId] || 0;
-      if (now - lastViewTime > 3600000) {
-        try {
-          const movieRef = doc(db1, 'movies', movieId);
-          await updateDoc(movieRef, { views: increment(1) });
-          lastViewTimestamps[movieId] = now;
-          const movieIndex = movies.findIndex(m => m.id === movieId);
-          if (movieIndex !== -1) {
-            movies[movieIndex].views = (movies[movieIndex].views || 0) + 1;
-          }
-        } catch (error) {
-          console.error('Error counting view:', error);
-        }
-      }
-    }
-
-    async function loadMoviesByGenre(genre) {
-      showLoading();
-      try {
-        const genreMovies = movies.filter(movie =>
-          Array.isArray(movie.genres) && movie.genres.includes(genre)
-        );
-        const sortedMovies = sortMovies(genreMovies, 'releaseYear', 'desc');
-        renderMovieList(sortedMovies, `${genre} Movies`);
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading movies: ' + error.message, 'error');
-        hideLoading();
-      }
-    }
-
-    async function loadAllMovies(sort = 'latest') {
-      showLoading();
-      try {
-        let allMoviesList = [...movies];
-
-        if (sort === 'popular') {
-          allMoviesList = sortMovies(allMoviesList, 'views', 'desc');
-        } else if (sort === 'newest') {
-          allMoviesList = sortMovies(allMoviesList, 'timestamp', 'desc');
-
-          // Apply series grouping for newest
-          const seriesGroups = new Map();
-          for (const movie of allMoviesList) {
-            const seriesKey = movie.seriesId || getTitlePrefix(movie.title);
-            if (!seriesGroups.has(seriesKey)) {
-              seriesGroups.set(seriesKey, []);
-            }
-            seriesGroups.get(seriesKey).push(movie);
-          }
-          const uniqueMovies = [];
-          for (const group of seriesGroups.values()) {
-            const selectedMovies = [];
-            for (let i = 0; i < Math.min(3, group.length); i++) {
-              const randomIndex = Math.floor(Math.random() * group.length);
-              selectedMovies.push(group[randomIndex]);
-              group.splice(randomIndex, 1);
-            }
-            uniqueMovies.push(...selectedMovies);
-          }
-          allMoviesList = uniqueMovies;
-        } else {
-          allMoviesList = sortMovies(allMoviesList, 'releaseYear', 'desc');
-        }
-
-        if (currentUser) {
-          const userRef = doc(db1, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            allMoviesList = sortMovies(allMoviesList, preferences.sortField || 'releaseYear', preferences.sortOrder || 'desc');
-          }
-        }
-        renderMovieList(allMoviesList, sort === 'popular' ? 'Popular Movies' : sort === 'newest' ? 'Newest Releases' : 'Latest Movies');
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading movies: ' + error.message, 'error');
-        hideLoading();
-      }
-    }
-
-    function renderMovieList(moviesList, title) {
-      const html = `
-      <section class="section">
-        <h2 class="section-title">${title}</h2>
-        ${moviesList.length > 0 ? `<div class="movies-grid">${moviesList.map(movie => renderMovieCard(movie)).join('')}</div>` : '<p>No movies found.</p>'}
-      </section>
-    `;
-      mainContent.innerHTML = html;
-      attachMovieCardEvents();
-    }
-
-    async function loadUserData(userId) {
-      try {
-        const userRef = doc(db1, 'users', userId);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          watchlist = userData.watchlist || [];
-          const validMovieIds = movies.map(m => m.id);
-          watchHistory = (userData.history || []).filter(id => validMovieIds.includes(id));
-          await updateDoc(userRef, { history: watchHistory });
-          saveWatchHistoryToCookies(watchHistory);
-        }
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    }
-
-    async function loadWatchlist() {
-      if (!currentUser) {
-        showToast('Please login to view your watchlist', 'error');
-        window.location.href = 'login.html';
-        return;
-      }
-      showLoading();
-      try {
-        if (watchlist.length === 0) {
-          mainContent.innerHTML = `
-          <section class="section">
-            <h2 class="section-title">Your Watchlist</h2>
-            <p>Your watchlist is empty. Add movies to watch later!</p>
-          </section>
-        `;
-          hideLoading();
-          return;
-        }
-        const moviePromises = watchlist.map(movieId =>
-          getDoc(doc(db1, 'movies', movieId)).then(docSnap =>
-            docSnap.exists() ? {
-              id: docSnap.id,
-              ...docSnap.data(),
-              genres: Array.isArray(docSnap.data().genres) ? docSnap.data().genres : [],
-              releaseYear: typeof docSnap.data().releaseYear === 'number' ? docSnap.data().releaseYear : 0,
-              timestamp: docSnap.data().dateAdded?.toDate() || new Date()
-            } : null
-          )
-        );
-        let watchlistMovies = (await Promise.all(moviePromises)).filter(Boolean);
-        if (currentUser) {
-          const userRef = doc(db1, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            watchlistMovies = sortMovies(watchlistMovies, preferences.sortField || 'releaseYear', preferences.sortOrder || 'desc');
-          }
-        }
-        renderMovieList(watchlistMovies, 'Your Watchlist');
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading watchlist: ' + error.message, 'error');
-        hideLoading();
-      }
-    }
-
-    async function loadHistory() {
-      if (!currentUser) {
-        showToast('Please login to view your history', 'error');
-        window.location.href = 'login.html';
-        return;
-      }
-      showLoading();
-      try {
-        if (watchHistory.length === 0) {
-          mainContent.innerHTML = `
-          <section class="section">
-            <h2 class="section-title">Your Watch History</h2>
-            <p>You haven't watched any movies yet.</p>
-          </section>
-        `;
-          hideLoading();
-          return;
-        }
-        const moviePromises = watchHistory.map(movieId =>
-          getDoc(doc(db1, 'movies', movieId)).then(docSnap =>
-            docSnap.exists() ? {
-              id: docSnap.id,
-              ...docSnap.data(),
-              genres: Array.isArray(docSnap.data().genres) ? docSnap.data().genres : [],
-              releaseYear: typeof docSnap.data().releaseYear === 'number' ? docSnap.data().releaseYear : 0,
-              timestamp: docSnap.data().dateAdded?.toDate() || new Date()
-            } : null
-          )
-        );
-        let historyMovies = (await Promise.all(moviePromises)).filter(Boolean);
-        if (currentUser) {
-          const userRef = doc(db1, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const preferences = userSnap.data().displayPreferences || {};
-            historyMovies = sortMovies(historyMovies, preferences.sortField || 'releaseYear', preferences.sortOrder || 'desc');
-          }
-        }
-        renderMovieList(historyMovies, 'Your Watch History');
-        hideLoading();
-      } catch (error) {
-        showToast('Error loading history: ' + error.message, 'error');
-        hideLoading();
-      }
-    }
-
-    function showLoading() {
-      loadingSpinner.classList.add('active');
-    }
-
-    function hideLoading() {
-      loadingSpinner.classList.remove('active');
-    }
-
-    function loadWatchHistoryFromCookies() {
-      const historyCookie = document.cookie.split('; ').find(row => row.startsWith('watchHistory='));
-      if (historyCookie) {
-        watchHistory = JSON.parse(decodeURIComponent(historyCookie.split('=')[1])) || [];
-      }
-    }
-
-    function saveWatchHistoryToCookies(history) {
-      const expires = new Date();
-      expires.setFullYear(expires.getFullYear() + 1);
-      document.cookie = `watchHistory=${encodeURIComponent(JSON.stringify(history))}; expires=${expires.toUTCString()}; path=/`;
-    }
-
-    function setupIntersectionObserver() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const movieCard = entry.target;
-            const img = movieCard.querySelector('.movie-poster');
-            if (img && img.getAttribute('data-src')) {
-              img.src = img.getAttribute('data-src');
-              img.removeAttribute('data-src');
-            }
-            observer.unobserve(movieCard);
-          }
-        });
-      }, { rootMargin: '50px' });
-
-      const checkAndObserve = () => {
-        document.querySelectorAll('.movie-card').forEach(card => {
-          const img = card.querySelector('.movie-poster');
-          if (img && img.src && !img.src.includes('via.placeholder.com') && !img.getAttribute('data-src')) {
-            img.setAttribute('data-src', img.src);
-            img.src = 'https://via.placeholder.com/300x450?text=Loading...';
-            observer.observe(card);
-          }
-        });
-      };
-
-      setTimeout(checkAndObserve, 500);
-    }
-
-    function checkInternetConnection() {
-      if (navigator.onLine) {
-        noInternetOverlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      } else {
-        noInternetOverlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-      }
-    }
-
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+    document.addEventListener('DOMContentLoaded', init);
   </script>
-  
-  <!-- NATIVE AD (BOOST AREA - INSIDE MOVIE GRID) - Placed after trending movies section for highest clicks -->
-  <script async="async" data-cfasync="false" src="https://pl29119195.profitablecpmratenetwork.com/3ca9d41e4ad15a44f99947e641077339/invoke.js"></script>
-  <div id="container-3ca9d41e4ad15a44f99947e641077339"></div>
 </body>
 
 </html>
