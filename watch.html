@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
-  <meta property="og:title" content="Am Wathing..." />
+  <meta property="og:title" content="Am Watching..." />
   <meta property="og:description" content="Vayo turebane filme ngewe nyigeze kure." />
   <meta property="og:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
   <meta property="og:url" content="https://kinaflix-fawn.vercel.app/" />
@@ -17,7 +17,7 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Am Wathing..." />
+  <meta name="twitter:title" content="Am Watching..." />
   <meta name="twitter:description" content="Vayo turebane filme ngewe nyigeze kure." />
   <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
 
@@ -28,6 +28,13 @@
       --dark: #000000;
       --light: #f5f5f5;
       --gray-text: #888;
+      --dark-gray: #1a1a1a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
@@ -35,29 +42,34 @@
       padding: 0;
       background-color: var(--dark);
       color: var(--light);
+      font-family: system-ui, -apple-system, sans-serif;
       height: 100vh;
       overflow: hidden;
-      font-family: system-ui, -apple-system, sans-serif;
     }
 
-    .back-button {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 100;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      transition: all 0.3s ease;
+    /* Main layout: video + series sidebar */
+    .main-container {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+      flex-direction: row;
+    }
+
+    /* Video container - takes remaining space */
+    .video-wrapper {
+      flex: 1;
+      position: relative;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
     }
 
     .video-container {
-      position: fixed;
-      top: 0;
-      left: 0;
       width: 100%;
       height: 100%;
       background: #000;
+      position: relative;
     }
 
     .video-container iframe,
@@ -68,8 +80,152 @@
       border: none;
     }
 
+    /* Series Episodes Sidebar - RIGHT SIDE */
+    .series-sidebar {
+      width: 320px;
+      background: var(--dark-gray);
+      display: none;
+      flex-direction: column;
+      border-left: 1px solid #333;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .series-sidebar.visible {
+      display: flex;
+    }
+
+    .sidebar-header {
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid #333;
+    }
+
+    .series-title {
+      font-size: 1.2rem;
+      color: var(--primary);
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .season-tabs {
+      display: flex;
+      gap: 0.5rem;
+      padding: 1rem;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      border-bottom: 1px solid #333;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .season-tab {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .season-tab.active {
+      background: var(--primary);
+    }
+
+    .episodes-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+
+    .episode-item {
+      background: #2a2a2a;
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .episode-item:hover {
+      background: var(--primary);
+      transform: translateX(-3px);
+    }
+
+    .episode-item.active {
+      background: var(--primary);
+      border-left: 3px solid #ff6b6b;
+    }
+
+    .episode-number {
+      font-size: 0.9rem;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .episode-info {
+      flex: 1;
+    }
+
+    .episode-title {
+      font-size: 0.8rem;
+      color: #ccc;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .episode-item:hover .episode-title {
+      color: #fff;
+    }
+
+    .playing-indicator {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .playing-indicator span {
+      width: 3px;
+      height: 8px;
+      background: white;
+      border-radius: 1px;
+      animation: wave 1s infinite ease-in-out;
+    }
+
+    .playing-indicator span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .playing-indicator span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes wave {
+
+      0%,
+      100% {
+        height: 8px;
+      }
+
+      50% {
+        height: 16px;
+      }
+    }
+
     .loading-overlay {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       right: 0;
@@ -98,6 +254,22 @@
       100% {
         transform: rotate(360deg);
       }
+    }
+
+    .back-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #f40612;
+      color: white;
     }
 
     .ad-notification {
@@ -165,7 +337,6 @@
       margin-left: 5px;
     }
 
-    /* Social bar container */
     .social-bar-container {
       position: fixed;
       bottom: 20px;
@@ -174,107 +345,183 @@
       pointer-events: none;
     }
 
-    .social-bar-container > * {
+    .social-bar-container>* {
       pointer-events: auto;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Scrollbar styling */
+    .episodes-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .episodes-list::-webkit-scrollbar-track {
+      background: var(--dark-gray);
+    }
+
+    .episodes-list::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .season-tabs::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .season-tabs::-webkit-scrollbar-track {
+      background: var(--dark-gray);
+    }
+
+    .season-tabs::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .video-wrapper {
+        height: 50vh;
+      }
+
+      .series-sidebar {
+        width: 100%;
+        height: 50vh;
+      }
+
+      .back-button {
+        top: 10px;
+        left: 10px;
+        font-size: 0.8rem;
+      }
+
+      .back-button span:last-child {
+        display: none;
+      }
+
+      .back-button .icon {
+        margin: 0;
+      }
     }
   </style>
 </head>
 
 <body>
   <a href="#" class="button back-button is-rounded" id="back-button">
-    <span class="icon">
-      <i class="fas fa-arrow-left"></i>
-    </span>
+    <span class="icon"><i class="fas fa-arrow-left"></i></span>
     <span>BACK</span>
   </a>
 
-  <!-- Ad Container for Google Ads -->
-  <div class="ad-container" id="ad-top" style="text-align: center; margin: 10px 0;"></div>
+  <div class="ad-container" id="ad-top" style="text-align: center; margin: 10px 0; display: none;"></div>
 
-  <!-- Social Bar (Ad Unit 4) -->
   <div class="social-bar-container" id="social-bar">
     <script src="https://pl29119196.profitablecpmratenetwork.com/b8/29/4d/b8294df1d7e2c4bdf1c663d5c0ec4f4b.js"></script>
   </div>
 
-  <div class="video-container" id="video-container">
-    <div class="loading-overlay" id="loading-overlay">
-      <div class="loading-spinner"></div>
+  <div class="main-container">
+    <!-- Video Section -->
+    <div class="video-wrapper">
+      <div class="video-container" id="video-container">
+        <div class="loading-overlay" id="loading-overlay">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Series Sidebar (RIGHT SIDE) -->
+    <div class="series-sidebar" id="series-sidebar">
+      <div class="sidebar-header">
+        <h2 class="series-title" id="series-title">Episodes</h2>
+      </div>
+      <div class="season-tabs" id="season-tabs"></div>
+      <div class="episodes-list" id="episodes-list"></div>
     </div>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import {
+      getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy
+    } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
     // Configuration
     const RUMBLE_CHANNEL_ID = 'u4m9tqz';
 
-    // SmartLink replacement for Play/Download buttons
-    const SMARTLINK_URL = 'https://www.profitablecpmratenetwork.com/p4f0vdtub?key=48b231bfea0e962b42040882e5dd904d';
+    // Firebase configs
+    const firebaseConfig1 = {
+      apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
+      authDomain: "kinaflix.firebaseapp.com",
+      projectId: "kinaflix",
+      storageBucket: "kinaflix.appspot.com",
+      messagingSenderId: "318239806217",
+      appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
+    };
 
-    // Function to apply SmartLink to buttons
-    function applySmartLinkToButtons() {
-      // Wait for DOM to be ready
-      setTimeout(() => {
-        // Find all potential play/download buttons
-        const buttons = document.querySelectorAll('a, button, [role="button"]');
-        buttons.forEach(button => {
-          const text = button.textContent?.toLowerCase() || '';
-          const href = button.getAttribute('href') || '';
-          
-          // Check if it's a play or download button
-          if (text.includes('play') || text.includes('download') || 
-              text.includes('watch') || text.includes('stream') ||
-              href.includes('play') || href.includes('download')) {
-            
-            // Store original functionality if needed
-            if (!button.hasAttribute('data-smartlink-applied')) {
-              button.setAttribute('data-smartlink-applied', 'true');
-              
-              // Override click behavior
-              button.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Open SmartLink in new tab
-                window.open(SMARTLINK_URL, '_blank');
-                
-                // Optionally trigger original action after delay
-                setTimeout(() => {
-                  if (button.tagName === 'A' && button.href && !button.href.includes('profitablecpmratenetwork')) {
-                    window.location.href = button.href;
-                  }
-                }, 100);
-              }, true);
-            }
-          }
-        });
-      }, 2000);
+    const firebaseConfig2 = {
+      apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
+      authDomain: "cullo-movies-6813f.firebaseapp.com",
+      projectId: "cullo-movies-6813f",
+      messagingSenderId: "12310118231",
+      appId: "1:12310118231:web:34682f354027fd19758812"
+    };
+
+    // Initialize apps
+    const app1 = initializeApp(firebaseConfig1, "kinaflix");
+    const db1 = getFirestore(app1);
+    const app2 = initializeApp(firebaseConfig2, "cullo");
+    const db2 = getFirestore(app2);
+
+    // Toast function
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // Function to detect video type from URL
+    // Escape HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Video type detection
     function detectVideoType(url) {
       if (!url) return 'unknown';
       const urlLower = url.toLowerCase();
-      if (urlLower.includes('drive.google.com') || urlLower.includes('gdrive')) {
-        return 'googledrive';
-      }
-      if (urlLower.includes('rumble.com')) {
-        return 'rumble';
-      }
-      if (urlLower.includes('archive.org') || urlLower.includes('ia800') || urlLower.includes('ia600') || urlLower.match(/\.archive\.org/)) {
-        return 'archive';
-      }
-      if (urlLower.match(/\.(mp4|webm|mkv|mov|avi)$/i)) {
-        return 'direct';
-      }
+      if (urlLower.includes('drive.google.com') || urlLower.includes('gdrive')) return 'googledrive';
+      if (urlLower.includes('rumble.com')) return 'rumble';
+      if (urlLower.includes('archive.org') || urlLower.includes('ia800') || urlLower.includes('ia600')) return 'archive';
+      if (urlLower.match(/\.(mp4|webm|mkv|mov|avi)$/i)) return 'direct';
       return 'unknown';
     }
 
-    // Function to extract Google Drive file ID
     function extractGoogleDriveId(url) {
-      const patterns = [
-        /\/d\/([a-zA-Z0-9_-]+)/,
-        /id=([a-zA-Z0-9_-]+)/,
-        /file\/d\/([a-zA-Z0-9_-]+)/
-      ];
+      const patterns = [/\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /file\/d\/([a-zA-Z0-9_-]+)/];
       for (const pattern of patterns) {
         const match = url.match(pattern);
         if (match && match[1]) return match[1];
@@ -282,13 +529,8 @@
       return null;
     }
 
-    // Function to extract Rumble video ID
     function extractRumbleId(url) {
-      const patterns = [
-        /rumble\.com\/(?:embed\/)?([a-zA-Z0-9_-]+)/,
-        /v([a-zA-Z0-9]+)/,
-        /video\/([a-zA-Z0-9_-]+)/
-      ];
+      const patterns = [/rumble\.com\/(?:embed\/)?([a-zA-Z0-9_-]+)/, /v([a-zA-Z0-9]+)/, /video\/([a-zA-Z0-9_-]+)/];
       for (const pattern of patterns) {
         const match = url.match(pattern);
         if (match && match[1]) return match[1];
@@ -296,419 +538,458 @@
       return null;
     }
 
-    // Function to extract Internet Archive identifier from various URL formats
     function extractArchiveIdentifier(url) {
-      // For direct file URLs like: https://ia600100.us.archive.org/35/items/genius-c-junior-giti/Genius_C_Junior_Giti.mp4
       const directMatch = url.match(/\/items\/([^\/]+)\//);
       if (directMatch && directMatch[1]) return directMatch[1];
-
-      // For details page URLs: https://archive.org/details/identifier
       const detailsMatch = url.match(/\/details\/([^\/?#]+)/);
       if (detailsMatch && detailsMatch[1]) return detailsMatch[1];
-
-      // For download URLs
       const downloadMatch = url.match(/\/download\/([^\/?#]+)/);
       if (downloadMatch && downloadMatch[1]) return downloadMatch[1];
-
       return null;
     }
 
-    // Function to get direct video URL from Internet Archive (handles the URL directly)
     function getArchiveDirectUrl(url) {
-      // If it's already a direct MP4 link, use it as is
-      if (url.match(/\.(mp4|webm|mkv|mov|avi)$/i)) {
-        return url;
-      }
-
+      if (url.match(/\.(mp4|webm|mkv|mov|avi)$/i)) return url;
       const identifier = extractArchiveIdentifier(url);
-      if (identifier) {
-        return `https://archive.org/download/${identifier}/${identifier}.mp4`;
-      }
+      if (identifier) return `https://archive.org/download/${identifier}/${identifier}.mp4`;
       return null;
     }
 
-    // FIXED: Enhanced Internet Archive Player - handles both direct MP4 and details pages
-    function initArchivePlayer(videoUrl, loadingOverlay) {
-      return new Promise((resolve) => {
-        const container = document.getElementById('video-container');
-        const directUrl = getArchiveDirectUrl(videoUrl);
-
-        if (directUrl) {
-          console.log('✓ Movie loaded: Playing Internet Archive video');
-          container.innerHTML = `
-            <video 
-              controls 
-              autoplay 
-              style="width:100%;height:100%;background:#000;">
-              <source src="${directUrl}" type="video/mp4">
-              <p>Your browser doesn't support HTML5 video. <a href="${directUrl}" target="_blank">Download the video</a></p>
-            </video>
-          `;
-
-          const video = container.querySelector('video');
-          if (video && loadingOverlay) {
-            video.addEventListener('canplay', () => {
-              loadingOverlay.style.display = 'none';
-              resolve();
-            });
-            video.addEventListener('loadeddata', () => {
-              loadingOverlay.style.display = 'none';
-              resolve();
-            });
-            video.addEventListener('error', () => {
-              console.log('Error loading direct video, trying embed fallback');
-              // Fallback to embed player
-              const identifier = extractArchiveIdentifier(videoUrl);
-              if (identifier) {
-                container.innerHTML = `
-                  <iframe 
-                    src="https://archive.org/embed/${identifier}" 
-                    frameborder="0" 
-                    allowfullscreen
-                    style="width:100%;height:100%;">
-                  </iframe>
-                `;
-              }
-              loadingOverlay.style.display = 'none';
-              resolve();
-            });
-            // Timeout fallback
-            setTimeout(() => {
-              if (loadingOverlay.style.display !== 'none') {
-                loadingOverlay.style.display = 'none';
-                resolve();
-              }
-            }, 8000);
-          }
-        } else {
-          // Fallback to embed player
-          const identifier = extractArchiveIdentifier(videoUrl);
-          if (identifier) {
-            console.log('✓ Movie loaded: Using Archive.org embed player');
-            container.innerHTML = `
-              <iframe 
-                src="https://archive.org/embed/${identifier}" 
-                frameborder="0" 
-                allowfullscreen
-                style="width:100%;height:100%;">
-              </iframe>
-            `;
-          } else {
-            container.innerHTML = `
-              <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;color:#e50914;">
-                <i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:20px;"></i>
-                <p>Unable to play this Internet Archive video.</p>
-                <a href="${videoUrl}" target="_blank" style="color:#e50914;margin-top:10px;">Open directly</a>
-              </div>
-            `;
-          }
-          setTimeout(() => {
-            if (loadingOverlay) loadingOverlay.style.display = 'none';
-            resolve();
-          }, 3000);
-        }
-      });
-    }
-
-    // Function to initialize Rumble player
-    function initRumblePlayer(videoId, loadingOverlay) {
-      return new Promise((resolve) => {
-        const divId = `rumble_${videoId}`;
-        const container = document.getElementById('video-container');
-        container.innerHTML = `<div id="${divId}" style="width:100%;height:100%;"></div>`;
-
-        // Load Rumble embed script
-        !function (r, u, m, b, l, e) {
-          r._Rumble = b;
-          r[b] || (r[b] = function () {
-            (r[b]._ = r[b]._ || []).push(arguments);
-            if (r[b]._.length == 1) {
-              l = u.createElement(m),
-                e = u.getElementsByTagName(m)[0],
-                l.async = 1,
-                l.src = "https://rumble.com/embedJS/" + RUMBLE_CHANNEL_ID +
-                (arguments[1].video ? '.' + arguments[1].video : '') +
-                "/?url=" + encodeURIComponent(location.href) +
-                "&args=" + encodeURIComponent(JSON.stringify([].slice.apply(arguments))),
-                e.parentNode.insertBefore(l, e)
-            }
-          })
-        }(window, document, "script", "Rumble");
-
-        // Initialize Rumble player
-        Rumble("play", { video: videoId, div: divId });
-
-        setTimeout(() => {
-          if (loadingOverlay) {
-            loadingOverlay.style.display = 'none';
-          }
-          resolve();
-        }, 5000);
-      });
-    }
-
-    // Function to initialize Google Drive player
-    function initGoogleDrivePlayer(fileId, loadingOverlay) {
-      return new Promise((resolve) => {
-        const container = document.getElementById('video-container');
-        container.innerHTML = `
-          <iframe 
-            src="https://drive.google.com/file/d/${fileId}/preview" 
-            frameborder="0" 
-            allow="autoplay; fullscreen; encrypted-media" 
-            allowfullscreen>
-          </iframe>
-        `;
-
-        const iframe = container.querySelector('iframe');
-        if (iframe && loadingOverlay) {
-          iframe.onload = () => {
-            loadingOverlay.style.display = 'none';
-            resolve();
-          };
-          setTimeout(() => {
-            if (loadingOverlay.style.display !== 'none') {
-              loadingOverlay.style.display = 'none';
-              resolve();
-            }
-          }, 8000);
-        } else {
-          setTimeout(() => {
-            loadingOverlay.style.display = 'none';
-            resolve();
-          }, 3000);
-        }
-      });
-    }
-
-    // Function to initialize direct video file
-    function initDirectVideoPlayer(videoUrl, loadingOverlay) {
-      return new Promise((resolve) => {
-        const container = document.getElementById('video-container');
-        console.log('✓ Movie loaded: Playing direct video');
-        container.innerHTML = `
-          <video 
-            controls 
-            autoplay 
-            style="width:100%;height:100%;background:#000;">
-            <source src="${videoUrl}" type="video/mp4">
-            <p>Your browser doesn't support HTML5 video.</p>
-          </video>
-        `;
-
+    // Player initializers
+    async function initArchivePlayer(videoUrl, loadingOverlay) {
+      const container = document.getElementById('video-container');
+      const directUrl = getArchiveDirectUrl(videoUrl);
+      if (directUrl) {
+        container.innerHTML = `<video controls autoplay style="width:100%;height:100%;background:#000;"><source src="${directUrl}" type="video/mp4"><p>Your browser doesn't support HTML5 video.</p></video>`;
         const video = container.querySelector('video');
         if (video && loadingOverlay) {
-          video.addEventListener('canplay', () => {
-            loadingOverlay.style.display = 'none';
-            resolve();
-          });
-          video.addEventListener('loadeddata', () => {
-            loadingOverlay.style.display = 'none';
-            resolve();
-          });
-          video.addEventListener('error', () => {
-            loadingOverlay.style.display = 'none';
-            resolve();
-          });
-          setTimeout(() => {
-            if (loadingOverlay.style.display !== 'none') {
-              loadingOverlay.style.display = 'none';
-              resolve();
-            }
-          }, 8000);
-        } else {
-          setTimeout(() => {
-            loadingOverlay.style.display = 'none';
-            resolve();
-          }, 3000);
+          video.addEventListener('canplay', () => loadingOverlay.style.display = 'none');
+          video.addEventListener('loadeddata', () => loadingOverlay.style.display = 'none');
+          video.addEventListener('error', () => loadingOverlay.style.display = 'none');
+          setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 8000);
         }
+      } else {
+        const identifier = extractArchiveIdentifier(videoUrl);
+        if (identifier) {
+          container.innerHTML = `<iframe src="https://archive.org/embed/${identifier}" frameborder="0" allowfullscreen style="width:100%;height:100%;"></iframe>`;
+        } else {
+          container.innerHTML = `<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;color:#e50914;"><i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:20px;"></i><p>Unable to play this video.</p></div>`;
+        }
+        setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 3000);
+      }
+    }
+
+    async function initRumblePlayer(videoId, loadingOverlay) {
+      const divId = `rumble_${videoId}`;
+      const container = document.getElementById('video-container');
+      container.innerHTML = `<div id="${divId}" style="width:100%;height:100%;"></div>`;
+
+      // Load Rumble embed script
+      !function (r, u, m, b, l, e) {
+        r._Rumble = b;
+        r[b] || (r[b] = function () {
+          (r[b]._ = r[b]._ || []).push(arguments);
+          if (r[b]._.length == 1) {
+            l = u.createElement(m),
+              e = u.getElementsByTagName(m)[0],
+              l.async = 1,
+              l.src = "https://rumble.com/embedJS/" + RUMBLE_CHANNEL_ID +
+              (arguments[1].video ? '.' + arguments[1].video : '') +
+              "/?url=" + encodeURIComponent(location.href) +
+              "&args=" + encodeURIComponent(JSON.stringify([].slice.apply(arguments))),
+              e.parentNode.insertBefore(l, e)
+          }
+        })
+      }(window, document, "script", "Rumble");
+
+      Rumble("play", { video: videoId, div: divId });
+      setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 5000);
+    }
+
+    async function initGoogleDrivePlayer(fileId, loadingOverlay) {
+      const container = document.getElementById('video-container');
+      container.innerHTML = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>`;
+      setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 5000);
+    }
+
+    async function initDirectVideoPlayer(videoUrl, loadingOverlay) {
+      const container = document.getElementById('video-container');
+      container.innerHTML = `<video controls autoplay style="width:100%;height:100%;background:#000;"><source src="${videoUrl}" type="video/mp4"></video>`;
+      const video = container.querySelector('video');
+      if (video && loadingOverlay) {
+        video.addEventListener('canplay', () => loadingOverlay.style.display = 'none');
+        video.addEventListener('loadeddata', () => loadingOverlay.style.display = 'none');
+        video.addEventListener('error', () => loadingOverlay.style.display = 'none');
+        setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 8000);
+      }
+    }
+
+    // Series data storage
+    let seriesEpisodes = [];
+    let seasonsList = [];
+    let currentSeason = 1;
+    let currentMovieId = null;
+    let currentSource = null;
+    let currentEpisodePlaying = null;
+    let currentSeriesTitle = '';
+
+    // Load series data from BOTH databases
+    async function loadSeriesData(movieId, source) {
+      try {
+        seriesEpisodes = [];
+        seasonsList = [];
+
+        // FIRST: Check in Kinaflix (db1) - handles seriesId structure
+        const kinaflixDoc = await getDoc(doc(db1, 'movies', movieId));
+        const kinaflixData = kinaflixDoc.data();
+
+        if (kinaflixData && kinaflixData.seriesId) {
+          console.log('✓ Series found in Kinaflix with seriesId:', kinaflixData.seriesId);
+
+          // Get all episodes in this series
+          const seriesQuery = query(collection(db1, 'movies'), where('seriesId', '==', kinaflixData.seriesId), orderBy('releaseYear', 'asc'));
+          const seriesSnap = await getDocs(seriesQuery);
+
+          let epNum = 1;
+          seriesSnap.docs.forEach(docSnap => {
+            const epData = docSnap.data();
+            const seasonYear = epData.releaseYear || 1;
+            if (!seasonsList.includes(seasonYear)) seasonsList.push(seasonYear);
+            seriesEpisodes.push({
+              id: docSnap.id,
+              season: seasonYear,
+              number: epNum,
+              title: epData.title || `Episode ${epNum}`,
+              videoUrl: epData.googleDriveLink || epData.videoUrl || '',
+              source: 'kinaflix'
+            });
+            epNum++;
+          });
+
+          // Get series name
+          try {
+            const seriesDoc = await getDoc(doc(db1, 'series', kinaflixData.seriesId));
+            if (seriesDoc.exists()) currentSeriesTitle = seriesDoc.data().name;
+          } catch (e) { console.log('Could not get series name'); }
+
+          if (currentSeriesTitle === '') currentSeriesTitle = kinaflixData.title || 'Series';
+
+          seasonsList.sort((a, b) => a - b);
+          if (seasonsList.length > 0) currentSeason = seasonsList[0];
+          return true;
+        }
+
+        // SECOND: Check in Cullo (db2) - handles seasons structure
+        if (source === 'cullo') {
+          const culloDoc = await getDoc(doc(db2, 'movies', movieId));
+          const culloData = culloDoc.data();
+
+          if (culloData && culloData.seasons && Array.isArray(culloData.seasons) && culloData.seasons.length > 0) {
+            console.log('✓ Series found in Cullo with seasons structure');
+
+            culloData.seasons.forEach((season, idx) => {
+              const seasonNum = season.number || idx + 1;
+              if (!seasonsList.includes(seasonNum)) seasonsList.push(seasonNum);
+
+              if (season.episodes && Array.isArray(season.episodes)) {
+                season.episodes.forEach(ep => {
+                  seriesEpisodes.push({
+                    id: ep.id || `${movieId}_s${seasonNum}_e${ep.number}`,
+                    season: seasonNum,
+                    number: ep.number || '?',
+                    title: ep.title || `Episode ${ep.number || '?'}`,
+                    videoUrl: ep.videoUrl || '',
+                    source: 'cullo'
+                  });
+                });
+              }
+            });
+
+            currentSeriesTitle = culloData.title || 'Series';
+            seasonsList.sort((a, b) => a - b);
+            if (seasonsList.length > 0) currentSeason = seasonsList[0];
+            return true;
+          }
+
+          // Also check if it's a series in the series collection
+          const culloSeriesDoc = await getDoc(doc(db2, 'series', movieId));
+          const culloSeriesData = culloSeriesDoc.data();
+
+          if (culloSeriesData && culloSeriesData.seasons && Array.isArray(culloSeriesData.seasons)) {
+            console.log('✓ Series found in Cullo series collection');
+
+            culloSeriesData.seasons.forEach((season, idx) => {
+              const seasonNum = season.number || idx + 1;
+              if (!seasonsList.includes(seasonNum)) seasonsList.push(seasonNum);
+
+              if (season.episodes && Array.isArray(season.episodes)) {
+                season.episodes.forEach(ep => {
+                  seriesEpisodes.push({
+                    id: ep.id || `${movieId}_s${seasonNum}_e${ep.number}`,
+                    season: seasonNum,
+                    number: ep.number || '?',
+                    title: ep.title || `Episode ${ep.number || '?'}`,
+                    videoUrl: ep.videoUrl || '',
+                    source: 'cullo'
+                  });
+                });
+              }
+            });
+
+            currentSeriesTitle = culloSeriesData.title || 'Series';
+            seasonsList.sort((a, b) => a - b);
+            if (seasonsList.length > 0) currentSeason = seasonsList[0];
+            return true;
+          }
+        }
+
+        // THIRD: If source is not specified, also check Cullo
+        if (source !== 'cullo') {
+          const culloDoc = await getDoc(doc(db2, 'movies', movieId));
+          const culloData = culloDoc.data();
+
+          if (culloData && culloData.seasons && Array.isArray(culloData.seasons) && culloData.seasons.length > 0) {
+            console.log('✓ Series found in Cullo (auto-detected)');
+
+            culloData.seasons.forEach((season, idx) => {
+              const seasonNum = season.number || idx + 1;
+              if (!seasonsList.includes(seasonNum)) seasonsList.push(seasonNum);
+
+              if (season.episodes && Array.isArray(season.episodes)) {
+                season.episodes.forEach(ep => {
+                  seriesEpisodes.push({
+                    id: ep.id || `${movieId}_s${seasonNum}_e${ep.number}`,
+                    season: seasonNum,
+                    number: ep.number || '?',
+                    title: ep.title || `Episode ${ep.number || '?'}`,
+                    videoUrl: ep.videoUrl || '',
+                    source: 'cullo'
+                  });
+                });
+              }
+            });
+
+            currentSeriesTitle = culloData.title || 'Series';
+            seasonsList.sort((a, b) => a - b);
+            if (seasonsList.length > 0) currentSeason = seasonsList[0];
+            return true;
+          }
+        }
+
+        console.log('No series data found');
+        return false;
+
+      } catch (error) {
+        console.error('Error loading series:', error);
+        return false;
+      }
+    }
+
+    // Render episodes in sidebar
+    function renderEpisodes() {
+      const seasonEpisodes = seriesEpisodes.filter(ep => ep.season === currentSeason);
+      const seasonTabsDiv = document.getElementById('season-tabs');
+      const episodesListDiv = document.getElementById('episodes-list');
+
+      document.getElementById('series-title').textContent = currentSeriesTitle || 'Episodes';
+
+      if (seasonsList.length > 0) {
+        seasonTabsDiv.innerHTML = seasonsList.map(s =>
+          `<button class="season-tab ${s === currentSeason ? 'active' : ''}" data-season="${s}">Season ${s}</button>`
+        ).join('');
+      } else {
+        seasonTabsDiv.innerHTML = '';
+      }
+
+      if (seasonEpisodes.length === 0) {
+        episodesListDiv.innerHTML = '<div style="text-align:center;padding:2rem;color:#666;">No episodes available.</div>';
+      } else {
+        episodesListDiv.innerHTML = seasonEpisodes.map(ep => {
+          const isActive = currentEpisodePlaying && currentEpisodePlaying.id === ep.id;
+          return `<div class="episode-item ${isActive ? 'active' : ''}" data-episode='${JSON.stringify(ep).replace(/'/g, "&#39;")}'>
+            <div class="episode-number">${isActive ? '<div class="playing-indicator"><span></span><span></span><span></span></div>' : 'Ep ' + ep.number}</div>
+            <div class="episode-info">
+              <div class="episode-title">${escapeHtml(ep.title)}</div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // Add season tab listeners
+      document.querySelectorAll('.season-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          currentSeason = parseInt(tab.dataset.season);
+          renderEpisodes();
+        });
+      });
+
+      // Add episode item listeners
+      document.querySelectorAll('.episode-item').forEach(item => {
+        item.addEventListener('click', async () => {
+          const ep = JSON.parse(item.dataset.episode);
+          if (!ep.videoUrl || ep.videoUrl.trim() === '') {
+            showToast('Coming soon!');
+            return;
+          }
+          currentEpisodePlaying = ep;
+          renderEpisodes();
+          showToast(`Loading: ${ep.title}`);
+          await loadAndPlayVideo(ep.videoUrl);
+
+          // Update URL without reload
+          const newUrl = `${window.location.pathname}?movieId=${ep.id}&source=${ep.source}`;
+          window.history.pushState({}, '', newUrl);
+        });
       });
     }
 
-    // Core player functionality
+    // Load and play video
+    async function loadAndPlayVideo(streamingLink) {
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
+      const decodedLink = decodeURIComponent(streamingLink);
+      const videoType = detectVideoType(decodedLink);
+
+      if (videoType === 'googledrive') {
+        const fileId = extractGoogleDriveId(decodedLink);
+        if (fileId) await initGoogleDrivePlayer(fileId, loadingOverlay);
+      } else if (videoType === 'rumble') {
+        const videoId = extractRumbleId(decodedLink);
+        if (videoId) await initRumblePlayer(videoId, loadingOverlay);
+      } else if (videoType === 'archive') {
+        await initArchivePlayer(decodedLink, loadingOverlay);
+      } else if (videoType === 'direct') {
+        await initDirectVideoPlayer(decodedLink, loadingOverlay);
+      } else {
+        const container = document.getElementById('video-container');
+        container.innerHTML = `<iframe src="${decodedLink}" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>`;
+        setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 5000);
+      }
+    }
+
+    // Load movie data from Firestore
+    async function loadMovieData(movieId, source) {
+      try {
+        if (source === 'cullo') {
+          const docSnap = await getDoc(doc(db2, 'movies', movieId));
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            return {
+              title: data.title,
+              googleDriveLink: data.videoUrl || data.googleDriveLink,
+              streamingLink: data.videoUrl || data.googleDriveLink,
+              videoUrl: data.videoUrl
+            };
+          }
+        } else {
+          const docSnap = await getDoc(doc(db1, 'movies', movieId));
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            return {
+              title: data.title,
+              googleDriveLink: data.googleDriveLink || data.videoUrl,
+              streamingLink: data.googleDriveLink || data.videoUrl,
+              videoUrl: data.videoUrl,
+              seriesId: data.seriesId
+            };
+          }
+        }
+        return null;
+      } catch (error) {
+        console.error('Error loading movie:', error);
+        return null;
+      }
+    }
+
+    // Main player initialization
     const initPlayer = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('movieId');
         let streamingLink = urlParams.get('streamingLink');
+        currentSource = urlParams.get('source') || 'kinaflix';
+        currentMovieId = movieId;
 
         if (!movieId && !streamingLink) {
           throw new Error("Invalid movie ID or streaming link");
         }
 
-        // Update back button href
+        // Set up back button with correct query parameters
         const backButton = document.getElementById('back-button');
         if (backButton && movieId) {
-          backButton.href = `see.html?id=${movieId}`;
+          backButton.href = `see.html?id=${movieId}&source=${currentSource}`;
         } else if (backButton) {
           backButton.href = 'index.html';
         }
 
-        // Show loading immediately
         const loadingOverlay = document.getElementById('loading-overlay');
-        if (loadingOverlay) {
-          loadingOverlay.style.display = 'flex';
-        }
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
 
-        // If streamingLink is not provided directly, load from Firestore
-        if (!streamingLink && movieId) {
-          const movieData = await loadMovieData(movieId);
-          streamingLink = movieData.googleDriveLink || movieData.streamingLink || movieData.videoUrl;
-        }
+        const seriesSidebar = document.getElementById('series-sidebar');
 
-        if (!streamingLink) {
-          throw new Error("No streaming link available for this movie");
-        }
+        // Check if this is a series (check both databases)
+        const isSeries = await loadSeriesData(movieId, currentSource);
 
-        // Decode the streaming link
-        const decodedLink = decodeURIComponent(streamingLink);
-        const videoType = detectVideoType(decodedLink);
+        if (isSeries && seriesEpisodes.length > 0) {
+          console.log('✓ Series detected, showing sidebar with', seriesEpisodes.length, 'episodes');
+          // Show sidebar for series
+          seriesSidebar.classList.add('visible');
+          renderEpisodes();
 
-        // Initialize video player based on link type
-        if (videoType === 'googledrive') {
-          const fileId = extractGoogleDriveId(decodedLink);
-          if (!fileId) throw new Error("Invalid Google Drive link format");
-          await initGoogleDrivePlayer(fileId, loadingOverlay);
-        }
-        else if (videoType === 'rumble') {
-          const videoId = extractRumbleId(decodedLink);
-          if (!videoId) throw new Error("Invalid Rumble link format");
-          await initRumblePlayer(videoId, loadingOverlay);
-        }
-        else if (videoType === 'archive') {
-          await initArchivePlayer(decodedLink, loadingOverlay);
-        }
-        else if (videoType === 'direct') {
-          await initDirectVideoPlayer(decodedLink, loadingOverlay);
-        }
-        else {
-          // Try to handle as generic iframe
-          const container = document.getElementById('video-container');
-          container.innerHTML = `
-            <iframe 
-              src="${decodedLink}" 
-              frameborder="0" 
-              allow="autoplay; fullscreen; encrypted-media" 
-              allowfullscreen>
-            </iframe>
-          `;
-          setTimeout(() => {
-            if (loadingOverlay) loadingOverlay.style.display = 'none';
-          }, 5000);
-        }
-
-        // Set page title if movieId exists
-        if (movieId) {
-          try {
-            const movieData = await loadMovieData(movieId);
-            document.title = `${movieData.title} | KINAFLIX`;
-          } catch (e) {
-            document.title = `Watching | KINAFLIX`;
+          // Find current episode playing (the one matching the movieId)
+          const currentEp = seriesEpisodes.find(ep => ep.id === movieId);
+          if (currentEp) {
+            currentEpisodePlaying = currentEp;
+            renderEpisodes();
+            if (currentEp.videoUrl) {
+              await loadAndPlayVideo(currentEp.videoUrl);
+            } else if (streamingLink) {
+              await loadAndPlayVideo(streamingLink);
+            }
+          } else if (streamingLink) {
+            await loadAndPlayVideo(streamingLink);
+          } else {
+            // Play first episode
+            const firstSeason = seasonsList[0];
+            const firstEp = seriesEpisodes.find(ep => ep.season === firstSeason);
+            if (firstEp && firstEp.videoUrl) {
+              currentEpisodePlaying = firstEp;
+              renderEpisodes();
+              await loadAndPlayVideo(firstEp.videoUrl);
+            } else {
+              throw new Error("No video available for this series");
+            }
           }
         } else {
-          document.title = `Watching | KINAFLIX`;
+          console.log('✓ Regular movie detected, hiding sidebar');
+          // Hide sidebar for regular movies
+          seriesSidebar.classList.remove('visible');
+
+          // Regular movie
+          if (!streamingLink && movieId) {
+            const movieData = await loadMovieData(movieId, currentSource);
+            streamingLink = movieData?.googleDriveLink || movieData?.streamingLink || movieData?.videoUrl;
+          }
+
+          if (!streamingLink) throw new Error("No streaming link available");
+          await loadAndPlayVideo(streamingLink);
         }
 
-        // Apply SmartLink to buttons after player loads
-        applySmartLinkToButtons();
+        // Set page title
+        if (movieId) {
+          try {
+            const movieData = await loadMovieData(movieId, currentSource);
+            if (movieData && movieData.title) document.title = `${movieData.title} | KINAFLIX`;
+          } catch (e) { }
+        }
 
       } catch (error) {
-        showError(error.message);
-      }
-    };
-
-    // Load movie data from Firestore (both databases)
-    const loadMovieData = async (movieId) => {
-      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js');
-      const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js');
-
-      // Primary Firebase config (Kinaflix)
-      const firebaseConfig1 = {
-        apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
-        authDomain: "kinaflix.firebaseapp.com",
-        projectId: "kinaflix",
-        storageBucket: "kinaflix.appspot.com",
-        messagingSenderId: "318239806217",
-        appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
-      };
-
-      // Secondary Firebase config (CULLO Movies)
-      const firebaseConfig2 = {
-        apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
-        authDomain: "cullo-movies-6813f.firebaseapp.com",
-        projectId: "cullo-movies-6813f",
-        messagingSenderId: "12310118231",
-        appId: "1:12310118231:web:34682f354027fd19758812"
-      };
-
-      // Try to load from Kinaflix first
-      const app1 = initializeApp(firebaseConfig1, "kinaflix");
-      const db1 = getFirestore(app1);
-      let docSnap = await getDoc(doc(db1, 'movies', movieId));
-
-      if (docSnap.exists()) {
-        return docSnap.data();
-      }
-
-      // If not found, try CULLO Movies
-      try {
-        const app2 = initializeApp(firebaseConfig2, "cullo");
-        const db2 = getFirestore(app2);
-
-        // Try movies collection first
-        docSnap = await getDoc(doc(db2, 'movies', movieId));
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          return {
-            title: data.title,
-            googleDriveLink: data.videoUrl || data.googleDriveLink,
-            streamingLink: data.videoUrl || data.streamingLink,
-            videoUrl: data.videoUrl
-          };
-        }
-
-        // Try series collection
-        docSnap = await getDoc(doc(db2, 'series', movieId));
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const firstSeason = data.seasons?.[0];
-          const firstEpisode = firstSeason?.episodes?.[0];
-          return {
-            title: data.title,
-            googleDriveLink: firstEpisode?.videoUrl || data.videoUrl,
-            streamingLink: firstEpisode?.videoUrl || data.videoUrl,
-            videoUrl: firstEpisode?.videoUrl || data.videoUrl
-          };
-        }
-      } catch (e) {
-        console.log('CULLO database not accessible:', e);
-      }
-
-      throw new Error('Movie not found in any database');
-    };
-
-    const showError = (message) => {
-      const container = document.getElementById('video-container');
-      container.innerHTML = `
-        <div style="position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#000;color:#e50914;text-align:center;padding:2rem;z-index:100;">
-          <h1 style="font-size:1.5rem;margin-bottom:1rem;">⚠️ Error</h1>
-          <p style="margin-bottom:1.5rem;">${message}</p>
-          <a href="index.html" style="background:#e50914;color:white;padding:0.5rem 1rem;border-radius:4px;text-decoration:none;">
-            <span style="margin-right:0.5rem;"><i class="fas fa-arrow-left"></i></span>
-            <span>Go Back</span>
-          </a>
-        </div>
-      `;
-      const loadingOverlay = document.getElementById('loading-overlay');
-      if (loadingOverlay) {
-        loadingOverlay.style.display = 'none';
-      }
-      document.title = `Error | KINAFLIX`;
-
-      if (!document.querySelector('.fa-arrow-left')) {
-        const faScript = document.createElement('script');
-        faScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js';
-        document.head.appendChild(faScript);
+        console.error('Error:', error);
+        const container = document.getElementById('video-container');
+        container.innerHTML = `<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#000;color:#e50914;text-align:center;padding:2rem;"><h1>⚠️ Error</h1><p>${error.message}</p><a href="index.html" style="background:#e50914;color:white;padding:0.5rem 1rem;border-radius:4px;text-decoration:none;margin-top:1rem;">Go Back</a></div>`;
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
       }
     };
 
@@ -718,9 +999,8 @@
       document.addEventListener('DOMContentLoaded', initPlayer);
     }
   </script>
-
-  <!-- Subscription Checker Script -->
-  <script src="js/subscription-checker.js"></script>
 </body>
 
 </html>
+
+
