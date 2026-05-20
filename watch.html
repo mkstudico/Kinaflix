@@ -18,9 +18,6 @@
   <meta name="twitter:description" content="Vayo turebane filme ngewe nyigeze kure." />
   <meta name="twitter:image" content="https://i.ibb.co/RpdRMfDm/Capture.png" />
 
-  <!-- HLS.js for adaptive streaming -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
   <style>
     :root {
       --primary: #e50914;
@@ -28,9 +25,6 @@
       --light: #f5f5f5;
       --gray-text: #888;
       --dark-gray: #1a1a1a;
-      --good: #22c55e;
-      --fair: #eab308;
-      --poor: #ef4444;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -62,79 +56,13 @@
       width: 100%; height: 100%; border: none;
     }
 
-    /* ====== ADAPTIVE STREAMING UI ====== */
-    .stream-info-overlay {
-      position: absolute; top: 10px; right: 10px; z-index: 50;
-      display: flex; gap: 8px; align-items: center;
-    }
-
-    .quality-badge {
-      background: rgba(0,0,0,0.8); color: white;
-      padding: 4px 10px; border-radius: 50px;
-      font-size: 0.7rem; font-weight: 700;
-      letter-spacing: 0.5px;
-      cursor: pointer; transition: all 0.3s;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .quality-badge:hover { background: var(--primary); }
-
-    .network-indicator {
-      background: rgba(0,0,0,0.8); color: white;
-      padding: 4px 10px; border-radius: 50px;
-      font-size: 0.65rem; font-weight: 600;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .network-indicator .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-    }
-    .network-indicator .dot.good { background: var(--good); }
-    .network-indicator .dot.fair { background: var(--fair); }
-    .network-indicator .dot.poor { background: var(--poor); }
-
-    .buffer-bar {
-      position: absolute; bottom: 0; left: 0; height: 3px;
-      background: var(--primary); transition: width 0.5s ease;
-      z-index: 49; opacity: 0.8;
-    }
-
-    .reduce-quality-btn {
-      position: absolute; bottom: 60px; left: 50%;
-      transform: translateX(-50%); z-index: 55;
-      background: var(--primary); color: white;
-      border: none; padding: 8px 18px; border-radius: 50px;
-      font-size: 0.8rem; font-weight: 600; cursor: pointer;
-      display: none; animation: fadeInUp 0.3s ease;
-    }
-    .reduce-quality-btn.show { display: block; }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-
-    /* Quality Menu */
-    .quality-menu {
-      position: absolute; top: 45px; right: 10px; z-index: 60;
-      background: rgba(0,0,0,0.95); border: 1px solid #333;
-      border-radius: 8px; padding: 6px 0; min-width: 120px;
-      display: none; overflow: hidden;
-    }
-    .quality-menu.open { display: block; }
-    .quality-option {
-      padding: 8px 16px; font-size: 0.8rem; cursor: pointer;
-      color: #ccc; transition: all 0.2s;
-    }
-    .quality-option:hover { background: rgba(255,255,255,0.1); color: white; }
-    .quality-option.active { color: var(--primary); font-weight: 700; }
-    .quality-option.auto { border-bottom: 1px solid #333; }
-
-    /* Series Sidebar */
     .series-sidebar {
       width: 320px; background: var(--dark-gray);
       display: none; flex-direction: column;
       border-left: 1px solid #333;
       height: 100vh; overflow: hidden;
     }
+
     .series-sidebar.visible { display: flex; }
 
     .sidebar-header {
@@ -160,6 +88,7 @@
       cursor: pointer; font-size: 0.8rem;
       transition: all 0.3s; white-space: nowrap;
     }
+
     .season-tab.active { background: var(--primary); }
 
     .episodes-list {
@@ -173,15 +102,40 @@
       cursor: pointer; transition: all 0.3s;
       display: flex; align-items: center; gap: 0.8rem;
     }
-    .episode-item:hover { background: var(--primary); transform: translateX(-3px); }
-    .episode-item.active { background: var(--primary); border-left: 3px solid #ff6b6b; }
-    .episode-number { font-size: 0.9rem; font-weight: bold; background: rgba(0,0,0,0.5); padding: 0.2rem 0.5rem; border-radius: 4px; min-width: 50px; text-align: center; }
+
+    .episode-item:hover {
+      background: var(--primary); transform: translateX(-3px);
+    }
+
+    .episode-item.active {
+      background: var(--primary); border-left: 3px solid #ff6b6b;
+    }
+
+    .episode-number {
+      font-size: 0.9rem; font-weight: bold;
+      background: rgba(0,0,0,0.5); padding: 0.2rem 0.5rem;
+      border-radius: 4px; min-width: 50px; text-align: center;
+    }
+
     .episode-info { flex: 1; }
-    .episode-title { font-size: 0.8rem; color: #ccc; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .episode-title {
+      font-size: 0.8rem; color: #ccc;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+
     .episode-item:hover .episode-title { color: #fff; }
 
-    .playing-indicator { display: flex; gap: 2px; align-items: center; justify-content: center; }
-    .playing-indicator span { width: 3px; height: 8px; background: white; border-radius: 1px; animation: wave 1s infinite ease-in-out; }
+    .playing-indicator {
+      display: flex; gap: 2px; align-items: center; justify-content: center;
+    }
+
+    .playing-indicator span {
+      width: 3px; height: 8px; background: white;
+      border-radius: 1px; animation: wave 1s infinite ease-in-out;
+    }
+
     .playing-indicator span:nth-child(2) { animation-delay: 0.15s; }
     .playing-indicator span:nth-child(3) { animation-delay: 0.3s; }
 
@@ -194,7 +148,6 @@
       position: absolute; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.8); display: flex;
       justify-content: center; align-items: center; z-index: 10;
-      flex-direction: column; gap: 15px;
     }
 
     .loading-spinner {
@@ -202,12 +155,6 @@
       border-top: 4px solid var(--primary);
       border-radius: 50%; width: 40px; height: 40px;
       animation: spin 1s linear infinite;
-    }
-    .loading-text {
-      font-size: 0.8rem; color: #aaa;
-    }
-    .loading-speed {
-      font-size: 0.7rem; color: var(--gray-text);
     }
 
     @keyframes spin {
@@ -221,7 +168,10 @@
       border: none; text-decoration: none;
       transition: all 0.3s ease;
     }
-    .back-button:hover { background-color: #f40612; color: white; }
+
+    .back-button:hover {
+      background-color: #f40612; color: white;
+    }
 
     .toast {
       position: fixed; bottom: 20px; left: 50%;
@@ -229,9 +179,9 @@
       background: rgba(0,0,0,0.9); color: white;
       padding: 0.8rem 1.5rem; border-radius: 8px;
       z-index: 1000; transition: transform 0.3s ease;
-      pointer-events: none; text-align: center;
-      max-width: 90%;
+      pointer-events: none;
     }
+
     .toast.show { transform: translateX(-50%) translateY(0); }
 
     .episodes-list::-webkit-scrollbar { width: 6px; }
@@ -258,38 +208,14 @@
     <span>BACK</span>
   </a>
 
+  <!-- REMOVED: Ad container & social bar -->
+
   <div class="main-container">
     <div class="video-wrapper">
       <div class="video-container" id="video-container">
         <div class="loading-overlay" id="loading-overlay">
           <div class="loading-spinner"></div>
-          <div class="loading-text" id="loading-text">Loading video...</div>
-          <div class="loading-speed" id="loading-speed"></div>
         </div>
-
-        <!-- Adaptive Streaming UI -->
-        <div class="stream-info-overlay">
-          <div class="network-indicator" id="network-indicator">
-            <span class="dot fair"></span>
-            <span id="network-label">Checking...</span>
-          </div>
-          <div class="quality-badge" id="quality-badge" title="Click to change quality">
-            <i class="fas fa-cog"></i>
-            <span id="quality-label">Auto</span>
-          </div>
-        </div>
-        <div class="quality-menu" id="quality-menu">
-          <div class="quality-option auto active" data-quality="auto">Auto (Best)</div>
-          <div class="quality-option" data-quality="1080p">1080p</div>
-          <div class="quality-option" data-quality="720p">720p</div>
-          <div class="quality-option" data-quality="480p">480p</div>
-          <div class="quality-option" data-quality="360p">360p</div>
-          <div class="quality-option" data-quality="240p">240p</div>
-        </div>
-        <div class="buffer-bar" id="buffer-bar" style="width:0%;"></div>
-        <button class="reduce-quality-btn" id="reduce-quality-btn">
-          <i class="fas fa-arrow-down"></i> Reduce Quality
-        </button>
       </div>
     </div>
 
@@ -310,278 +236,9 @@
       getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy
     } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
-    // ==========================================
-    // MODULE 1: NETWORK MONITOR
-    // ==========================================
-    class NetworkMonitor {
-      constructor() {
-        this.bandwidth = null;
-        this.connectionType = 'unknown';
-        this.listeners = [];
-        this.testUrl = 'https://www.google.com/images/phd/px.gif';
-        this.isMonitoring = false;
-      }
-
-      async measureBandwidth() {
-        const startTime = performance.now();
-        try {
-          const response = await fetch(this.testUrl + '?t=' + Date.now(), {
-            cache: 'no-store',
-            mode: 'no-cors'
-          });
-          const endTime = performance.now();
-          const duration = (endTime - startTime) / 1000;
-          const sizeInBits = 100 * 8; // ~100 bytes test file
-          this.bandwidth = (sizeInBits / duration) / 1000000; // Mbps
-        } catch (e) {
-          this.bandwidth = 0.5; // Assume slow on error
-        }
-        this.detectConnectionType();
-        this.notifyListeners();
-        return this.bandwidth;
-      }
-
-      detectConnectionType() {
-        if (navigator.connection) {
-          const conn = navigator.connection;
-          if (conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g') {
-            this.connectionType = 'slow';
-          } else if (conn.effectiveType === '3g') {
-            this.connectionType = 'medium';
-          } else if (conn.downlink > 5) {
-            this.connectionType = 'fast';
-          } else {
-            this.connectionType = 'medium';
-          }
-        } else if (this.bandwidth < 1) {
-          this.connectionType = 'slow';
-        } else if (this.bandwidth < 5) {
-          this.connectionType = 'medium';
-        } else {
-          this.connectionType = 'fast';
-        }
-      }
-
-      getConnectionType() {
-        return this.connectionType;
-      }
-
-      onSpeedChange(callback) {
-        this.listeners.push(callback);
-      }
-
-      notifyListeners() {
-        this.listeners.forEach(cb => cb({
-          bandwidth: this.bandwidth,
-          connectionType: this.connectionType
-        }));
-      }
-
-      startMonitoring(intervalMs = 30000) {
-        if (this.isMonitoring) return;
-        this.isMonitoring = true;
-        this.measureBandwidth();
-        this.interval = setInterval(() => this.measureBandwidth(), intervalMs);
-      }
-
-      stopMonitoring() {
-        this.isMonitoring = false;
-        if (this.interval) clearInterval(this.interval);
-      }
-    }
-
-    // ==========================================
-    // MODULE 2: ADAPTIVE BUFFER MANAGER
-    // ==========================================
-    class AdaptiveBufferManager {
-      constructor(videoElement) {
-        this.video = videoElement;
-        this.stallCount = 0;
-        this.lastStallTime = 0;
-        this.isStalled = false;
-      }
-
-      getBufferHealth() {
-        if (!this.video) return 0;
-        const buffered = this.video.buffered;
-        const currentTime = this.video.currentTime;
-        if (buffered.length === 0) return 0;
-
-        let bufferedEnd = 0;
-        for (let i = 0; i < buffered.length; i++) {
-          if (currentTime >= buffered.start(i) && currentTime <= buffered.end(i)) {
-            bufferedEnd = buffered.end(i);
-            break;
-          }
-        }
-        const bufferSeconds = Math.max(0, bufferedEnd - currentTime);
-        return bufferSeconds;
-      }
-
-      getBufferPercentage(optimalBuffer = 30) {
-        const health = this.getBufferHealth();
-        return Math.min(100, Math.round((health / optimalBuffer) * 100));
-      }
-
-      predictStall() {
-        const buffer = this.getBufferHealth();
-        const playbackRate = this.video?.playbackRate || 1;
-        const effectiveBuffer = buffer / playbackRate;
-        if (effectiveBuffer < 3) return 0.9;
-        if (effectiveBuffer < 8) return 0.5;
-        if (effectiveBuffer < 15) return 0.2;
-        return 0.05;
-      }
-
-      onStall() {
-        this.stallCount++;
-        this.lastStallTime = Date.now();
-        this.isStalled = true;
-      }
-
-      onRecover() {
-        this.isStalled = false;
-      }
-
-      shouldDegradeQuality() {
-        return this.stallCount >= 3;
-      }
-
-      resetStallCounter() {
-        if (Date.now() - this.lastStallTime > 60000) {
-          this.stallCount = 0;
-        }
-      }
-    }
-
-    // ==========================================
-    // MODULE 3: QUALITY SELECTOR
-    // ==========================================
-    class QualitySelector {
-      constructor() {
-        this.currentQuality = 'auto';
-        this.qualities = ['2160p', '1080p', '720p', '480p', '360p', '240p'];
-        this.hlsLevels = [];
-        this.manualOverride = false;
-      }
-
-      getAvailableQualities(url) {
-        // Check for quality variants in URL pattern
-        const qualities = [];
-        const basePatterns = [
-          { suffix: '_4k.mp4', quality: '2160p' },
-          { suffix: '_1080p.mp4', quality: '1080p' },
-          { suffix: '_720p.mp4', quality: '720p' },
-          { suffix: '_480p.mp4', quality: '480p' },
-          { suffix: '_360p.mp4', quality: '360p' },
-          { suffix: '_240p.mp4', quality: '240p' },
-        ];
-
-        if (url.includes('archive.org')) {
-          // Archive.org often has multiple qualities
-          const base = url.replace(/\.(mp4|webm)$/i, '');
-          qualities.push(
-            { url: url, quality: '720p' },
-            { url: base + '.mp4', quality: '480p' }
-          );
-        }
-
-        return qualities;
-      }
-
-      selectOptimalQuality(bandwidth) {
-        if (this.manualOverride) return this.currentQuality;
-        if (bandwidth >= 10) return '1080p';
-        if (bandwidth >= 5) return '720p';
-        if (bandwidth >= 2) return '480p';
-        if (bandwidth >= 0.5) return '360p';
-        return '240p';
-      }
-
-      setQuality(quality) {
-        this.currentQuality = quality;
-        this.manualOverride = quality !== 'auto';
-      }
-
-      createQualityMenu(container) {
-        // Already in HTML
-      }
-    }
-
-    // ==========================================
-    // MODULE 4: MULTI-SOURCE MANAGER
-    // ==========================================
-    class MultiSourceManager {
-      constructor() {
-        this.sources = [];
-        this.currentSourceIndex = 0;
-        this.retryCount = 0;
-        this.maxRetries = 3;
-        this.circuitOpen = false;
-      }
-
-      addSource(url, type, quality = '720p') {
-        this.sources.push({ url, type, quality, failed: false });
-      }
-
-      getCurrentSource() {
-        if (this.sources.length === 0) return null;
-        return this.sources[this.currentSourceIndex];
-      }
-
-      getNextAvailableSource() {
-        for (let i = this.currentSourceIndex + 1; i < this.sources.length; i++) {
-          if (!this.sources[i].failed) return this.sources[i];
-        }
-        return null;
-      }
-
-      async testSourceAvailability(url) {
-        try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 3000);
-          const response = await fetch(url, {
-            method: 'HEAD',
-            signal: controller.signal,
-            cache: 'no-store'
-          });
-          clearTimeout(timeout);
-          return response.ok;
-        } catch (e) {
-          return false;
-        }
-      }
-
-      markCurrentFailed() {
-        if (this.sources[this.currentSourceIndex]) {
-          this.sources[this.currentSourceIndex].failed = true;
-        }
-        this.retryCount++;
-        if (this.retryCount >= this.maxRetries) {
-          this.circuitOpen = true;
-        }
-      }
-
-      switchToNextSource() {
-        const next = this.getNextAvailableSource();
-        if (next) {
-          this.currentSourceIndex = this.sources.indexOf(next);
-          return next;
-        }
-        return null;
-      }
-
-      resetCircuit() {
-        this.retryCount = 0;
-        this.circuitOpen = false;
-        this.sources.forEach(s => s.failed = false);
-      }
-    }
-
-    // ==========================================
-    // MAIN APPLICATION
-    // ==========================================
     const RUMBLE_CHANNEL_ID = 'u4m9tqz';
+
+    // Firebase configs
     const firebaseConfig1 = {
       apiKey: "AIzaSyCBrRTdhrRTRL9ZfZpb-m-1XBmbDIsXF9k",
       authDomain: "kinaflix.firebaseapp.com",
@@ -590,6 +247,7 @@
       messagingSenderId: "318239806217",
       appId: "1:318239806217:web:ee98bd97cd2a08ac3239d8"
     };
+
     const firebaseConfig2 = {
       apiKey: "AIzaSyA2ba1jUA7L0H-3JbeRud0cLEWHHf4rpk",
       authDomain: "cullo-movies-6813f.firebaseapp.com",
@@ -598,24 +256,20 @@
       appId: "1:12310118231:web:34682f354027fd19758812"
     };
 
+    // Initialize Firebase ONCE
     const app1 = initializeApp(firebaseConfig1, "kinaflix");
     const app2 = initializeApp(firebaseConfig2, "cullo");
     const db1 = getFirestore(app1);
     const db2 = getFirestore(app2);
 
-    function getDb(source) { return source === 'cullo' ? db2 : db1; }
+    function getDb(source) {
+      return source === 'cullo' ? db2 : db1;
+    }
 
-    // Initialize adaptive streaming modules
-    const networkMonitor = new NetworkMonitor();
-    const qualitySelector = new QualitySelector();
-    const multiSourceManager = new MultiSourceManager();
-    let bufferManager = null;
-    let currentHls = null;
-
-    function showToast(msg, duration = 3000) {
+    function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg; toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), duration);
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     function escapeHtml(text) {
@@ -624,270 +278,12 @@
       div.textContent = text; return div.innerHTML;
     }
 
-    function updateNetworkUI(data) {
-      const indicator = document.getElementById('network-indicator');
-      const dot = indicator.querySelector('.dot');
-      const label = document.getElementById('network-label');
-
-      dot.className = 'dot';
-      if (data.connectionType === 'fast') {
-        dot.classList.add('good');
-        label.textContent = 'Fast';
-      } else if (data.connectionType === 'medium') {
-        dot.classList.add('fair');
-        label.textContent = 'Fair';
-      } else {
-        dot.classList.add('poor');
-        label.textContent = 'Slow';
-      }
-    }
-
-    function updateQualityUI(quality) {
-      const label = document.getElementById('quality-label');
-      label.textContent = quality === 'auto' ? 'Auto' : quality;
-      document.querySelectorAll('.quality-option').forEach(opt => {
-        opt.classList.toggle('active', opt.dataset.quality === quality);
-      });
-    }
-
-    function updateBufferUI(percentage) {
-      const bar = document.getElementById('buffer-bar');
-      bar.style.width = percentage + '%';
-      if (percentage < 20) bar.style.background = 'var(--poor)';
-      else if (percentage < 50) bar.style.background = 'var(--fair)';
-      else bar.style.background = 'var(--primary)';
-    }
-
-    function showReduceQualityButton() {
-      const btn = document.getElementById('reduce-quality-btn');
-      btn.classList.add('show');
-      btn.addEventListener('click', () => {
-        const currentIdx = qualitySelector.qualities.indexOf(qualitySelector.currentQuality);
-        if (currentIdx < qualitySelector.qualities.length - 1) {
-          const lowerQuality = qualitySelector.qualities[currentIdx + 1];
-          qualitySelector.setQuality(lowerQuality);
-          updateQualityUI(lowerQuality);
-          showToast(`Switched to ${lowerQuality}`, 2000);
-          btn.classList.remove('show');
-          if (currentHls) {
-            const levelIndex = qualitySelector.qualities.indexOf(lowerQuality);
-            if (levelIndex >= 0 && levelIndex < currentHls.levels.length) {
-              currentHls.currentLevel = currentHls.levels.length - 1 - levelIndex;
-            }
-          }
-        }
-      });
-    }
-
-    function hideReduceQualityButton() {
-      document.getElementById('reduce-quality-btn').classList.remove('show');
-    }
-
-    // ===== HLS PLAYER SETUP =====
-    function setupHlsPlayer(video, url) {
-      return new Promise((resolve, reject) => {
-        if (Hls.isSupported()) {
-          const hls = new Hls({
-            startLevel: -1, // Start with lowest quality
-            capLevelToPlayerSize: true,
-            maxBufferLength: 20,
-            maxMaxBufferLength: 30,
-            maxBufferSize: 60 * 1000 * 1000,
-            maxBufferHole: 0.5,
-            lowBufferWatchdogPeriod: 0.5,
-            highBufferWatchdogPeriod: 2,
-            nudgeOffset: 0.1,
-            nudgeMaxRetry: 3,
-            maxFragLookUpTolerance: 0.25,
-            liveSyncDurationCount: 3,
-            abrEwmaFastLive: 3,
-            abrEwmaSlowLive: 9,
-            abrEwmaFastVoD: 3,
-            abrEwmaSlowVoD: 9,
-            abrEwmaDefaultEstimate: 500000,
-            abrBandWidthFactor: 0.95,
-            abrBandWidthUpFactor: 0.7,
-            abrMaxWithRealBitrate: true,
-            maxStarvationDelay: 4,
-            maxLoadingDelay: 4,
-            manifestLoadPolicy: {
-              default: {
-                maxTimeToFirstByteMs: 10000,
-                maxLoadTimeMs: 20000,
-                timeoutRetry: { maxNumRetry: 2, retryDelayMs: 1000, maxRetryDelayMs: 8000 }
-              }
-            }
-          });
-
-          hls.loadSource(url);
-          hls.attachMedia(video);
-          
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            qualitySelector.hlsLevels = hls.levels;
-            resolve(hls);
-          });
-
-          hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-            const level = hls.levels[data.level];
-            if (level) {
-              const height = level.height;
-              const quality = height >= 1080 ? '1080p' : height >= 720 ? '720p' : height >= 480 ? '480p' : '360p';
-              updateQualityUI(quality);
-            }
-          });
-
-          hls.on(Hls.Events.ERROR, (event, data) => {
-            if (data.fatal) {
-              switch (data.type) {
-                case Hls.ErrorTypes.NETWORK_ERROR:
-                  hls.startLoad();
-                  break;
-                case Hls.ErrorTypes.MEDIA_ERROR:
-                  hls.recoverMediaError();
-                  break;
-                default:
-                  reject(new Error('Fatal HLS error'));
-                  break;
-              }
-            }
-          });
-
-          currentHls = hls;
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          video.src = url;
-          resolve(null);
-        } else {
-          reject(new Error('HLS not supported'));
-        }
-      });
-    }
-
-    // ===== DIRECT PLAYER WITH ADAPTIVE BUFFERING =====
-    function setupDirectPlayer(video, url) {
-      return new Promise((resolve) => {
-        video.src = url;
-        video.load();
-        resolve(null);
-      });
-    }
-
-    // ===== MAIN PLAYER INITIALIZATION =====
-    async function initAdaptivePlayer(streamingLink) {
-      const container = document.getElementById('video-container');
-      const loadingOverlay = document.getElementById('loading-overlay');
-      const loadingText = document.getElementById('loading-text');
-      const loadingSpeed = document.getElementById('loading-speed');
-
-      // Remove old video element
-      const oldVideo = container.querySelector('video');
-      if (oldVideo) oldVideo.remove();
-
-      // Create fresh video element
-      const video = document.createElement('video');
-      video.controls = true;
-      video.autoplay = true;
-      video.style.cssText = 'width:100%;height:100%;background:#000;';
-      video.setAttribute('playsinline', '');
-      container.appendChild(video);
-
-      // Initialize buffer manager
-      bufferManager = new AdaptiveBufferManager(video);
-
-      // Start network monitoring
-      loadingText.textContent = 'Testing connection speed...';
-      await networkMonitor.measureBandwidth();
-      loadingSpeed.textContent = `${Math.round(networkMonitor.bandwidth * 10) / 10} Mbps detected`;
-      updateNetworkUI({
-        bandwidth: networkMonitor.bandwidth,
-        connectionType: networkMonitor.connectionType
-      });
-
-      // Select optimal quality
-      const optimalQuality = qualitySelector.selectOptimalQuality(networkMonitor.bandwidth);
-      updateQualityUI(qualitySelector.currentQuality);
-
-      loadingText.textContent = 'Loading video...';
-
-      try {
-        // Try HLS first for adaptive streaming
-        if (streamingLink.includes('.m3u8') || streamingLink.includes('hls')) {
-          await setupHlsPlayer(video, streamingLink);
-        } else {
-          // Direct playback with adaptive monitoring
-          await setupDirectPlayer(video, streamingLink);
-        }
-
-        // Buffer monitoring
-        const bufferInterval = setInterval(() => {
-          if (!bufferManager) return;
-          
-          const bufferHealth = bufferManager.getBufferHealth();
-          const bufferPercent = bufferManager.getBufferPercentage();
-          const stallProb = bufferManager.predictStall();
-
-          updateBufferUI(bufferPercent);
-
-          if (stallProb > 0.5 && bufferManager.shouldDegradeQuality()) {
-            showReduceQualityButton();
-          }
-
-          if (bufferHealth < 2 && !video.paused) {
-            bufferManager.onStall();
-            showToast('Buffering...', 1500);
-          }
-
-          if (bufferHealth > 10) {
-            bufferManager.onRecover();
-            hideReduceQualityButton();
-            bufferManager.resetStallCounter();
-          }
-        }, 2000);
-
-        // Video event listeners
-        video.addEventListener('waiting', () => {
-          loadingOverlay.style.display = 'flex';
-          loadingText.textContent = 'Buffering...';
-        });
-
-        video.addEventListener('playing', () => {
-          loadingOverlay.style.display = 'none';
-          hideReduceQualityButton();
-        });
-
-        video.addEventListener('canplay', () => {
-          loadingOverlay.style.display = 'none';
-        });
-
-        video.addEventListener('error', async (e) => {
-          console.error('Video error:', e);
-          multiSourceManager.markCurrentFailed();
-          const nextSource = multiSourceManager.switchToNextSource();
-          if (nextSource) {
-            showToast('Switching to alternative source...', 2000);
-            video.src = nextSource.url;
-            video.load();
-          }
-        });
-
-        // Start periodic bandwidth monitoring
-        networkMonitor.startMonitoring(15000);
-
-        return video;
-      } catch (error) {
-        console.error('Player error:', error);
-        loadingText.textContent = 'Error loading video. Retrying...';
-        throw error;
-      }
-    }
-
-    // ===== VIDEO TYPE DETECTION =====
     function detectVideoType(url) {
       if (!url) return 'unknown';
       const u = url.toLowerCase();
-      if (u.includes('.m3u8') || u.includes('hls')) return 'hls';
       if (u.includes('drive.google.com') || u.includes('gdrive')) return 'googledrive';
       if (u.includes('rumble.com')) return 'rumble';
-      if (u.includes('archive.org') || u.includes('ia800')) return 'archive';
+      if (u.includes('archive.org') || u.includes('ia800') || u.includes('ia600')) return 'archive';
       if (u.match(/\.(mp4|webm|mkv|mov|avi)$/i)) return 'direct';
       return 'unknown';
     }
@@ -907,6 +303,7 @@
     function extractArchiveIdentifier(url) {
       const m1 = url.match(/\/items\/([^\/]+)\//); if (m1 && m1[1]) return m1[1];
       const m2 = url.match(/\/details\/([^\/?#]+)/); if (m2 && m2[1]) return m2[1];
+      const m3 = url.match(/\/download\/([^\/?#]+)/); if (m3 && m3[1]) return m3[1];
       return null;
     }
 
@@ -916,24 +313,24 @@
       return id ? `https://archive.org/download/${id}/${id}.mp4` : null;
     }
 
-    // ===== SPECIAL PLAYERS =====
+    // === PLAYER INITIALIZERS ===
     async function initArchivePlayer(videoUrl, loadingOverlay) {
+      const container = document.getElementById('video-container');
       const directUrl = getArchiveDirectUrl(videoUrl);
       if (directUrl) {
-        return await initAdaptivePlayer(directUrl);
+        container.innerHTML = `<video controls autoplay style="width:100%;height:100%;background:#000;"><source src="${directUrl}" type="video/mp4"></video>`;
+        const video = container.querySelector('video');
+        if (video && loadingOverlay) {
+          video.addEventListener('canplay', () => loadingOverlay.style.display = 'none');
+          video.addEventListener('error', () => loadingOverlay.style.display = 'none');
+          setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 8000);
+        }
+      } else {
+        const id = extractArchiveIdentifier(videoUrl);
+        if (id) container.innerHTML = `<iframe src="https://archive.org/embed/${id}" frameborder="0" allowfullscreen style="width:100%;height:100%;"></iframe>`;
+        else container.innerHTML = `<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;color:#e50914;"><i class="fas fa-exclamation-triangle" style="font-size:48px;margin-bottom:20px;"></i><p>Unable to play this video.</p></div>`;
+        setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 3000);
       }
-      const container = document.getElementById('video-container');
-      const id = extractArchiveIdentifier(videoUrl);
-      container.innerHTML = `<iframe src="https://archive.org/embed/${id}" frameborder="0" allowfullscreen style="width:100%;height:100%;"></iframe>`;
-      setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 3000);
-      return null;
-    }
-
-    async function initGoogleDrivePlayer(fileId, loadingOverlay) {
-      const container = document.getElementById('video-container');
-      container.innerHTML = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>`;
-      setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 5000);
-      return null;
     }
 
     async function initRumblePlayer(videoId, loadingOverlay) {
@@ -943,107 +340,83 @@
       !function(r,u,m,b,l,e){r._Rumble=b;r[b]||(r[b]=function(){(r[b]._=r[b]._||[]).push(arguments);if(r[b]._.length==1){l=u.createElement(m),e=u.getElementsByTagName(m)[0],l.async=1,l.src="https://rumble.com/embedJS/"+RUMBLE_CHANNEL_ID+(arguments[1].video?'.'+arguments[1].video:'')+"/?url="+encodeURIComponent(location.href)+"&args="+encodeURIComponent(JSON.stringify([].slice.apply(arguments))),e.parentNode.insertBefore(l,e)}})}(window,document,"script","Rumble");
       Rumble("play",{video:videoId,div:divId});
       setTimeout(()=>{if(loadingOverlay)loadingOverlay.style.display='none';},5000);
-      return null;
     }
 
-    // ===== QUALITY MENU HANDLER =====
-    document.getElementById('quality-badge').addEventListener('click', () => {
-      document.getElementById('quality-menu').classList.toggle('open');
-    });
-
-    document.addEventListener('click', (e) => {
-      const menu = document.getElementById('quality-menu');
-      const badge = document.getElementById('quality-badge');
-      if (!menu.contains(e.target) && !badge.contains(e.target)) {
-        menu.classList.remove('open');
-      }
-    });
-
-    document.querySelectorAll('.quality-option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        const quality = opt.dataset.quality;
-        qualitySelector.setQuality(quality);
-        updateQualityUI(quality);
-        document.getElementById('quality-menu').classList.remove('open');
-        showToast(`Quality set to ${quality === 'auto' ? 'Auto' : quality}`, 2000);
-      });
-    });
-
-    // ===== NETWORK SPEED CHANGE HANDLER =====
-    networkMonitor.onSpeedChange((data) => {
-      updateNetworkUI(data);
-      if (qualitySelector.currentQuality === 'auto') {
-        const optimal = qualitySelector.selectOptimalQuality(data.bandwidth);
-        updateQualityUI('auto');
-      }
-    });
-
-    // ===== LOAD AND PLAY =====
-    async function loadAndPlayVideo(streamingLink) {
-      const loadingOverlay = document.getElementById('loading-overlay');
-      if (loadingOverlay) loadingOverlay.style.display = 'flex';
-
-      const decodedLink = decodeURIComponent(streamingLink);
-      const videoType = detectVideoType(decodedLink);
-
-      try {
-        if (videoType === 'hls' || videoType === 'direct') {
-          await initAdaptivePlayer(decodedLink);
-        } else if (videoType === 'archive') {
-          await initArchivePlayer(decodedLink, loadingOverlay);
-        } else if (videoType === 'googledrive') {
-          const fileId = extractGoogleDriveId(decodedLink);
-          if (fileId) await initGoogleDrivePlayer(fileId, loadingOverlay);
-        } else if (videoType === 'rumble') {
-          const videoId = extractRumbleId(decodedLink);
-          if (videoId) await initRumblePlayer(videoId, loadingOverlay);
-        } else {
-          await initAdaptivePlayer(decodedLink);
-        }
-      } catch (error) {
-        console.error('Playback error:', error);
-        showToast('Error loading video. Please try again.', 3000);
-      }
-
-      if (loadingOverlay) loadingOverlay.style.display = 'none';
+    async function initGoogleDrivePlayer(fileId, loadingOverlay) {
+      const container = document.getElementById('video-container');
+      container.innerHTML = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>`;
+      setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 5000);
     }
 
-    // ===== SERIES DATA (unchanged) =====
+    async function initDirectVideoPlayer(videoUrl, loadingOverlay) {
+      const container = document.getElementById('video-container');
+      container.innerHTML = `<video controls autoplay style="width:100%;height:100%;background:#000;"><source src="${videoUrl}" type="video/mp4"></video>`;
+      const video = container.querySelector('video');
+      if (video && loadingOverlay) {
+        video.addEventListener('canplay', () => loadingOverlay.style.display = 'none');
+        video.addEventListener('error', () => loadingOverlay.style.display = 'none');
+        setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 8000);
+      }
+    }
+
+    // === SERIES DATA ===
     let seriesEpisodes = [], seasonsList = [], currentSeason = 1;
     let currentMovieId = null, currentSource = null, currentEpisodePlaying = null;
 
     async function loadSeriesData(movieId, source) {
       try {
         const db = getDb(source);
+
+        // === KINAFLIX SERIES (seriesId) ===
         if (source === 'kinaflix') {
           const movieDoc = await getDoc(doc(db, 'movies', movieId));
           const movieData = movieDoc.data();
+
           if (movieData && movieData.seriesId) {
-            const seriesQuery = query(collection(db, 'movies'), where('seriesId', '==', movieData.seriesId), orderBy('releaseYear', 'asc'));
+            const seriesQuery = query(
+              collection(db, 'movies'),
+              where('seriesId', '==', movieData.seriesId),
+              orderBy('releaseYear', 'asc')
+            );
             const seriesSnap = await getDocs(seriesQuery);
-            seriesEpisodes = []; seasonsList = [];
+
+            seriesEpisodes = [];
+            seasonsList = [];
             let epNum = 1;
+
             seriesSnap.docs.forEach(docSnap => {
               const epData = docSnap.data();
               const seasonYear = epData.releaseYear || 1;
               if (!seasonsList.includes(seasonYear)) seasonsList.push(seasonYear);
               seriesEpisodes.push({
-                id: docSnap.id, season: seasonYear, number: epNum,
+                id: docSnap.id,
+                season: seasonYear,
+                number: epNum,
                 title: epData.title || `Episode ${epNum}`,
                 videoUrl: epData.googleDriveLink || epData.videoUrl || '',
                 source: 'kinaflix'
               });
               epNum++;
             });
+
             seasonsList.sort((a, b) => a - b);
             if (seasonsList.length > 0) currentSeason = seasonsList[0];
+
+            // Get series name
             let seriesName = '';
-            try { const sd = await getDoc(doc(db, 'series', movieData.seriesId)); if (sd.exists()) seriesName = sd.data().name; } catch(e) {}
+            try {
+              const seriesDoc = await getDoc(doc(db, 'series', movieData.seriesId));
+              if (seriesDoc.exists()) seriesName = seriesDoc.data().name;
+            } catch (e) { }
+
             document.getElementById('series-title').textContent = seriesName || movieData.title || 'Series';
             return true;
           }
         }
+
+        // === CULLO SERIES (seasons array) ===
         if (source === 'cullo') {
+          // Try movies collection first
           let movieDoc = await getDoc(doc(db, 'movies', movieId));
           if (movieDoc.exists()) {
             const data = movieDoc.data();
@@ -1051,43 +424,60 @@
               return buildCulloSeries(data);
             }
           }
+          // Try series collection
           const seriesDoc = await getDoc(doc(db, 'series', movieId));
-          if (seriesDoc.exists()) return buildCulloSeries(seriesDoc.data());
+          if (seriesDoc.exists()) {
+            const data = seriesDoc.data();
+            return buildCulloSeries(data);
+          }
         }
+
         return false;
-      } catch (error) { console.error('Error loading series:', error); return false; }
+      } catch (error) {
+        console.error('Error loading series:', error);
+        return false;
+      }
     }
 
     function buildCulloSeries(data) {
-      seriesEpisodes = []; seasonsList = [];
+      seriesEpisodes = [];
+      seasonsList = [];
+
       data.seasons.forEach((season, idx) => {
         const snum = season.number || idx + 1;
         if (!seasonsList.includes(snum)) seasonsList.push(snum);
         (season.episodes || []).forEach(ep => {
           seriesEpisodes.push({
             id: ep.id || `${currentMovieId}_s${snum}_e${ep.number}`,
-            season: snum, number: ep.number || '?',
+            season: snum,
+            number: ep.number || '?',
             title: ep.title || `Episode ${ep.number}`,
-            videoUrl: ep.videoUrl || '', source: 'cullo'
+            videoUrl: ep.videoUrl || '',
+            source: 'cullo'
           });
         });
       });
+
       seasonsList.sort((a, b) => a - b);
       if (seasonsList.length > 0) currentSeason = seasonsList[0];
       document.getElementById('series-title').textContent = data.title || 'Series';
       return true;
     }
 
+    // === RENDER EPISODES ===
     function renderEpisodes() {
       const seasonEpisodes = seriesEpisodes.filter(ep => ep.season === currentSeason);
-      document.getElementById('season-tabs').innerHTML = seasonsList.map(s =>
+      const seasonTabsDiv = document.getElementById('season-tabs');
+      const episodesListDiv = document.getElementById('episodes-list');
+
+      seasonTabsDiv.innerHTML = seasonsList.map(s =>
         `<button class="season-tab ${s === currentSeason ? 'active' : ''}" data-season="${s}">${currentSource === 'kinaflix' ? s : 'Season ' + s}</button>`
       ).join('');
-      const listDiv = document.getElementById('episodes-list');
+
       if (seasonEpisodes.length === 0) {
-        listDiv.innerHTML = '<div style="text-align:center;padding:2rem;color:#666;">No episodes available.</div>';
+        episodesListDiv.innerHTML = '<div style="text-align:center;padding:2rem;color:#666;">No episodes available.</div>';
       } else {
-        listDiv.innerHTML = seasonEpisodes.map(ep => {
+        episodesListDiv.innerHTML = seasonEpisodes.map(ep => {
           const isActive = currentEpisodePlaying && currentEpisodePlaying.id === ep.id;
           return `<div class="episode-item ${isActive ? 'active' : ''}" data-episode='${JSON.stringify(ep).replace(/'/g, "&#39;")}'>
             <div class="episode-number">${isActive ? '<div class="playing-indicator"><span></span><span></span><span></span></div>' : 'Ep ' + ep.number}</div>
@@ -1095,22 +485,60 @@
           </div>`;
         }).join('');
       }
+
+      // Season tab listeners
       document.querySelectorAll('.season-tab').forEach(tab => {
-        tab.addEventListener('click', () => { currentSeason = parseInt(tab.dataset.season); renderEpisodes(); });
+        tab.addEventListener('click', () => {
+          currentSeason = parseInt(tab.dataset.season);
+          renderEpisodes();
+        });
       });
+
+      // Episode item listeners
       document.querySelectorAll('.episode-item').forEach(item => {
         item.addEventListener('click', async () => {
           const ep = JSON.parse(item.dataset.episode);
-          if (!ep.videoUrl || ep.videoUrl.trim() === '') { showToast('Coming soon!'); return; }
-          currentEpisodePlaying = ep; renderEpisodes();
+          if (!ep.videoUrl || ep.videoUrl.trim() === '') {
+            showToast('Coming soon!');
+            return;
+          }
+          currentEpisodePlaying = ep;
+          renderEpisodes();
           showToast(`Loading: ${ep.title}`);
           await loadAndPlayVideo(ep.videoUrl);
-          window.history.pushState({}, '', `${window.location.pathname}?movieId=${ep.id}&source=${ep.source}`);
+          // Update URL without reload
+          const newUrl = `${window.location.pathname}?movieId=${ep.id}&source=${ep.source}`;
+          window.history.pushState({}, '', newUrl);
         });
       });
     }
 
-    // ===== MAIN INIT =====
+    // === LOAD AND PLAY ===
+    async function loadAndPlayVideo(streamingLink) {
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
+      const decodedLink = decodeURIComponent(streamingLink);
+      const videoType = detectVideoType(decodedLink);
+
+      if (videoType === 'googledrive') {
+        const fileId = extractGoogleDriveId(decodedLink);
+        if (fileId) await initGoogleDrivePlayer(fileId, loadingOverlay);
+      } else if (videoType === 'rumble') {
+        const videoId = extractRumbleId(decodedLink);
+        if (videoId) await initRumblePlayer(videoId, loadingOverlay);
+      } else if (videoType === 'archive') {
+        await initArchivePlayer(decodedLink, loadingOverlay);
+      } else if (videoType === 'direct') {
+        await initDirectVideoPlayer(decodedLink, loadingOverlay);
+      } else {
+        const container = document.getElementById('video-container');
+        container.innerHTML = `<iframe src="${decodedLink}" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>`;
+        setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 5000);
+      }
+    }
+
+    // === MAIN INIT ===
     const initPlayer = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1119,31 +547,56 @@
         currentSource = urlParams.get('source') || 'kinaflix';
         currentMovieId = movieId;
 
-        if (!movieId && !streamingLink) throw new Error("Invalid movie ID or streaming link");
+        if (!movieId && !streamingLink) {
+          throw new Error("Invalid movie ID or streaming link");
+        }
 
+        // FIXED: Back button with proper query
         const backButton = document.getElementById('back-button');
-        if (backButton && movieId) backButton.href = `see.html?id=${movieId}&source=${currentSource}`;
-        else if (backButton) backButton.href = 'index.html';
+        if (backButton && movieId) {
+          backButton.href = `see.html?id=${movieId}&source=${currentSource}`;
+        } else if (backButton) {
+          backButton.href = 'index.html';
+        }
+
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
 
         const seriesSidebar = document.getElementById('series-sidebar');
+
+        // Check for series
         const isSeries = await loadSeriesData(movieId, currentSource);
 
         if (isSeries && seriesEpisodes.length > 0) {
-          seriesSidebar.classList.add('visible'); renderEpisodes();
+          seriesSidebar.classList.add('visible');
+          renderEpisodes();
+
           const currentEp = seriesEpisodes.find(ep => ep.id === movieId);
           if (currentEp) {
-            currentEpisodePlaying = currentEp; renderEpisodes();
-            if (currentEp.videoUrl) await loadAndPlayVideo(currentEp.videoUrl);
-            else if (streamingLink) await loadAndPlayVideo(streamingLink);
+            currentEpisodePlaying = currentEp;
+            renderEpisodes();
+            if (currentEp.videoUrl) {
+              await loadAndPlayVideo(currentEp.videoUrl);
+            } else if (streamingLink) {
+              await loadAndPlayVideo(streamingLink);
+            }
           } else if (streamingLink) {
             await loadAndPlayVideo(streamingLink);
           } else {
-            const firstEp = seriesEpisodes.find(ep => ep.season === seasonsList[0]);
-            if (firstEp && firstEp.videoUrl) { currentEpisodePlaying = firstEp; renderEpisodes(); await loadAndPlayVideo(firstEp.videoUrl); }
-            else throw new Error("No video available");
+            const firstSeason = seasonsList[0];
+            const firstEp = seriesEpisodes.find(ep => ep.season === firstSeason);
+            if (firstEp && firstEp.videoUrl) {
+              currentEpisodePlaying = firstEp;
+              renderEpisodes();
+              await loadAndPlayVideo(firstEp.videoUrl);
+            } else {
+              throw new Error("No video available for this series");
+            }
           }
         } else {
           seriesSidebar.classList.remove('visible');
+
+          // Regular movie - load from DB if no streamingLink
           if (!streamingLink && movieId) {
             const db = getDb(currentSource);
             const movieDoc = await getDoc(doc(db, 'movies', movieId));
@@ -1152,6 +605,7 @@
               streamingLink = data.googleDriveLink || data.videoUrl || data.streamingLink;
               document.title = `${data.title || 'Watching'} | KINAFLIX`;
             }
+            // Fallback to Cullo if not found
             if (!streamingLink && currentSource === 'kinaflix') {
               try {
                 const culloDoc = await getDoc(doc(db2, 'movies', movieId));
@@ -1160,14 +614,18 @@
                   streamingLink = data.videoUrl || data.googleDriveLink || data.streamingLink;
                   if (data.title) document.title = `${data.title} | KINAFLIX`;
                 }
-              } catch(e) {}
+              } catch (e) { }
             }
           }
+
           if (!streamingLink) throw new Error("No streaming link available");
           await loadAndPlayVideo(streamingLink);
         }
 
-        if (!document.title.includes('|')) document.title = 'Watching | KINAFLIX';
+        if (!document.title.includes('|')) {
+          document.title = 'Watching | KINAFLIX';
+        }
+
       } catch (error) {
         console.error('Error:', error);
         const container = document.getElementById('video-container');
@@ -1177,8 +635,11 @@
       }
     };
 
-    if (document.readyState === 'complete') initPlayer();
-    else document.addEventListener('DOMContentLoaded', initPlayer);
+    if (document.readyState === 'complete') {
+      initPlayer();
+    } else {
+      document.addEventListener('DOMContentLoaded', initPlayer);
+    }
   </script>
 </body>
 
